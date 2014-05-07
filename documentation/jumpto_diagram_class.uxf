@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="12.2">
+  <zoom_level>10</zoom_level>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>40</x>
+      <y>230</y>
+      <w>170</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>*Serializer*
+--
++onSerialize: delegate
++onDeserialize: delegate
+--
++Serialize()
++Deserialize()</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>710</x>
+      <y>230</y>
+      <w>150</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>ProjectJumpLinkDesc
+--
+--
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>40</x>
+      <y>340</y>
+      <w>160</w>
+      <h>140</h>
+    </coordinates>
+    <panel_attributes>JumpToEditorWindow
+--
+--
+-OnEnable()
+-OnDisable()
+-OnGUI()
+-OnHierarchyChanged()
+-OnProjectChanged()
+-OnSelectionChanged()</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>560</x>
+      <y>230</y>
+      <w>140</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>GuiJumpToToolbar
+--
+--</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>370</x>
+      <y>340</y>
+      <w>150</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>GuiJumpLinkIconView
+--
+--</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>530</x>
+      <y>340</y>
+      <w>170</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>GuiJumpLinkDetailsView
+--
+--</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>210</x>
+      <y>340</y>
+      <w>150</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>GuiJumpLinkListView
+--
+--</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>710</x>
+      <y>340</y>
+      <w>170</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>HierarchyJumpLinkDesc
+--
+--</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>220</x>
+      <y>230</y>
+      <w>330</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>JumpLinks
+--
+-m_HierarchyLinks: List&lt;HierarchyJumpLinkDesc&gt;
+-m_ProjectLinks: List&lt;ProjectJumpLinkDesc&gt;
+--
++OnSerialize()
++OnDeserialize()</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>370</x>
+      <y>450</y>
+      <w>150</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>RefToRect
+--
+-m_RectInternal: Rect
+--</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>210</x>
+      <y>450</y>
+      <w>150</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>JumpToSettings
+--
+--
++OnSerialize()
++OnDeserialize()</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>
