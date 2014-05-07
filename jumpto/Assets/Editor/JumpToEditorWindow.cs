@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 
 
-//TODO: make items clickable (what happens when clicked?)
+//xTODO: make items clickable
 //xTODO: project and hierarchy foldouts
 //TODO: replace GUILayout.Label with m_LinkLabelStyle.Draw()
 //TODO: ability to remove items
@@ -22,6 +22,7 @@ public class JumpToEditorWindow : EditorWindow
 		public GUIContent LinkLabelContent = new GUIContent();
 		public Color LinkColor = Color.black;
 		public System.Type LinkType = null;
+		public Rect Area = new Rect();
 	}
 
 
@@ -31,14 +32,19 @@ public class JumpToEditorWindow : EditorWindow
 	[SerializeField]
 	private List<LinkedObject> m_HierarchyReferences = new List<LinkedObject>();
 
+	private bool m_Initialized = false;
+
 	private bool m_ProjectLinksUnfolded = true;
 	private bool m_HierarchyLinksUnfolded = true;
 
 	private Texture2D m_IconPrefabNormal;
 	private Texture2D m_IconPrefabModel;
 	private Texture2D m_IconGameObject;
-
+	private Texture2D m_IconBackground;
 	private GUIStyle  m_LinkLabelStyle;
+	private LinkedObject m_MouseDownObject;
+	private LinkedObject m_SelectedObject;
+	private Vector2 m_IconSize = new Vector2(16.0f, 16.0f);
 
 	private Color ColorViolet = new Color(0.6f, 0.27f, 0.67f, 1.0f);
 
@@ -48,16 +54,39 @@ public class JumpToEditorWindow : EditorWindow
 		m_IconPrefabNormal = EditorGUIUtility.FindTexture("PrefabNormal Icon");
 		m_IconPrefabModel = EditorGUIUtility.FindTexture("PrefabModel Icon");
 		m_IconGameObject = EditorGUIUtility.FindTexture("GameObject Icon");
+		//m_IconBackground = EditorGUIUtility.FindTexture("me_trans_head_l");
+	}
+
+	void OnDestroy()
+	{
+		Object.DestroyImmediate(m_IconBackground);
+	}
+
+	private void Init()
+	{
+		m_Initialized = true;
+
+		m_LinkLabelStyle = new GUIStyle(GUI.skin.label);
+		m_LinkLabelStyle.padding.left = 17;
+
+		m_IconBackground = new Texture2D(4, 4, TextureFormat.RGB24, false);
+		Color[] whiteTex = new Color[16];
+		for (int i = 0; i < 16; i++)
+			whiteTex[i] = Color.white;
+		m_IconBackground.SetPixels(whiteTex);
+		m_IconBackground.Apply();
 	}
 
 	void OnGUI()
 	{
 		//NOTE: it's ridiculous that I have to do this here.
-		if (m_LinkLabelStyle == null)
-		{
-			m_LinkLabelStyle = new GUIStyle(GUI.skin.label);
-			m_LinkLabelStyle.padding.left = 17;
-		}
+		if (!m_Initialized)
+			Init();
+
+		Vector2 iconSizeBak = EditorGUIUtility.GetIconSize();
+		EditorGUIUtility.SetIconSize(m_IconSize);
+
+		Color bgColor = GUI.backgroundColor;
 
 		m_ProjectLinksUnfolded = EditorGUILayout.Foldout(m_ProjectLinksUnfolded, "Project References");
 		if (m_ProjectLinksUnfolded)
@@ -65,9 +94,33 @@ public class JumpToEditorWindow : EditorWindow
 			for (int i = 0; i < m_ProjectReferences.Count; i++)
 			{
 				GUILayout.BeginHorizontal();
-				m_LinkLabelStyle.normal.textColor = m_ProjectReferences[i].LinkColor;
 				GUILayout.Space(17.0f);
+
+				m_LinkLabelStyle.normal.textColor = m_ProjectReferences[i].LinkColor;
+				if (m_ProjectReferences[i] == m_SelectedObject)
+				{
+					m_LinkLabelStyle.normal.background = m_IconBackground;
+					GUI.backgroundColor = Color.cyan;
+				}
+				else
+				{
+					m_LinkLabelStyle.normal.background = null;
+					GUI.backgroundColor = bgColor;
+				}
+
 				GUILayout.Label(m_ProjectReferences[i].LinkLabelContent, m_LinkLabelStyle, GUILayout.Height(16.0f));
+				m_ProjectReferences[i].Area = GUILayoutUtility.GetLastRect();
+
+				//m_ProjectReferences[i].Area.x = 16.0f;
+				//m_ProjectReferences[i].Area.y = 16.0f * i + 16.0f;
+				//m_ProjectReferences[i].Area.width = position.width;
+				//m_ProjectReferences[i].Area.height = 16.0f;
+				//m_LinkLabelStyle.Draw(m_ProjectReferences[i].Area,
+				//	m_ProjectReferences[i].LinkLabelContent,
+				//	false, false,
+				//	m_ProjectReferences[i] == m_SelectedObject,
+				//	m_ProjectReferences[i] == m_SelectedObject);
+
 				GUILayout.EndHorizontal();
 			}
 		}
@@ -80,11 +133,106 @@ public class JumpToEditorWindow : EditorWindow
 			for (int i = 0; i < m_HierarchyReferences.Count; i++)
 			{
 				GUILayout.BeginHorizontal();
-				m_LinkLabelStyle.normal.textColor = m_HierarchyReferences[i].LinkColor;
 				GUILayout.Space(17.0f);
+
+				m_LinkLabelStyle.normal.textColor = m_HierarchyReferences[i].LinkColor;
+				if (m_HierarchyReferences[i] == m_SelectedObject)
+				{
+					m_LinkLabelStyle.normal.background = m_IconBackground;
+					GUI.backgroundColor = Color.cyan;
+				}
+				else
+				{
+					m_LinkLabelStyle.normal.background = null;
+					GUI.backgroundColor = bgColor;
+				}
+				
 				GUILayout.Label(m_HierarchyReferences[i].LinkLabelContent, m_LinkLabelStyle, GUILayout.Height(16.0f));
+				m_HierarchyReferences[i].Area = GUILayoutUtility.GetLastRect();
 				GUILayout.EndHorizontal();
 			}
+		}
+
+		GUI.backgroundColor = bgColor;
+		EditorGUIUtility.SetIconSize(iconSizeBak);
+
+		Event currentEvent = Event.current;
+		switch (currentEvent.type)
+		{
+		case EventType.MouseDown:
+			{
+				m_MouseDownObject = null;
+				Vector2 mousePos = currentEvent.mousePosition;
+				if (m_ProjectLinksUnfolded)
+				{
+					for (int i = 0; i < m_ProjectReferences.Count; i++)
+					{
+						if (m_ProjectReferences[i].Area.Contains(mousePos))
+						{
+							m_MouseDownObject = m_ProjectReferences[i];
+							break;
+						}
+					}
+				}
+
+				if (m_MouseDownObject == null && m_HierarchyLinksUnfolded)
+				{
+					for (int i = 0; i < m_HierarchyReferences.Count; i++)
+					{
+						if (m_HierarchyReferences[i].Area.Contains(mousePos))
+						{
+							m_MouseDownObject = m_HierarchyReferences[i];
+							break;
+						}
+					}
+				}
+			}
+			break;
+		case EventType.MouseUp:
+			{
+				m_SelectedObject = null;
+				Vector2 mousePos = currentEvent.mousePosition;
+				if (m_ProjectLinksUnfolded)
+				{
+					for (int i = 0; i < m_ProjectReferences.Count; i++)
+					{
+						if (m_ProjectReferences[i].Area.Contains(mousePos) &&
+							m_ProjectReferences[i] == m_MouseDownObject)
+						{
+							m_SelectedObject = m_ProjectReferences[i];
+							m_MouseDownObject = null;
+							Repaint();
+							break;
+						}
+					}
+				}
+
+				if (m_SelectedObject == null && m_HierarchyLinksUnfolded)
+				{
+					for (int i = 0; i < m_HierarchyReferences.Count; i++)
+					{
+						if (m_HierarchyReferences[i].Area.Contains(mousePos) &&
+							m_HierarchyReferences[i] == m_MouseDownObject)
+						{
+							m_SelectedObject = m_HierarchyReferences[i];
+							m_MouseDownObject = null;
+							Repaint();
+							break;
+						}
+					}
+				}
+
+				if (m_SelectedObject != null)
+				{
+					Debug.Log("Selected " + m_SelectedObject.LinkLabelContent.text);
+				}
+			}
+			break;
+		//case EventType.Layout:
+		//	{
+				
+		//	}
+		//	break;
 		}
 	}
 
@@ -104,6 +252,7 @@ public class JumpToEditorWindow : EditorWindow
 
 	void OnProjectChange()
 	{
+		Debug.Log("Project changed");
 		CheckProjectLinks();
 		Repaint();
 	}
