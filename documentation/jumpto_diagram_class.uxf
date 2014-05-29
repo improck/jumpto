@@ -4,8 +4,8 @@
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>40</x>
-      <y>230</y>
+      <x>410</x>
+      <y>350</y>
       <w>170</w>
       <h>100</h>
     </coordinates>
@@ -21,12 +21,12 @@
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>710</x>
-      <y>230</y>
+      <x>520</x>
+      <y>610</y>
       <w>150</w>
-      <h>100</h>
+      <h>80</h>
     </coordinates>
-    <panel_attributes>ProjectJumpLinkDesc
+    <panel_attributes>ProjectJumpLink
 --
 --
 </panel_attributes>
@@ -35,16 +35,17 @@
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>40</x>
-      <y>340</y>
-      <w>160</w>
-      <h>140</h>
+      <x>190</x>
+      <y>330</y>
+      <w>170</w>
+      <h>150</h>
     </coordinates>
     <panel_attributes>JumpToEditorWindow
 --
 --
 -OnEnable()
 -OnDisable()
+-OnClose()
 -OnGUI()
 -OnHierarchyChanged()
 -OnProjectChanged()
@@ -54,8 +55,8 @@
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>560</x>
-      <y>230</y>
+      <x>280</x>
+      <y>490</y>
       <w>140</w>
       <h>100</h>
     </coordinates>
@@ -67,10 +68,10 @@
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>370</x>
-      <y>340</y>
+      <x>120</x>
+      <y>570</y>
       <w>150</w>
-      <h>100</h>
+      <h>70</h>
     </coordinates>
     <panel_attributes>GuiJumpLinkIconView
 --
@@ -80,10 +81,10 @@
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>530</x>
-      <y>340</y>
+      <x>100</x>
+      <y>650</y>
       <w>170</w>
-      <h>100</h>
+      <h>70</h>
     </coordinates>
     <panel_attributes>GuiJumpLinkDetailsView
 --
@@ -93,10 +94,10 @@
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>210</x>
-      <y>340</y>
+      <x>120</x>
+      <y>490</y>
       <w>150</w>
-      <h>100</h>
+      <h>70</h>
     </coordinates>
     <panel_attributes>GuiJumpLinkListView
 --
@@ -106,12 +107,12 @@
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>710</x>
-      <y>340</y>
+      <x>680</x>
+      <y>610</y>
       <w>170</w>
-      <h>100</h>
+      <h>80</h>
     </coordinates>
-    <panel_attributes>HierarchyJumpLinkDesc
+    <panel_attributes>HierarchyJumpLink
 --
 --</panel_attributes>
     <additional_attributes/>
@@ -119,16 +120,18 @@
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>220</x>
-      <y>230</y>
+      <x>520</x>
+      <y>460</y>
       <w>330</w>
-      <h>100</h>
+      <h>140</h>
     </coordinates>
     <panel_attributes>JumpLinks
 --
--m_HierarchyLinks: List&lt;HierarchyJumpLinkDesc&gt;
--m_ProjectLinks: List&lt;ProjectJumpLinkDesc&gt;
+-m_HierarchyLinks: List&lt;HierarchyJumpLink&gt;
+-m_ProjectLinks: List&lt;ProjectJumpLink&gt;
 --
++AddProjectLink(link: ProjectJumpLink)
++AddHierarchyJumpLink(link: HierarchyJumpLink)
 +OnSerialize()
 +OnDeserialize()</panel_attributes>
     <additional_attributes/>
@@ -136,9 +139,9 @@
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>370</x>
-      <y>450</y>
-      <w>150</w>
+      <x>280</x>
+      <y>600</y>
+      <w>160</w>
       <h>80</h>
     </coordinates>
     <panel_attributes>RefToRect
@@ -150,10 +153,10 @@
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>210</x>
-      <y>450</y>
+      <x>640</x>
+      <y>370</y>
       <w>150</w>
-      <h>80</h>
+      <h>70</h>
     </coordinates>
     <panel_attributes>JumpToSettings
 --
