@@ -30,7 +30,7 @@ namespace JumpTo
 			ColorViolet = new Color(0.6f, 0.27f, 0.67f, 1.0f);
 		}
 
-		public void DestroyInstance()
+		public void Cleanup()
 		{
 			Object.DestroyImmediate(IconBackground);
 		}

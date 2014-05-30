@@ -58,13 +58,13 @@ namespace JumpTo
 	[System.Serializable]
 	public class JumpLinks : ScriptableObject
 	{
-		#region Singleton
+		#region Pseudo-Singleton
 		private static JumpLinks s_Instance = null;
 
-		public static JumpLinks Instance { get { if (s_Instance == null) { s_Instance = ScriptableObject.CreateInstance<JumpLinks>(); } return s_Instance; } }
+		public static JumpLinks Instance { get { return s_Instance; } /*set { s_Instance = value; }*/ }
 
 
-		public JumpLinks() { s_Instance = this; }
+		protected JumpLinks() { s_Instance = this; }
 		#endregion
 
 
@@ -105,10 +105,10 @@ namespace JumpTo
 		}
 
 
-		void OnEnable()
-		{
-			s_Instance = this;
-		}
+		//void OnEnable()
+		//{
+		//	s_Instance = this;
+		//}
 
 		public void CreateJumpLink(UnityEngine.Object linkObject)
 		{

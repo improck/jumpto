@@ -17,7 +17,7 @@ using JumpTo;
 
 public class JumpToEditorWindow : EditorWindow
 {
-	private bool m_Initialized = false;
+	[System.NonSerialized] private bool m_Initialized = false;
 
 	[SerializeField] private bool m_ProjectLinksUnfolded = true;
 	[SerializeField] private bool m_HierarchyLinksUnfolded = true;
@@ -27,20 +27,35 @@ public class JumpToEditorWindow : EditorWindow
 
 	void OnEnable()
 	{
-		//m_JumpLinks = JumpLinks.Instance;
+		m_JumpLinks = JumpLinks.Instance;
+
+		if (m_JumpLinks == null)
+		{
+			m_JumpLinks = ScriptableObject.CreateInstance<JumpLinks>();
+			m_JumpLinks.hideFlags = HideFlags.HideAndDontSave;
+		}
+
 		//m_IconBackground = EditorGUIUtility.FindTexture("me_trans_head_l");
+	}
+
+	void OnDisable()
+	{
+		GraphicAssets.Instance.Cleanup();
 	}
 
 	void OnDestroy()
 	{
 		//Object.DestroyImmediate(m_IconBackground);
+
+		GraphicAssets.Instance.Cleanup();
 	}
 
 	private void Init()
 	{
+		Debug.Log("JT Init");
 		m_Initialized = true;
 
-		JumpTo.GraphicAssets.Instance.InitGuiStyle();
+		GraphicAssets.Instance.InitGuiStyle();
 	}
 
 	void OnGUI()
@@ -48,6 +63,11 @@ public class JumpToEditorWindow : EditorWindow
 		//NOTE: it's ridiculous that I have to do this here.
 		if (!m_Initialized)
 			Init();
+
+		if (GUILayout.Button("Print"))
+		{
+			Debug.Log(JumpLinks.Instance.ProjectLinks.Count);
+		}
 
 		Vector2 iconSizeBak = EditorGUIUtility.GetIconSize();
 		EditorGUIUtility.SetIconSize(GraphicAssets.Instance.IconSize);
@@ -73,7 +93,9 @@ public class JumpToEditorWindow : EditorWindow
 				//	m_LinkLabelStyle.normal.background = null;
 				//	GUI.backgroundColor = bgColor;
 				//}
-
+				if (m_JumpLinks.ProjectLinks == null) { Debug.LogError("project links is null"); GUILayout.EndHorizontal(); continue; }
+				else if (m_JumpLinks.ProjectLinks[i] == null) { Debug.LogError("project links i is null: " + i); GUILayout.EndHorizontal(); continue; }
+				else if (GraphicAssets.Instance.LinkLabelStyle == null) { Debug.LogError("label style is null"); GUILayout.EndHorizontal(); continue; }
 				GUILayout.Label(m_JumpLinks.ProjectLinks[i].LinkLabelContent, GraphicAssets.Instance.LinkLabelStyle, GUILayout.Height(JumpLinks.LinkHeight));
 				m_JumpLinks.ProjectLinks[i].Area = GUILayoutUtility.GetLastRect();
 
@@ -113,6 +135,9 @@ public class JumpToEditorWindow : EditorWindow
 				//	GUI.backgroundColor = bgColor;
 				//}
 
+				if (m_JumpLinks.HierarchyLinks == null) { Debug.LogError("hierarchy links is null"); GUILayout.EndHorizontal(); continue; }
+				else if (m_JumpLinks.HierarchyLinks[i] == null) { Debug.LogError("hierarchy links i is null: " + i); GUILayout.EndHorizontal(); continue; }
+				else if (GraphicAssets.Instance.LinkLabelStyle == null) { Debug.LogError("label style is null"); GUILayout.EndHorizontal(); continue; }
 				GUILayout.Label(m_JumpLinks.HierarchyLinks[i].LinkLabelContent, GraphicAssets.Instance.LinkLabelStyle, GUILayout.Height(JumpLinks.LinkHeight));
 				m_JumpLinks.HierarchyLinks[i].Area = GUILayoutUtility.GetLastRect();
 
@@ -205,9 +230,12 @@ public class JumpToEditorWindow : EditorWindow
 
 	void OnFocus()
 	{
-		m_JumpLinks = JumpLinks.Instance;
-		m_JumpLinks.CheckHierarchyLinks();
-		m_JumpLinks.CheckProjectLinks();
+		//apparently OnFocus() gets called before OnEnable()!
+		if (m_JumpLinks != null)
+		{
+			m_JumpLinks.CheckHierarchyLinks();
+			m_JumpLinks.CheckProjectLinks();
+		}
 	}
 
 	//***** Only called if focused *****
