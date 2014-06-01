@@ -5,61 +5,81 @@ using System.Collections;
 
 namespace JumpTo
 {
-	public class GuiJumpLinkListView : GuiJumpLinkView
+	public class GuiJumpLinkListView : GuiBase
 	{
 		[SerializeField] private bool m_ProjectLinksUnfolded = true;
 		[SerializeField] private bool m_HierarchyLinksUnfolded = true;
 
+		private readonly Vector2 IconSize = new Vector2(16.0f, 16.0f);
 
-		public override void OnGui()
+		private RectRef m_DrawRect = new RectRef();
+
+
+		public override void OnGui(RectRef position)
 		{
-			Vector2 iconSizeBak = EditorGUIUtility.GetIconSize();
-			EditorGUIUtility.SetIconSize(GraphicAssets.Instance.IconSize);
+			m_DrawRect.x = position.x;
+			m_DrawRect.y = position.y;
+			m_DrawRect.width = position.width;
+			m_DrawRect.height = 16.0f;
 
-			Color bgColor = GUI.backgroundColor;
+			Vector2 iconSizeBak = EditorGUIUtility.GetIconSize();
+			EditorGUIUtility.SetIconSize(IconSize);
+
+			Color bgColorBak = GUI.backgroundColor;
 
 			JumpLinks jumpLinks = JumpLinks.Instance;
 
-			m_ProjectLinksUnfolded = EditorGUILayout.Foldout(m_ProjectLinksUnfolded, "Project References");
-			if (m_ProjectLinksUnfolded)
+			m_ProjectLinksUnfolded = EditorGUI.Foldout(m_DrawRect, m_ProjectLinksUnfolded, "Project References");
+
+			m_DrawRect.y += m_DrawRect.height;
+
+			if (m_ProjectLinksUnfolded && jumpLinks.ProjectLinks.Count > 0)
 			{
+				m_DrawRect.height = Mathf.Max(IconSize.y, GraphicAssets.LinkHeight);
+
+				ProjectJumpLink projectLink;
+
 				for (int i = 0; i < jumpLinks.ProjectLinks.Count; i++)
 				{
-					GUILayout.BeginHorizontal();
-					GUILayout.Space(17.0f);
+					projectLink = jumpLinks.ProjectLinks[i];
+					GraphicAssets.Instance.LinkLabelStyle.normal.textColor = projectLink.LinkColor;
+					GUI.Label(m_DrawRect, projectLink.LinkLabelContent, GraphicAssets.Instance.LinkLabelStyle);
+					
+					projectLink.Area.Set(m_DrawRect.x + 16.0f, m_DrawRect.y, m_DrawRect.width - 16.0f, m_DrawRect.height);
 
-					if (jumpLinks.ProjectLinks == null) { Debug.LogError("project links is null"); GUILayout.EndHorizontal(); continue; }
-					else if (jumpLinks.ProjectLinks[i] == null) { Debug.LogError("project links i is null: " + i); GUILayout.EndHorizontal(); continue; }
-					else if (GraphicAssets.Instance.LinkLabelStyle == null) { Debug.LogError("label style is null"); GUILayout.EndHorizontal(); continue; }
-					GUILayout.Label(jumpLinks.ProjectLinks[i].LinkLabelContent, GraphicAssets.Instance.LinkLabelStyle, GUILayout.Height(JumpLinks.LinkHeight));
-					jumpLinks.ProjectLinks[i].Area = GUILayoutUtility.GetLastRect();
-
-					GUILayout.EndHorizontal();
+					m_DrawRect.y += m_DrawRect.height;
 				}
 			}
 
-			EditorGUILayout.Separator();
+			m_DrawRect.y += 16.0f;
+			m_DrawRect.height = 16.0f;
 
-			m_HierarchyLinksUnfolded = EditorGUILayout.Foldout(m_HierarchyLinksUnfolded, "Hierarchy References");
-			if (m_HierarchyLinksUnfolded)
+			m_HierarchyLinksUnfolded = EditorGUI.Foldout(m_DrawRect, m_HierarchyLinksUnfolded, "Hierarchy References");
+
+			m_DrawRect.y += m_DrawRect.height;
+
+			if (m_HierarchyLinksUnfolded && jumpLinks.HierarchyLinks.Count > 0)
 			{
+				m_DrawRect.height = Mathf.Max(IconSize.y, GraphicAssets.LinkHeight);
+
+				HierarchyJumpLink hierarchyLink;
+
 				for (int i = 0; i < jumpLinks.HierarchyLinks.Count; i++)
 				{
-					GUILayout.BeginHorizontal();
-					GUILayout.Space(17.0f);
+					hierarchyLink = jumpLinks.HierarchyLinks[i];
+					GraphicAssets.Instance.LinkLabelStyle.normal.textColor = hierarchyLink.LinkColor;
+					GUI.Label(m_DrawRect, hierarchyLink.LinkLabelContent, GraphicAssets.Instance.LinkLabelStyle);
 
-					if (jumpLinks.HierarchyLinks == null) { Debug.LogError("hierarchy links is null"); GUILayout.EndHorizontal(); continue; }
-					else if (jumpLinks.HierarchyLinks[i] == null) { Debug.LogError("hierarchy links i is null: " + i); GUILayout.EndHorizontal(); continue; }
-					else if (GraphicAssets.Instance.LinkLabelStyle == null) { Debug.LogError("label style is null"); GUILayout.EndHorizontal(); continue; }
-					GUILayout.Label(jumpLinks.HierarchyLinks[i].LinkLabelContent, GraphicAssets.Instance.LinkLabelStyle, GUILayout.Height(JumpLinks.LinkHeight));
-					jumpLinks.HierarchyLinks[i].Area = GUILayoutUtility.GetLastRect();
+					hierarchyLink.Area.Set(m_DrawRect.x + 16.0f, m_DrawRect.y, m_DrawRect.width - 16.0f, m_DrawRect.height);
 
-					GUILayout.EndHorizontal();
+					m_DrawRect.y += m_DrawRect.height;
 				}
 			}
 
-			GUI.backgroundColor = bgColor;
+			GUI.backgroundColor = bgColorBak;
 			EditorGUIUtility.SetIconSize(iconSizeBak);
+
+			position.y = m_DrawRect.y;
 		}
 	}
 }

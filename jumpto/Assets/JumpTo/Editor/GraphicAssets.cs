@@ -25,7 +25,6 @@ namespace JumpTo
 			IconBackground.SetPixels(whiteTex);
 			IconBackground.Apply();
 
-			IconSize = new Vector2(16.0f, 16.0f);
 			ColorViolet = new Color(0.6f, 0.27f, 0.67f, 1.0f);
 		}
 
@@ -35,16 +34,21 @@ namespace JumpTo
 		}
 		#endregion
 
+		//***** IMAGES *****
 
 		public Texture2D IconPrefabNormal { get; private set; }
 		public Texture2D IconPrefabModel { get; private set; }
 		public Texture2D IconGameObject { get; private set; }
 		public Texture2D IconBackground { get; private set; }
 
+		//***** GUI STYLES *****
+
 		public GUIStyle LinkLabelStyle { get; private set; }
 
-		public Vector2 IconSize { get; private set; }
-		public Color ColorViolet { get; private set; }
+		//***** CONSTANTS *****
+
+		public readonly Color ColorViolet = new Color(0.6f, 0.27f, 0.67f, 1.0f);
+		public const float LinkHeight = 19.0f;
 
 
 		public void InitGuiStyle()

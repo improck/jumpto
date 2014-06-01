@@ -11,13 +11,13 @@ namespace JumpTo
 		[SerializeField] private UnityEngine.Object m_LinkReference;
 		[SerializeField] private GUIContent m_LinkLabelContent = new GUIContent();
 		[SerializeField] private Color m_LinkColor = Color.black;
-		[SerializeField] private Rect m_Area = new Rect();
+		[SerializeField] private RectRef m_Area = new RectRef();
 
 
 		public UnityEngine.Object LinkReference { get { return m_LinkReference; } set { m_LinkReference = value; } }
 		public GUIContent LinkLabelContent { get { return m_LinkLabelContent; } set { m_LinkLabelContent = value; } }
 		public Color LinkColor { get { return m_LinkColor; } set { m_LinkColor = value; } }
-		public Rect Area { get { return m_Area; } set { m_Area = value; } }
+		public RectRef Area { get { return m_Area; } set { m_Area.Set(value); } }
 
 
 		void OnSerialize()
@@ -36,13 +36,13 @@ namespace JumpTo
 		[SerializeField] private UnityEngine.Object m_LinkReference;
 		[SerializeField] private GUIContent m_LinkLabelContent = new GUIContent();
 		[SerializeField] private Color m_LinkColor = Color.black;
-		[SerializeField] private Rect m_Area = new Rect();
+		[SerializeField] private RectRef m_Area = new RectRef();
 
 
 		public UnityEngine.Object LinkReference { get { return m_LinkReference; } set { m_LinkReference = value; } }
 		public GUIContent LinkLabelContent { get { return m_LinkLabelContent; } set { m_LinkLabelContent = value; } }
 		public Color LinkColor { get { return m_LinkColor; } set { m_LinkColor = value; } }
-		public Rect Area { get { return m_Area; } set { m_Area = value; } }
+		public RectRef Area { get { return m_Area; } set { m_Area.Set(value); } }
 
 
 		void OnSerialize()
@@ -72,9 +72,6 @@ namespace JumpTo
 		[SerializeField] private List<HierarchyJumpLink> m_HierarchyLinks = new List<HierarchyJumpLink>();
 
 
-		public const float LinkHeight = 19.0f;
-
-
 		public List<ProjectJumpLink> ProjectLinks { get { return m_ProjectLinks; } }
 		public List<HierarchyJumpLink> HierarchyLinks { get { return m_HierarchyLinks; } }
 
@@ -84,7 +81,7 @@ namespace JumpTo
 			{
 				if (m_ProjectLinks.Count > 0)
 				{
-					return m_ProjectLinks[m_ProjectLinks.Count - 1].Area.y + LinkHeight;
+					return m_ProjectLinks[m_ProjectLinks.Count - 1].Area.y + GraphicAssets.LinkHeight;
 				}
 
 				return 0.0f;
@@ -97,7 +94,7 @@ namespace JumpTo
 			{
 				if (m_HierarchyLinks.Count > 0)
 				{
-					return m_HierarchyLinks[m_HierarchyLinks.Count - 1].Area.y + LinkHeight;
+					return m_HierarchyLinks[m_HierarchyLinks.Count - 1].Area.y + GraphicAssets.LinkHeight;
 				}
 
 				return 0.0f;

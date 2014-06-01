@@ -19,7 +19,9 @@ public class JumpToEditorWindow : EditorWindow
 	[System.NonSerialized] private bool m_Initialized = false;
 
 	[SerializeField] private JumpLinks m_JumpLinks;
-	[SerializeField] private GuiJumpLinkView m_View;
+	[SerializeField] private GuiBase m_View;
+
+	[System.NonSerialized] private RectRef m_Position = new RectRef();
 
 
 	void OnEnable()
@@ -66,7 +68,11 @@ public class JumpToEditorWindow : EditorWindow
 		if (!m_Initialized)
 			Init();
 
-		m_View.OnGui();
+		//GUI.Label(new Rect(0.0f, 0.0f, 50.0f, 16.0f), "Hello?");
+		
+		m_Position.Set(0.0f, 0.0f, position.width, position.height);
+
+		m_View.OnGui(m_Position);
 		
 		//Event currentEvent = Event.current;
 		//switch (currentEvent.type)
