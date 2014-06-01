@@ -1,6 +1,5 @@
 ﻿using UnityEditor;
 using UnityEngine;
-using System.Collections.Generic;
 using JumpTo;
 
 
@@ -19,10 +18,8 @@ public class JumpToEditorWindow : EditorWindow
 {
 	[System.NonSerialized] private bool m_Initialized = false;
 
-	[SerializeField] private bool m_ProjectLinksUnfolded = true;
-	[SerializeField] private bool m_HierarchyLinksUnfolded = true;
-
 	[SerializeField] private JumpLinks m_JumpLinks;
+	[SerializeField] private GuiJumpLinkView m_View;
 
 
 	void OnEnable()
@@ -33,6 +30,12 @@ public class JumpToEditorWindow : EditorWindow
 		{
 			m_JumpLinks = ScriptableObject.CreateInstance<JumpLinks>();
 			m_JumpLinks.hideFlags = HideFlags.HideAndDontSave;
+		}
+
+		if (m_View == null)
+		{
+			m_View = ScriptableObject.CreateInstance<GuiJumpLinkListView>();
+			m_View.hideFlags = HideFlags.HideAndDontSave;
 		}
 
 		//m_IconBackground = EditorGUIUtility.FindTexture("me_trans_head_l");
@@ -52,7 +55,6 @@ public class JumpToEditorWindow : EditorWindow
 
 	private void Init()
 	{
-		Debug.Log("JT Init");
 		m_Initialized = true;
 
 		GraphicAssets.Instance.InitGuiStyle();
@@ -64,90 +66,8 @@ public class JumpToEditorWindow : EditorWindow
 		if (!m_Initialized)
 			Init();
 
-		if (GUILayout.Button("Print"))
-		{
-			Debug.Log(JumpLinks.Instance.ProjectLinks.Count);
-		}
-
-		Vector2 iconSizeBak = EditorGUIUtility.GetIconSize();
-		EditorGUIUtility.SetIconSize(GraphicAssets.Instance.IconSize);
-
-		Color bgColor = GUI.backgroundColor;
-
-		m_ProjectLinksUnfolded = EditorGUILayout.Foldout(m_ProjectLinksUnfolded, "Project References");
-		if (m_ProjectLinksUnfolded)
-		{
-			for (int i = 0; i < m_JumpLinks.ProjectLinks.Count; i++)
-			{
-				GUILayout.BeginHorizontal();
-				GUILayout.Space(17.0f);
-
-				//m_LinkLabelStyle.normal.textColor = m_ProjectReferences[i].LinkColor;
-				//if (m_ProjectReferences[i] == m_SelectedObject)
-				//{
-				//	m_LinkLabelStyle.normal.background = m_IconBackground;
-				//	GUI.backgroundColor = Color.cyan;
-				//}
-				//else
-				//{
-				//	m_LinkLabelStyle.normal.background = null;
-				//	GUI.backgroundColor = bgColor;
-				//}
-				if (m_JumpLinks.ProjectLinks == null) { Debug.LogError("project links is null"); GUILayout.EndHorizontal(); continue; }
-				else if (m_JumpLinks.ProjectLinks[i] == null) { Debug.LogError("project links i is null: " + i); GUILayout.EndHorizontal(); continue; }
-				else if (GraphicAssets.Instance.LinkLabelStyle == null) { Debug.LogError("label style is null"); GUILayout.EndHorizontal(); continue; }
-				GUILayout.Label(m_JumpLinks.ProjectLinks[i].LinkLabelContent, GraphicAssets.Instance.LinkLabelStyle, GUILayout.Height(JumpLinks.LinkHeight));
-				m_JumpLinks.ProjectLinks[i].Area = GUILayoutUtility.GetLastRect();
-
-				//m_ProjectReferences[i].Area.x = 16.0f;
-				//m_ProjectReferences[i].Area.y = 16.0f * i + 16.0f;
-				//m_ProjectReferences[i].Area.width = position.width;
-				//m_ProjectReferences[i].Area.height = 16.0f;
-				//m_LinkLabelStyle.Draw(m_ProjectReferences[i].Area,
-				//	m_ProjectReferences[i].LinkLabelContent,
-				//	false, false,
-				//	m_ProjectReferences[i] == m_SelectedObject,
-				//	m_ProjectReferences[i] == m_SelectedObject);
-
-				GUILayout.EndHorizontal();
-			}
-		}
-
-		EditorGUILayout.Separator();
-
-		m_HierarchyLinksUnfolded = EditorGUILayout.Foldout(m_HierarchyLinksUnfolded, "Hierarchy References");
-		if (m_HierarchyLinksUnfolded)
-		{
-			for (int i = 0; i < m_JumpLinks.HierarchyLinks.Count; i++)
-			{
-				GUILayout.BeginHorizontal();
-				GUILayout.Space(17.0f);
-
-				//m_LinkLabelStyle.normal.textColor = m_HierarchyReferences[i].LinkColor;
-				//if (m_HierarchyReferences[i] == m_SelectedObject)
-				//{
-				//	m_LinkLabelStyle.normal.background = m_IconBackground;
-				//	GUI.backgroundColor = Color.cyan;
-				//}
-				//else
-				//{
-				//	m_LinkLabelStyle.normal.background = null;
-				//	GUI.backgroundColor = bgColor;
-				//}
-
-				if (m_JumpLinks.HierarchyLinks == null) { Debug.LogError("hierarchy links is null"); GUILayout.EndHorizontal(); continue; }
-				else if (m_JumpLinks.HierarchyLinks[i] == null) { Debug.LogError("hierarchy links i is null: " + i); GUILayout.EndHorizontal(); continue; }
-				else if (GraphicAssets.Instance.LinkLabelStyle == null) { Debug.LogError("label style is null"); GUILayout.EndHorizontal(); continue; }
-				GUILayout.Label(m_JumpLinks.HierarchyLinks[i].LinkLabelContent, GraphicAssets.Instance.LinkLabelStyle, GUILayout.Height(JumpLinks.LinkHeight));
-				m_JumpLinks.HierarchyLinks[i].Area = GUILayoutUtility.GetLastRect();
-
-				GUILayout.EndHorizontal();
-			}
-		}
-
-		GUI.backgroundColor = bgColor;
-		EditorGUIUtility.SetIconSize(iconSizeBak);
-
+		m_View.OnGui();
+		
 		//Event currentEvent = Event.current;
 		//switch (currentEvent.type)
 		//{
