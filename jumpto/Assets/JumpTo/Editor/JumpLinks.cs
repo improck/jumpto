@@ -11,14 +11,20 @@ namespace JumpTo
 		[SerializeField] private UnityEngine.Object m_LinkReference;
 		[SerializeField] private GUIContent m_LinkLabelContent = new GUIContent();
 		[SerializeField] private Color m_LinkColor = Color.black;
-		[SerializeField] private RectRef m_Area = new RectRef();
 
 
 		public UnityEngine.Object LinkReference { get { return m_LinkReference; } set { m_LinkReference = value; } }
 		public GUIContent LinkLabelContent { get { return m_LinkLabelContent; } set { m_LinkLabelContent = value; } }
 		public Color LinkColor { get { return m_LinkColor; } set { m_LinkColor = value; } }
-		public RectRef Area { get { return m_Area; } set { m_Area.Set(value); } }
+		public RectRef Area { get; set; }
+		public bool Visible { get; set; }
 
+
+		public ProjectJumpLink()
+		{
+			Area = new RectRef();
+			Visible = true;
+		}
 
 		void OnSerialize()
 		{
@@ -36,14 +42,20 @@ namespace JumpTo
 		[SerializeField] private UnityEngine.Object m_LinkReference;
 		[SerializeField] private GUIContent m_LinkLabelContent = new GUIContent();
 		[SerializeField] private Color m_LinkColor = Color.black;
-		[SerializeField] private RectRef m_Area = new RectRef();
 
 
 		public UnityEngine.Object LinkReference { get { return m_LinkReference; } set { m_LinkReference = value; } }
 		public GUIContent LinkLabelContent { get { return m_LinkLabelContent; } set { m_LinkLabelContent = value; } }
 		public Color LinkColor { get { return m_LinkColor; } set { m_LinkColor = value; } }
-		public RectRef Area { get { return m_Area; } set { m_Area.Set(value); } }
+		public RectRef Area { get; set; }
+		public bool Visible { get; set; }
 
+
+		public HierarchyJumpLink()
+		{
+			Area = new RectRef();
+			Visible = true;
+		}
 
 		void OnSerialize()
 		{
@@ -191,16 +203,16 @@ namespace JumpTo
 				m_ProjectLinks.Add(link);
 
 				//TODO: position it at the bottom of the list
-				//if (m_ProjectLinks.Count > 1)
-				//{
-				//	Rect lastArea = m_ProjectLinks[m_ProjectLinks.Count - 1].Area;
-				//	Rect linkArea = link.Area;
-				//	linkArea.x = lastArea.x;
-				//	linkArea.y = lastArea.y + LinkHeight;
-				//	linkArea.width = lastArea.width;
-				//	linkArea.height = lastArea.height;
-				//	link.Area = linkArea;
-				//}
+				if (m_ProjectLinks.Count > 1)
+				{
+					Rect lastArea = m_ProjectLinks[m_ProjectLinks.Count - 1].Area;
+					Rect linkArea = link.Area;
+					linkArea.x = lastArea.x;
+					linkArea.y = lastArea.y + GraphicAssets.LinkHeight;
+					linkArea.width = lastArea.width;
+					linkArea.height = lastArea.height;
+					link.Area.Set(linkArea);
+				}
 			}
 		}
 
@@ -261,22 +273,70 @@ namespace JumpTo
 				m_HierarchyLinks.Add(link);
 
 				//TODO: position it at the bottom of the list
-				//if (m_HierarchyLinks.Count > 1)
-				//{
-				//	Rect lastArea = m_HierarchyLinks[m_HierarchyLinks.Count - 1].Area;
-				//	Rect linkArea = link.Area;
-				//	linkArea.x = lastArea.x;
-				//	linkArea.y = lastArea.y + LinkHeight;
-				//	linkArea.width = lastArea.width;
-				//	linkArea.height = lastArea.height;
-				//	link.Area = linkArea;
-				//}
+				if (m_HierarchyLinks.Count > 1)
+				{
+					Rect lastArea = m_HierarchyLinks[m_HierarchyLinks.Count - 1].Area;
+					Rect linkArea = link.Area;
+					linkArea.x = lastArea.x;
+					linkArea.y = lastArea.y + GraphicAssets.LinkHeight;
+					linkArea.width = lastArea.width;
+					linkArea.height = lastArea.height;
+					link.Area.Set(linkArea);
+				}
 			}
 		}
 		
 		public ProjectJumpLink ProjectLinkHitTest(Vector2 position)
 		{
 			//TODO: binary search of list sorted by y-position
+
+			//int linkCount = m_ProjectLinks.Count;
+			//if (linkCount > 0)
+			//{
+			//	if (linkCount == 1)
+			//	{
+			//		RectRef rect = m_ProjectLinks[0].Area;
+			//		if (rect.yMin == position.y ||
+			//				(rect.yMin > position.y && rect.yMax < position.y))
+			//		{
+			//			if (m_ProjectLinks[0].Visible)
+			//				return m_ProjectLinks[0];
+			//			else
+			//				return null;
+			//		}
+			//	}
+			//	else
+			//	{
+			//		int indexMin = 0;
+			//		int indexMax = linkCount - 1;
+			//		int index = 0;
+			//		RectRef rect = null;
+
+			//		while (indexMax >= indexMin)
+			//		{
+			//			index = (indexMin + indexMax) >> 1;
+
+			//			rect = m_ProjectLinks[index].Area;
+						
+			//			if (rect.yMax < position.y)
+			//			{
+			//				indexMin = index + 1;
+			//			}
+			//			else if (rect.yMin > position.y)
+			//			{
+			//				indexMax = index - 1;
+			//			}
+			//			else if (rect.yMin == position.y ||
+			//				(rect.yMin > position.y && rect.yMax < position.y))
+			//			{
+			//				if (m_ProjectLinks[index].Visible)
+			//					return m_ProjectLinks[index];
+			//				else
+			//					return null;
+			//			}
+			//		}
+			//	}
+			//}
 
 			return null;
 		}

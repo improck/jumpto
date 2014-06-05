@@ -187,6 +187,8 @@ public class JumpToEditorWindow : EditorWindow
 		{
 			m_JumpLinks.CreateJumpLink(linkObjects[i]);
 		}
+
+		Repaint();
 	}
 
 	

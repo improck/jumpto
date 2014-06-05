@@ -33,21 +33,32 @@ namespace JumpTo
 
 			m_DrawRect.y += m_DrawRect.height;
 
-			if (m_ProjectLinksUnfolded && jumpLinks.ProjectLinks.Count > 0)
+			if (m_ProjectLinksUnfolded)
 			{
-				m_DrawRect.height = Mathf.Max(IconSize.y, GraphicAssets.LinkHeight);
+				if (jumpLinks.ProjectLinks.Count > 0)
+				{
+					m_DrawRect.height = Mathf.Max(IconSize.y, GraphicAssets.LinkHeight);
 
-				ProjectJumpLink projectLink;
+					ProjectJumpLink projectLink;
 
+					for (int i = 0; i < jumpLinks.ProjectLinks.Count; i++)
+					{
+						projectLink = jumpLinks.ProjectLinks[i];
+						GraphicAssets.Instance.LinkLabelStyle.normal.textColor = projectLink.LinkColor;
+						GUI.Label(m_DrawRect, projectLink.LinkLabelContent, GraphicAssets.Instance.LinkLabelStyle);
+					
+						projectLink.Visible = true;
+						projectLink.Area.Set(m_DrawRect.x + 16.0f, m_DrawRect.y, m_DrawRect.width - 16.0f, m_DrawRect.height);
+
+						m_DrawRect.y += m_DrawRect.height;
+					}
+				}
+			}
+			else
+			{
 				for (int i = 0; i < jumpLinks.ProjectLinks.Count; i++)
 				{
-					projectLink = jumpLinks.ProjectLinks[i];
-					GraphicAssets.Instance.LinkLabelStyle.normal.textColor = projectLink.LinkColor;
-					GUI.Label(m_DrawRect, projectLink.LinkLabelContent, GraphicAssets.Instance.LinkLabelStyle);
-					
-					projectLink.Area.Set(m_DrawRect.x + 16.0f, m_DrawRect.y, m_DrawRect.width - 16.0f, m_DrawRect.height);
-
-					m_DrawRect.y += m_DrawRect.height;
+					jumpLinks.ProjectLinks[i].Visible = false;
 				}
 			}
 
@@ -58,21 +69,32 @@ namespace JumpTo
 
 			m_DrawRect.y += m_DrawRect.height;
 
-			if (m_HierarchyLinksUnfolded && jumpLinks.HierarchyLinks.Count > 0)
+			if (m_HierarchyLinksUnfolded)
 			{
-				m_DrawRect.height = Mathf.Max(IconSize.y, GraphicAssets.LinkHeight);
+				if (jumpLinks.HierarchyLinks.Count > 0)
+				{
+					m_DrawRect.height = Mathf.Max(IconSize.y, GraphicAssets.LinkHeight);
 
-				HierarchyJumpLink hierarchyLink;
+					HierarchyJumpLink hierarchyLink;
 
+					for (int i = 0; i < jumpLinks.HierarchyLinks.Count; i++)
+					{
+						hierarchyLink = jumpLinks.HierarchyLinks[i];
+						GraphicAssets.Instance.LinkLabelStyle.normal.textColor = hierarchyLink.LinkColor;
+						GUI.Label(m_DrawRect, hierarchyLink.LinkLabelContent, GraphicAssets.Instance.LinkLabelStyle);
+
+						hierarchyLink.Visible = true;
+						hierarchyLink.Area.Set(m_DrawRect.x + 16.0f, m_DrawRect.y, m_DrawRect.width - 16.0f, m_DrawRect.height);
+
+						m_DrawRect.y += m_DrawRect.height;
+					}
+				}
+			}
+			else
+			{
 				for (int i = 0; i < jumpLinks.HierarchyLinks.Count; i++)
 				{
-					hierarchyLink = jumpLinks.HierarchyLinks[i];
-					GraphicAssets.Instance.LinkLabelStyle.normal.textColor = hierarchyLink.LinkColor;
-					GUI.Label(m_DrawRect, hierarchyLink.LinkLabelContent, GraphicAssets.Instance.LinkLabelStyle);
-
-					hierarchyLink.Area.Set(m_DrawRect.x + 16.0f, m_DrawRect.y, m_DrawRect.width - 16.0f, m_DrawRect.height);
-
-					m_DrawRect.y += m_DrawRect.height;
+					jumpLinks.HierarchyLinks[i].Visible = false;
 				}
 			}
 
@@ -80,6 +102,19 @@ namespace JumpTo
 			EditorGUIUtility.SetIconSize(iconSizeBak);
 
 			position.y = m_DrawRect.y;
+
+			switch (Event.current.type)
+			{
+			case EventType.MouseDown:
+				{
+					ProjectJumpLink projectLink = jumpLinks.ProjectLinkHitTest(Event.current.mousePosition);
+					if (projectLink != null)
+					{
+						Debug.Log("MouseDown: " + projectLink.LinkReference.name);
+					}
+				}
+				break;
+			}
 		}
 	}
 }
