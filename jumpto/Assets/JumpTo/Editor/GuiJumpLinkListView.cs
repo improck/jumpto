@@ -6,114 +6,93 @@ namespace JumpTo
 {
 	public class GuiJumpLinkListView : GuiBase
 	{
-		[SerializeField] private bool m_ProjectLinksUnfolded = true;
-		[SerializeField] private bool m_HierarchyLinksUnfolded = true;
-
-		private readonly Vector2 IconSize = new Vector2(16.0f, 16.0f);
+		[SerializeField] private float m_Divider = 0.5f;
+		[SerializeField] private GuiProjectJumpLinkView m_ProjectView;
+		[SerializeField] private GuiHierarchyJumpLinkView m_HierarchyView;
 
 		private RectRef m_DrawRect = new RectRef();
+		private readonly Vector2 IconSize = new Vector2(16.0f, 16.0f);
 
 
-		public override void OnGui(RectRef position)
+		public override void OnWindowEnable()
 		{
-			m_DrawRect.x = position.x;
-			m_DrawRect.y = position.y;
-			m_DrawRect.width = position.width;
-			m_DrawRect.height = 16.0f;
+			if (m_ProjectView == null)
+			{
+				m_ProjectView = GuiProjectJumpLinkView.Create();
+			}
 
+			if (m_HierarchyView == null)
+			{
+				m_HierarchyView = GuiHierarchyJumpLinkView.Create();
+			}
+
+			m_ProjectView.OnWindowEnable();
+			m_HierarchyView.OnWindowEnable();
+		}
+
+		protected override void OnGui()
+		{
 			Vector2 iconSizeBak = EditorGUIUtility.GetIconSize();
 			EditorGUIUtility.SetIconSize(IconSize);
 
 			Color bgColorBak = GUI.backgroundColor;
 
-			JumpLinks jumpLinks = JumpLinks.Instance;
-
-			m_ProjectLinksUnfolded = EditorGUI.Foldout(m_DrawRect, m_ProjectLinksUnfolded, "Project References");
-
-			m_DrawRect.y += m_DrawRect.height;
-
-			if (m_ProjectLinksUnfolded)
+			switch (JumpToSettings.Instance.Visibility)
 			{
-				if (jumpLinks.ProjectLinks.Count > 0)
+			case JumpToSettings.VisibleList.ProjectAndHierarchy:
 				{
-					m_DrawRect.height = Mathf.Max(IconSize.y, GraphicAssets.LinkHeight);
+					//draw the top/left box
+					if (JumpToSettings.Instance.Vertical)
+						m_DrawRect.Set(0.0f, 0.0f, m_Size.x, Mathf.Floor(m_Size.y * m_Divider));
+					else
+						m_DrawRect.Set(0.0f, 0.0f, m_Size.x * m_Divider, m_Size.y);
 
-					ProjectJumpLink projectLink;
-
-					for (int i = 0; i < jumpLinks.ProjectLinks.Count; i++)
-					{
-						projectLink = jumpLinks.ProjectLinks[i];
-						GraphicAssets.Instance.LinkLabelStyle.normal.textColor = projectLink.LinkColor;
-						GUI.Label(m_DrawRect, projectLink.LinkLabelContent, GraphicAssets.Instance.LinkLabelStyle);
+					if (JumpToSettings.Instance.ProjectFirst)
+						m_ProjectView.Draw(m_DrawRect);
+					else
+						m_HierarchyView.Draw(m_DrawRect);
 					
-						projectLink.Visible = true;
-						projectLink.Area.Set(m_DrawRect.x + 16.0f, m_DrawRect.y, m_DrawRect.width - 16.0f, m_DrawRect.height);
+					//TODO: draw a divider
 
-						m_DrawRect.y += m_DrawRect.height;
-					}
+					//draw the bottom/right box
+					if (JumpToSettings.Instance.Vertical)
+						m_DrawRect.Set(0.0f, Mathf.Floor(m_Size.y * m_Divider), m_Size.x, Mathf.Floor(m_Size.y * (1.0f - m_Divider)));
+					else
+						m_DrawRect.Set(m_Size.x * m_Divider, 0.0f, m_Size.x * (1.0f - m_Divider), m_Size.y);
+
+					if (JumpToSettings.Instance.ProjectFirst)
+						m_HierarchyView.Draw(m_DrawRect);
+					else
+						m_ProjectView.Draw(m_DrawRect);
 				}
-			}
-			else
-			{
-				for (int i = 0; i < jumpLinks.ProjectLinks.Count; i++)
+				break;
+			case JumpToSettings.VisibleList.ProjectOnly:
 				{
-					jumpLinks.ProjectLinks[i].Visible = false;
+					m_DrawRect.Set(0.0f, 0.0f, m_Size.x, m_Size.y);
+
+					m_ProjectView.Draw(m_DrawRect);
 				}
-			}
-
-			m_DrawRect.y += 16.0f;
-			m_DrawRect.height = 16.0f;
-
-			m_HierarchyLinksUnfolded = EditorGUI.Foldout(m_DrawRect, m_HierarchyLinksUnfolded, "Hierarchy References");
-
-			m_DrawRect.y += m_DrawRect.height;
-
-			if (m_HierarchyLinksUnfolded)
-			{
-				if (jumpLinks.HierarchyLinks.Count > 0)
+				break;
+			case JumpToSettings.VisibleList.HierarchyOnly:
 				{
-					m_DrawRect.height = Mathf.Max(IconSize.y, GraphicAssets.LinkHeight);
+					m_DrawRect.Set(0.0f, 0.0f, m_Size.x, m_Size.y);
 
-					HierarchyJumpLink hierarchyLink;
-
-					for (int i = 0; i < jumpLinks.HierarchyLinks.Count; i++)
-					{
-						hierarchyLink = jumpLinks.HierarchyLinks[i];
-						GraphicAssets.Instance.LinkLabelStyle.normal.textColor = hierarchyLink.LinkColor;
-						GUI.Label(m_DrawRect, hierarchyLink.LinkLabelContent, GraphicAssets.Instance.LinkLabelStyle);
-
-						hierarchyLink.Visible = true;
-						hierarchyLink.Area.Set(m_DrawRect.x + 16.0f, m_DrawRect.y, m_DrawRect.width - 16.0f, m_DrawRect.height);
-
-						m_DrawRect.y += m_DrawRect.height;
-					}
-				}
-			}
-			else
-			{
-				for (int i = 0; i < jumpLinks.HierarchyLinks.Count; i++)
-				{
-					jumpLinks.HierarchyLinks[i].Visible = false;
-				}
-			}
-
-			GUI.backgroundColor = bgColorBak;
-			EditorGUIUtility.SetIconSize(iconSizeBak);
-
-			position.y = m_DrawRect.y;
-
-			switch (Event.current.type)
-			{
-			case EventType.MouseDown:
-				{
-					ProjectJumpLink projectLink = jumpLinks.ProjectLinkHitTest(Event.current.mousePosition);
-					if (projectLink != null)
-					{
-						Debug.Log("MouseDown: " + projectLink.LinkReference.name);
-					}
+					m_HierarchyView.Draw(m_DrawRect);
 				}
 				break;
 			}
+
+			GUI.backgroundColor = bgColorBak;
+
+			EditorGUIUtility.SetIconSize(iconSizeBak);
+		}
+
+		public static GuiJumpLinkListView Create()
+		{
+			GuiJumpLinkListView instance = ScriptableObject.CreateInstance<GuiJumpLinkListView>();
+			instance.hideFlags = HideFlags.HideAndDontSave;
+
+			return instance;
 		}
 	}
 }

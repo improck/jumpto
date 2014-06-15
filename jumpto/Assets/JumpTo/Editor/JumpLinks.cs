@@ -73,7 +73,15 @@ namespace JumpTo
 		#region Pseudo-Singleton
 		private static JumpLinks s_Instance = null;
 
-		public static JumpLinks Instance { get { return s_Instance; } /*set { s_Instance = value; }*/ }
+		public static JumpLinks Instance { get { return s_Instance; } }
+
+		public static JumpLinks Create()
+		{
+			JumpLinks instance = ScriptableObject.CreateInstance<JumpLinks>();
+			instance.hideFlags = HideFlags.HideAndDontSave;
+
+			return instance;
+		}
 
 
 		protected JumpLinks() { s_Instance = this; }

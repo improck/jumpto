@@ -44,6 +44,7 @@ namespace JumpTo
 		//***** GUI STYLES *****
 
 		public GUIStyle LinkLabelStyle { get; private set; }
+		public GUIStyle LinkBoxStyle { get; private set; }
 
 		//***** CONSTANTS *****
 
@@ -54,7 +55,10 @@ namespace JumpTo
 		public void InitGuiStyle()
 		{
 			LinkLabelStyle = new GUIStyle(GUI.skin.label);
-			LinkLabelStyle.padding.left = 17;
+			LinkLabelStyle.padding.left = 8;
+
+			LinkBoxStyle = new GUIStyle(GUI.skin.box);
+			LinkBoxStyle.fontStyle = FontStyle.Bold;
 		}
 	}
 }

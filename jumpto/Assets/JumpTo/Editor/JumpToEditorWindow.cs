@@ -19,6 +19,7 @@ public class JumpToEditorWindow : EditorWindow
 	[System.NonSerialized] private bool m_Initialized = false;
 
 	[SerializeField] private JumpLinks m_JumpLinks;
+	[SerializeField] private JumpToSettings m_Settings;
 	[SerializeField] private GuiBase m_View;
 
 	[System.NonSerialized] private RectRef m_Position = new RectRef();
@@ -30,27 +31,38 @@ public class JumpToEditorWindow : EditorWindow
 
 		if (m_JumpLinks == null)
 		{
-			m_JumpLinks = ScriptableObject.CreateInstance<JumpLinks>();
-			m_JumpLinks.hideFlags = HideFlags.HideAndDontSave;
+			m_JumpLinks = JumpLinks.Create();
+		}
+
+		m_Settings = JumpToSettings.Instance;
+
+		if (m_Settings == null)
+		{
+			m_Settings = JumpToSettings.Create();
 		}
 
 		if (m_View == null)
 		{
-			m_View = ScriptableObject.CreateInstance<GuiJumpLinkListView>();
-			m_View.hideFlags = HideFlags.HideAndDontSave;
+			m_View = GuiJumpLinkListView.Create();
 		}
+
+		m_View.OnWindowEnable();
 
 		//m_IconBackground = EditorGUIUtility.FindTexture("me_trans_head_l");
 	}
 
 	void OnDisable()
 	{
+		m_View.OnWindowDisable();
+
 		GraphicAssets.Instance.Cleanup();
 	}
 
 	void OnDestroy()
 	{
 		//Object.DestroyImmediate(m_IconBackground);
+
+		m_View.OnWindowClose();
 
 		GraphicAssets.Instance.Cleanup();
 	}
@@ -70,9 +82,12 @@ public class JumpToEditorWindow : EditorWindow
 
 		//GUI.Label(new Rect(0.0f, 0.0f, 50.0f, 16.0f), "Hello?");
 		
+		//position.x & y are the position of the window in Unity, i think
+		//	maybe it's the window position on the desktop
+		//	either way it wasn't the value i expected, so i force (0, 0)
 		m_Position.Set(0.0f, 0.0f, position.width, position.height);
 
-		m_View.OnGui(m_Position);
+		m_View.Draw(m_Position);
 		
 		//Event currentEvent = Event.current;
 		//switch (currentEvent.type)
