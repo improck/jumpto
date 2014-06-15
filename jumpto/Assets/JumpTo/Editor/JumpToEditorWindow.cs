@@ -9,7 +9,7 @@ using JumpTo;
 //TODO: ability to remove items
 //TODO: context menu
 //TODO: drag-n-drop to/from window
-//TODO: serialize links
+//xTODO: serialize links
 //TODO: update on scene change?
 //TODO: update on project change?
 
@@ -20,7 +20,7 @@ public class JumpToEditorWindow : EditorWindow
 
 	[SerializeField] private JumpLinks m_JumpLinks;
 	[SerializeField] private JumpToSettings m_Settings;
-	[SerializeField] private GuiBase m_View;
+	[SerializeField] private GuiJumpLinkListView m_View;
 
 	[System.NonSerialized] private RectRef m_Position = new RectRef();
 
@@ -43,7 +43,7 @@ public class JumpToEditorWindow : EditorWindow
 
 		if (m_View == null)
 		{
-			m_View = GuiJumpLinkListView.Create();
+			m_View = GuiBase.Create<GuiJumpLinkListView>();
 		}
 
 		m_View.OnWindowEnable();

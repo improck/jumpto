@@ -51,13 +51,5 @@ namespace JumpTo
 
 			GUI.EndScrollView(true);
 		}
-
-		public static GuiProjectJumpLinkView Create()
-		{
-			GuiProjectJumpLinkView instance = ScriptableObject.CreateInstance<GuiProjectJumpLinkView>();
-			instance.hideFlags = HideFlags.HideAndDontSave;
-
-			return instance;
-		}
 	}
 }

@@ -11,23 +11,29 @@ namespace JumpTo
 		[SerializeField] private GuiHierarchyJumpLinkView m_HierarchyView;
 
 		private RectRef m_DrawRect = new RectRef();
+		private Rect m_DividerRect;
+
+		private const float DividerHalfThickness = 3.0f;
+		private const float DividerMin = 74.0f;
+
 		private readonly Vector2 IconSize = new Vector2(16.0f, 16.0f);
+		private readonly int DividerHash = "divider".GetHashCode();
 
 
 		public override void OnWindowEnable()
 		{
 			if (m_ProjectView == null)
 			{
-				m_ProjectView = GuiProjectJumpLinkView.Create();
+				m_ProjectView = GuiBase.Create<GuiProjectJumpLinkView>();
 			}
 
 			if (m_HierarchyView == null)
 			{
-				m_HierarchyView = GuiHierarchyJumpLinkView.Create();
+				m_HierarchyView = GuiBase.Create<GuiHierarchyJumpLinkView>();
 			}
 
-			m_ProjectView.OnWindowEnable();
-			m_HierarchyView.OnWindowEnable();
+			//m_ProjectView.OnWindowEnable();
+			//m_HierarchyView.OnWindowEnable();
 		}
 
 		protected override void OnGui()
@@ -41,11 +47,30 @@ namespace JumpTo
 			{
 			case JumpToSettings.VisibleList.ProjectAndHierarchy:
 				{
+					float adjWidth = m_Size.x;
+					float adjHeight = m_Size.y;
+
 					//draw the top/left box
 					if (JumpToSettings.Instance.Vertical)
-						m_DrawRect.Set(0.0f, 0.0f, m_Size.x, Mathf.Floor(m_Size.y * m_Divider));
+					{
+						adjHeight = Mathf.Floor(m_Size.y * m_Divider);
+						m_DrawRect.Set(0.0f, 0.0f, m_Size.x, adjHeight - DividerHalfThickness);
+
+						m_DividerRect.x = 0.0f;
+						m_DividerRect.y = m_DrawRect.height;
+						m_DividerRect.width = m_Size.x;
+						m_DividerRect.height = DividerHalfThickness * 2.0f;
+					}
 					else
-						m_DrawRect.Set(0.0f, 0.0f, m_Size.x * m_Divider, m_Size.y);
+					{
+						adjWidth = Mathf.Floor(m_Size.x * m_Divider);
+						m_DrawRect.Set(0.0f, 0.0f, adjWidth - DividerHalfThickness, m_Size.y);
+
+						m_DividerRect.x = m_DrawRect.width;;
+						m_DividerRect.y = 0.0f;
+						m_DividerRect.width = DividerHalfThickness * 2.0f;
+						m_DividerRect.height = m_Size.y;
+					}
 
 					if (JumpToSettings.Instance.ProjectFirst)
 						m_ProjectView.Draw(m_DrawRect);
@@ -56,14 +81,20 @@ namespace JumpTo
 
 					//draw the bottom/right box
 					if (JumpToSettings.Instance.Vertical)
-						m_DrawRect.Set(0.0f, Mathf.Floor(m_Size.y * m_Divider), m_Size.x, Mathf.Floor(m_Size.y * (1.0f - m_Divider)));
+					{
+						m_DrawRect.Set(0.0f, adjHeight + DividerHalfThickness, m_Size.x, (m_Size.y - adjHeight) - DividerHalfThickness);
+					}
 					else
-						m_DrawRect.Set(m_Size.x * m_Divider, 0.0f, m_Size.x * (1.0f - m_Divider), m_Size.y);
+					{
+						m_DrawRect.Set(adjWidth + DividerHalfThickness, 0.0f, (m_Size.x - adjWidth) - DividerHalfThickness, m_Size.y);
+					}
 
 					if (JumpToSettings.Instance.ProjectFirst)
 						m_HierarchyView.Draw(m_DrawRect);
 					else
 						m_ProjectView.Draw(m_DrawRect);
+
+					OnDividerGui();
 				}
 				break;
 			case JumpToSettings.VisibleList.ProjectOnly:
@@ -87,12 +118,54 @@ namespace JumpTo
 			EditorGUIUtility.SetIconSize(iconSizeBak);
 		}
 
-		public static GuiJumpLinkListView Create()
+		private void OnDividerGui()
 		{
-			GuiJumpLinkListView instance = ScriptableObject.CreateInstance<GuiJumpLinkListView>();
-			instance.hideFlags = HideFlags.HideAndDontSave;
+			int controlId = GUIUtility.GetControlID(DividerHash, FocusType. Passive, m_DividerRect);
 
-			return instance;
+			if (JumpToSettings.Instance.Vertical)
+				EditorGUIUtility.AddCursorRect(m_DividerRect, MouseCursor.SplitResizeUpDown, controlId);
+			else
+				EditorGUIUtility.AddCursorRect(m_DividerRect, MouseCursor.SplitResizeLeftRight, controlId);
+
+			Event current = Event.current;
+			switch (current.GetTypeForControl(controlId))
+			{
+			case EventType.MouseDown:
+				{
+					if (current.button == 0 && m_DividerRect.Contains(current.mousePosition))
+					{
+						GUIUtility.hotControl = controlId;
+						current.Use();
+					}
+				}
+				break;
+			case EventType.MouseUp:
+				{
+					if (GUIUtility.hotControl == controlId)
+					{
+						GUIUtility.hotControl = 0;
+						current.Use();
+					}
+				}
+				break;
+			case EventType.MouseDrag:
+				{
+					if (GUIUtility.hotControl == controlId && current.button == 0)
+					{
+						if (JumpToSettings.Instance.Vertical)
+						{
+							m_Divider = Mathf.Clamp(current.mousePosition.y, DividerMin, m_Size.y - DividerMin) / m_Size.y;
+						}
+						else
+						{
+							m_Divider = Mathf.Clamp(current.mousePosition.x, DividerMin, m_Size.x - DividerMin) / m_Size.x;
+						}
+
+						current.Use();
+					}
+				}
+				break;
+			}
 		}
 	}
 }

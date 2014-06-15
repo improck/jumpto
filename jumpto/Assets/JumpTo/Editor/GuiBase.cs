@@ -33,5 +33,13 @@ namespace JumpTo
 
 			GUI.EndGroup();
 		}
+
+		public static T Create<T>() where T : GuiBase
+		{
+			T instance = ScriptableObject.CreateInstance<T>();
+			instance.hideFlags = HideFlags.HideAndDontSave;
+
+			return instance;
+		}
 	}
 }
