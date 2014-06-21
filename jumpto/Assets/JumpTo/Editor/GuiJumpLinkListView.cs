@@ -14,7 +14,7 @@ namespace JumpTo
 		private Rect m_DividerRect;
 
 		private const float DividerHalfThickness = 3.0f;
-		private const float DividerMin = 74.0f;
+		public const float DividerMin = 74.0f;
 
 		private readonly Vector2 IconSize = new Vector2(16.0f, 16.0f);
 		private readonly int DividerHash = "divider".GetHashCode();

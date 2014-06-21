@@ -46,6 +46,22 @@ public class JumpToEditorWindow : EditorWindow
 			m_View = GuiBase.Create<GuiJumpLinkListView>();
 		}
 
+		if (m_Settings.Visibility == JumpToSettings.VisibleList.ProjectAndHierarchy)
+		{
+			if (m_Settings.Vertical)
+			{
+				this.minSize = new Vector2(120.0f, GuiJumpLinkListView.DividerMin * 2.0f);
+			}
+			else
+			{
+				this.minSize = new Vector2(240.0f, GuiJumpLinkListView.DividerMin);
+			}
+		}
+		else
+		{
+			this.minSize = new Vector2(120.0f, GuiJumpLinkListView.DividerMin);
+		}
+
 		m_View.OnWindowEnable();
 
 		//m_IconBackground = EditorGUIUtility.FindTexture("me_trans_head_l");
