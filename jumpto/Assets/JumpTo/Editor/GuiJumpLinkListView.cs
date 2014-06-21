@@ -20,7 +20,7 @@ namespace JumpTo
 		private readonly int DividerHash = "divider".GetHashCode();
 
 
-		public override void OnWindowEnable()
+		public override void OnWindowEnable(EditorWindow window)
 		{
 			if (m_ProjectView == null)
 			{
@@ -32,8 +32,8 @@ namespace JumpTo
 				m_HierarchyView = GuiBase.Create<GuiHierarchyJumpLinkView>();
 			}
 
-			//m_ProjectView.OnWindowEnable();
-			//m_HierarchyView.OnWindowEnable();
+			m_ProjectView.OnWindowEnable(window);
+			m_HierarchyView.OnWindowEnable(window);
 		}
 
 		protected override void OnGui()

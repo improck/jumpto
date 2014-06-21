@@ -10,9 +10,9 @@ namespace JumpTo
 		protected Vector2 m_Size;
 
 
-		public virtual void OnWindowEnable() { }
-		public virtual void OnWindowDisable() { }
-		public virtual void OnWindowClose() { }
+		public virtual void OnWindowEnable(EditorWindow window) { }
+		public virtual void OnWindowDisable(EditorWindow window) { }
+		public virtual void OnWindowClose(EditorWindow window) { }
 
 		protected abstract void OnGui();
 

@@ -62,14 +62,14 @@ public class JumpToEditorWindow : EditorWindow
 			this.minSize = new Vector2(120.0f, GuiJumpLinkListView.DividerMin);
 		}
 
-		m_View.OnWindowEnable();
+		m_View.OnWindowEnable(this);
 
 		//m_IconBackground = EditorGUIUtility.FindTexture("me_trans_head_l");
 	}
 
 	void OnDisable()
 	{
-		m_View.OnWindowDisable();
+		m_View.OnWindowDisable(this);
 
 		GraphicAssets.Instance.Cleanup();
 	}
@@ -78,7 +78,7 @@ public class JumpToEditorWindow : EditorWindow
 	{
 		//Object.DestroyImmediate(m_IconBackground);
 
-		m_View.OnWindowClose();
+		m_View.OnWindowClose(this);
 
 		GraphicAssets.Instance.Cleanup();
 	}

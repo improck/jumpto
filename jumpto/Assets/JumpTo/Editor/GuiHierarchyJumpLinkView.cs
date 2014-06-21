@@ -12,6 +12,14 @@ namespace JumpTo
 		private Rect m_ScrollViewRect;
 		private Rect m_DrawRect;
 
+		private EditorWindow m_Window;
+
+
+		public override void OnWindowEnable(EditorWindow window)
+		{
+			m_Window = window;
+		}
+
 
 		protected override void OnGui()
 		{

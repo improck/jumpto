@@ -11,7 +11,16 @@ namespace JumpTo
 
 		private Rect m_ScrollViewRect;
 		private Rect m_DrawRect;
+		//private int m_Preselected = -1;
+		//private int m_Selected = -1;
 
+		private EditorWindow m_Window;
+
+
+		public override void OnWindowEnable(EditorWindow window)
+		{
+			m_Window = window;
+		}
 
 		protected override void OnGui()
 		{
@@ -41,10 +50,40 @@ namespace JumpTo
 			for (int i = 0; i < projectLinks.Count; i++)
 			{
 				GraphicAssets.Instance.LinkLabelStyle.normal.textColor = projectLinks[i].LinkColor;
+				
+				projectLinks[i].Visible = true;
+				projectLinks[i].Area.Set(m_DrawRect.x, m_DrawRect.y, m_DrawRect.width - 16.0f, m_DrawRect.height);
+
+				//if (Event.current.isMouse)
+				//{
+				//	if (Event.current.type == EventType.MouseDown)
+				//	{
+				//		if (projectLinks[i].Area.RectInternal.Contains(Event.current.mousePosition))
+				//			m_Preselected = i;
+				//	}
+				//	else if (Event.current.type == EventType.MouseUp)
+				//	{
+				//		if (m_Preselected > -1)
+				//		{
+				//			if (projectLinks[i].Area.RectInternal.Contains(Event.current.mousePosition))
+				//				m_Selected = i;
+				//			else
+				//				m_Selected = -1;
+
+				//			m_Preselected = -1;
+
+				//			m_Window.Repaint();
+				//		}
+				//	}
+				//}
+
+				//if (m_Selected > -1 && m_Selected == i)
+				//	GraphicAssets.Instance.LinkLabelStyle.normal.background =
+				//		GraphicAssets.Instance.IconBackground;
+
 				GUI.Label(m_DrawRect, projectLinks[i].LinkLabelContent, GraphicAssets.Instance.LinkLabelStyle);
 
-				projectLinks[i].Visible = true;
-				projectLinks[i].Area.Set(m_DrawRect.x + 16.0f, m_DrawRect.y, m_DrawRect.width - 16.0f, m_DrawRect.height);
+				//GraphicAssets.Instance.LinkLabelStyle.normal.background = null;
 
 				m_DrawRect.y += m_DrawRect.height;
 			}
