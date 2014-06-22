@@ -1,5 +1,6 @@
 ﻿using UnityEditor;
 using UnityEngine;
+using System.Collections.Generic;
 
 
 namespace JumpTo
@@ -30,6 +31,8 @@ namespace JumpTo
 
 		public GUIStyle LinkLabelStyle { get; private set; }
 		public GUIStyle LinkBoxStyle { get; private set; }
+		public GUIStyle ToolbarStyle { get; private set; }
+		public GUIStyle ToolbarButtonStyle { get; private set; }
 
 		//***** CONSTANTS *****
 
@@ -43,14 +46,17 @@ namespace JumpTo
 		public void InitGuiStyle()
 		{
 			GUISkin editorSkin = EditorGUIUtility.GetBuiltinSkin(EditorSkin.Inspector);
-			GUIStyle hierarchyLabelStyle = editorSkin.GetStyle("Hi Label");
-			LinkLabelStyle = new GUIStyle(hierarchyLabelStyle);
+
+			LinkLabelStyle = new GUIStyle(editorSkin.GetStyle("Hi Label"));
 			LinkLabelStyle.name = "Link Label Style";
 			LinkLabelStyle.padding.left = 8;
 
 			LinkBoxStyle = new GUIStyle(GUI.skin.box);
 			LinkBoxStyle.fontStyle = FontStyle.Bold;
 			LinkBoxStyle.normal.background = m_Outline;
+
+			ToolbarStyle = new GUIStyle(editorSkin.GetStyle("Toolbar"));
+			ToolbarButtonStyle = new GUIStyle(editorSkin.GetStyle("toolbarbutton"));
 		}
 
 		public void Cleanup()
@@ -64,6 +70,9 @@ namespace JumpTo
 			IconPrefabNormal = EditorGUIUtility.FindTexture("PrefabNormal Icon");
 			IconPrefabModel = EditorGUIUtility.FindTexture("PrefabModel Icon");
 			IconGameObject = EditorGUIUtility.FindTexture("GameObject Icon");
+
+			GUISkin editorSkin = EditorGUIUtility.GetBuiltinSkin(EditorSkin.Inspector);
+			GUIStyle toolbarStyle = editorSkin.GetStyle("Toolbar");
 
 			//TODO: load this from an embedded image
 			m_Outline = new Texture2D(32, 32, TextureFormat.RGBA32, false);

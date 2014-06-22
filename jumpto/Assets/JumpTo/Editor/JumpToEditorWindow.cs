@@ -23,6 +23,7 @@ public class JumpToEditorWindow : EditorWindow
 
 	[SerializeField] private JumpLinks m_JumpLinks;
 	[SerializeField] private JumpToSettings m_Settings;
+	[SerializeField] private GuiToolbar m_Toolbar;
 	[SerializeField] private GuiJumpLinkListView m_View;
 
 	[System.NonSerialized] private RectRef m_Position = new RectRef();
@@ -42,6 +43,11 @@ public class JumpToEditorWindow : EditorWindow
 		if (m_Settings == null)
 		{
 			m_Settings = JumpToSettings.Create();
+		}
+
+		if (m_Toolbar == null)
+		{
+			m_Toolbar = GuiBase.Create<GuiToolbar>();
 		}
 
 		if (m_View == null)
@@ -65,9 +71,8 @@ public class JumpToEditorWindow : EditorWindow
 			this.minSize = new Vector2(120.0f, GuiJumpLinkListView.DividerMin);
 		}
 
+		m_Toolbar.OnWindowEnable(this);
 		m_View.OnWindowEnable(this);
-
-		//m_IconBackground = EditorGUIUtility.FindTexture("me_trans_head_l");
 	}
 
 	void OnDisable()
@@ -77,8 +82,6 @@ public class JumpToEditorWindow : EditorWindow
 
 	void OnDestroy()
 	{
-		//Object.DestroyImmediate(m_IconBackground);
-
 		m_View.OnWindowClose(this);
 
 		GraphicAssets.Instance.Cleanup();
@@ -97,93 +100,15 @@ public class JumpToEditorWindow : EditorWindow
 		if (!m_Initialized)
 			Init();
 
-		//GUI.Label(new Rect(0.0f, 0.0f, 50.0f, 16.0f), "Hello?");
-		
 		//position.x & y are the position of the window in Unity, i think
 		//	maybe it's the window position on the desktop
 		//	either way it wasn't the value i expected, so i force (0, 0)
-		m_Position.Set(0.0f, 0.0f, position.width, position.height);
+		m_Position.Set(0.0f, 0.0f, position.width, 18.0f);
+		m_Toolbar.Draw(m_Position);
 
+		m_Position.y = m_Position.height;
+		m_Position.height = position.height - m_Position.height;
 		m_View.Draw(m_Position);
-		
-		//Event currentEvent = Event.current;
-		//switch (currentEvent.type)
-		//{
-		//case EventType.MouseDown:
-		//	{
-		//		m_MouseDownObject = null;
-		//		Vector2 mousePos = currentEvent.mousePosition;
-		//		if (m_ProjectLinksUnfolded)
-		//		{
-		//			for (int i = 0; i < m_ProjectReferences.Count; i++)
-		//			{
-		//				if (m_ProjectReferences[i].Area.Contains(mousePos))
-		//				{
-		//					m_MouseDownObject = m_ProjectReferences[i];
-		//					break;
-		//				}
-		//			}
-		//		}
-
-		//		if (m_MouseDownObject == null && m_HierarchyLinksUnfolded)
-		//		{
-		//			for (int i = 0; i < m_HierarchyReferences.Count; i++)
-		//			{
-		//				if (m_HierarchyReferences[i].Area.Contains(mousePos))
-		//				{
-		//					m_MouseDownObject = m_HierarchyReferences[i];
-		//					break;
-		//				}
-		//			}
-		//		}
-		//	}
-		//	break;
-		//case EventType.MouseUp:
-		//	{
-		//		m_SelectedObject = null;
-		//		Vector2 mousePos = currentEvent.mousePosition;
-		//		if (m_ProjectLinksUnfolded)
-		//		{
-		//			for (int i = 0; i < m_ProjectReferences.Count; i++)
-		//			{
-		//				if (m_ProjectReferences[i].Area.Contains(mousePos) &&
-		//					m_ProjectReferences[i] == m_MouseDownObject)
-		//				{
-		//					m_SelectedObject = m_ProjectReferences[i];
-		//					m_MouseDownObject = null;
-		//					Repaint();
-		//					break;
-		//				}
-		//			}
-		//		}
-
-		//		if (m_SelectedObject == null && m_HierarchyLinksUnfolded)
-		//		{
-		//			for (int i = 0; i < m_HierarchyReferences.Count; i++)
-		//			{
-		//				if (m_HierarchyReferences[i].Area.Contains(mousePos) &&
-		//					m_HierarchyReferences[i] == m_MouseDownObject)
-		//				{
-		//					m_SelectedObject = m_HierarchyReferences[i];
-		//					m_MouseDownObject = null;
-		//					Repaint();
-		//					break;
-		//				}
-		//			}
-		//		}
-
-		//		if (m_SelectedObject != null)
-		//		{
-		//			Debug.Log("Selected " + m_SelectedObject.LinkLabelContent.text);
-		//		}
-		//	}
-		//	break;
-		////case EventType.Layout:
-		////	{
-				
-		////	}
-		////	break;
-		//}
 	}
 
 	void OnFocus()
@@ -229,7 +154,6 @@ public class JumpToEditorWindow : EditorWindow
 	public static void JumpTo_InitMainMenu()
 	{
 		JumpToEditorWindow window = EditorWindow.GetWindow<JumpToEditorWindow>("Jump To");
-		//window.m_SerializedObject = new SerializedObject(window);
 		window.Show();
 	}
 

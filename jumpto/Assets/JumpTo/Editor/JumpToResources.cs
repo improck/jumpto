@@ -13,6 +13,11 @@ namespace JumpTo
 	{
 		public static readonly int LabelProjectLinks = "label_projectLinks".GetHashCode();
 		public static readonly int LabelHierarchyLinks = "label_hierarchyLinks".GetHashCode();
+
+		public static readonly int TooltipProjectFirst = "tooltip_projectFirst".GetHashCode();
+		public static readonly int TooltipHierarchyFirst = "tooltip_hierarchyFirst".GetHashCode();
+		public static readonly int TooltipVertical = "tooltip_vertical".GetHashCode();
+		public static readonly int TooltipHorizontal = "tooltip_horizontal".GetHashCode();
 	}
 
 	public class ResLoad
@@ -93,6 +98,11 @@ namespace JumpTo
 		{
 			m_TextResources.Add(ResId.LabelProjectLinks, "Project Links");
 			m_TextResources.Add(ResId.LabelHierarchyLinks, "Hierarchy Links");
+
+			m_TextResources.Add(ResId.TooltipProjectFirst, "Project First");
+			m_TextResources.Add(ResId.TooltipHierarchyFirst, "Hierarchy First");
+			m_TextResources.Add(ResId.TooltipVertical, "Vertical Orientation");
+			m_TextResources.Add(ResId.TooltipHorizontal, "Horizontal Orientation");
 		}
 	}
 }
