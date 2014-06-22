@@ -17,13 +17,11 @@ namespace JumpTo
 		public GUIContent LinkLabelContent { get { return m_LinkLabelContent; } set { m_LinkLabelContent = value; } }
 		public Color LinkColor { get { return m_LinkColor; } set { m_LinkColor = value; } }
 		public RectRef Area { get; set; }
-		public bool Visible { get; set; }
 
 
 		public ProjectJumpLink()
 		{
 			Area = new RectRef();
-			Visible = true;
 		}
 
 		void OnSerialize()
@@ -48,13 +46,11 @@ namespace JumpTo
 		public GUIContent LinkLabelContent { get { return m_LinkLabelContent; } set { m_LinkLabelContent = value; } }
 		public Color LinkColor { get { return m_LinkColor; } set { m_LinkColor = value; } }
 		public RectRef Area { get; set; }
-		public bool Visible { get; set; }
 
 
 		public HierarchyJumpLink()
 		{
 			Area = new RectRef();
-			Visible = true;
 		}
 
 		void OnSerialize()
@@ -137,7 +133,8 @@ namespace JumpTo
 					prefabType == PrefabType.PrefabInstance ||
 					prefabType == PrefabType.ModelPrefabInstance ||
 					prefabType == PrefabType.DisconnectedPrefabInstance ||
-					prefabType == PrefabType.DisconnectedModelPrefabInstance)
+					prefabType == PrefabType.DisconnectedModelPrefabInstance ||
+					prefabType == PrefabType.MissingPrefabInstance)
 				{
 					AddHierarchyLink(linkObject, prefabType);
 				}
@@ -254,20 +251,22 @@ namespace JumpTo
 							link.LinkLabelContent.image = graphicAssets.IconPrefabModel;
 						link.LinkColor = graphicAssets.ColorViolet;
 					}
-					else if (prefabType == PrefabType.DisconnectedPrefabInstance)
+					else if (prefabType == PrefabType.DisconnectedPrefabInstance ||
+						prefabType == PrefabType.DisconnectedModelPrefabInstance ||
+						prefabType == PrefabType.MissingPrefabInstance)
 					{
 						if (link.LinkLabelContent.image == null)
 							link.LinkLabelContent.image = graphicAssets.IconPrefabNormal;
 
 						link.LinkColor = Color.red;
 					}
-					else if (prefabType == PrefabType.DisconnectedModelPrefabInstance)
-					{
-						if (link.LinkLabelContent.image == null)
-							link.LinkLabelContent.image = graphicAssets.IconPrefabModel;
+					//else if (prefabType == PrefabType.DisconnectedModelPrefabInstance)
+					//{
+					//	if (link.LinkLabelContent.image == null)
+					//		link.LinkLabelContent.image = graphicAssets.IconPrefabModel;
 
-						link.LinkColor = Color.red;
-					}
+					//	link.LinkColor = Color.red;
+					//}
 					else if (link.LinkLabelContent.image == null)
 					{
 						link.LinkLabelContent.image = graphicAssets.IconGameObject;

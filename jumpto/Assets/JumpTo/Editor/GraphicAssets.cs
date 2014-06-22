@@ -25,7 +25,6 @@ namespace JumpTo
 		public Texture2D IconPrefabNormal { get; private set; }
 		public Texture2D IconPrefabModel { get; private set; }
 		public Texture2D IconGameObject { get; private set; }
-		public Texture2D IconBackground { get; private set; }
 
 		//***** GUI STYLES *****
 
@@ -43,7 +42,10 @@ namespace JumpTo
 
 		public void InitGuiStyle()
 		{
-			LinkLabelStyle = new GUIStyle(GUI.skin.label);
+			GUISkin editorSkin = EditorGUIUtility.GetBuiltinSkin(EditorSkin.Inspector);
+			GUIStyle hierarchyLabelStyle = editorSkin.GetStyle("Hi Label");
+			LinkLabelStyle = new GUIStyle(hierarchyLabelStyle);
+			LinkLabelStyle.name = "Link Label Style";
 			LinkLabelStyle.padding.left = 8;
 
 			LinkBoxStyle = new GUIStyle(GUI.skin.box);
@@ -53,8 +55,8 @@ namespace JumpTo
 
 		public void Cleanup()
 		{
-			Object.DestroyImmediate(IconBackground);
 			Object.DestroyImmediate(m_Outline);
+			s_Instance = null;
 		}
 
 		private void InitAssets()
@@ -63,14 +65,7 @@ namespace JumpTo
 			IconPrefabModel = EditorGUIUtility.FindTexture("PrefabModel Icon");
 			IconGameObject = EditorGUIUtility.FindTexture("GameObject Icon");
 
-			IconBackground = new Texture2D(4, 4, TextureFormat.RGB24, false);
-			Color[] whiteTex = new Color[16];
-			for (int i = 0; i < 16; i++)
-				whiteTex[i] = Color.white;
-			IconBackground.SetPixels(whiteTex);
-			IconBackground.Apply();
-			IconBackground.hideFlags = HideFlags.HideAndDontSave;
-
+			//TODO: load this from an embedded image
 			m_Outline = new Texture2D(32, 32, TextureFormat.RGBA32, false);
 			Color[] outline = new Color[32 * 32];
 			for (int i = 0; i < 32; i++)

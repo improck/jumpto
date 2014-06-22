@@ -11,6 +11,7 @@ namespace JumpTo
 
 		private Rect m_ScrollViewRect;
 		private Rect m_DrawRect;
+		private int m_Selected = -1;
 
 		private EditorWindow m_Window;
 
@@ -19,7 +20,6 @@ namespace JumpTo
 		{
 			m_Window = window;
 		}
-
 
 		protected override void OnGui()
 		{
@@ -43,18 +43,59 @@ namespace JumpTo
 
 			m_ScrollViewPosition = GUI.BeginScrollView(m_DrawRect, m_ScrollViewPosition, m_ScrollViewRect);
 
-			//draw inside of scroll view
-			m_DrawRect.Set(0.0f, 0.0f, m_ScrollViewRect.width, GraphicAssets.LinkHeight);
-
-			for (int i = 0; i < hierarchyLinks.Count; i++)
+			switch (Event.current.type)
 			{
-				GraphicAssets.Instance.LinkLabelStyle.normal.textColor = hierarchyLinks[i].LinkColor;
-				GUI.Label(m_DrawRect, hierarchyLinks[i].LinkLabelContent, GraphicAssets.Instance.LinkLabelStyle);
+			case EventType.MouseDown:
+				{
+					m_Selected = -1;
 
-				hierarchyLinks[i].Visible = true;
-				hierarchyLinks[i].Area.Set(m_DrawRect.x + 16.0f, m_DrawRect.y, m_DrawRect.width - 16.0f, m_DrawRect.height);
+					for (int i = 0; i < hierarchyLinks.Count; i++)
+					{
+						if (hierarchyLinks[i].Area.RectInternal.Contains(Event.current.mousePosition))
+						{
+							m_Selected = i;
+							break;
+						}
+					}
 
-				m_DrawRect.y += m_DrawRect.height;
+					m_Window.Repaint();
+				}
+				break;
+			case EventType.MouseUp:
+				{
+					if (m_Selected > -1)
+					{
+						if (!Event.current.control && !Event.current.command)
+							Selection.activeObject = hierarchyLinks[m_Selected].LinkReference;
+						else
+						{
+							//TODO: handle multiple selection
+						}
+
+						m_Window.Repaint();
+					}
+				}
+				break;
+			case EventType.Repaint:
+				{
+					//draw inside of scroll view
+					m_DrawRect.Set(0.0f, 0.0f, m_ScrollViewRect.width, GraphicAssets.LinkHeight);
+
+					for (int i = 0; i < hierarchyLinks.Count; i++)
+					{
+						GraphicAssets.Instance.LinkLabelStyle.normal.textColor = hierarchyLinks[i].LinkColor;
+
+						hierarchyLinks[i].Area.Set(m_DrawRect.x, m_DrawRect.y, m_DrawRect.width - 16.0f, m_DrawRect.height);
+
+						if (m_Selected > -1 && m_Selected == i)
+							GraphicAssets.Instance.LinkLabelStyle.Draw(m_DrawRect, hierarchyLinks[i].LinkLabelContent, false, false, true, m_Window == EditorWindow.focusedWindow);
+						else
+							GraphicAssets.Instance.LinkLabelStyle.Draw(m_DrawRect, hierarchyLinks[i].LinkLabelContent, false, false, false, false);
+
+						m_DrawRect.y += m_DrawRect.height;
+					}
+				}
+				break;
 			}
 
 			GUI.EndScrollView(true);

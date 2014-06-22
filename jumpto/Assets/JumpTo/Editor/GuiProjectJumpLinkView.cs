@@ -11,8 +11,7 @@ namespace JumpTo
 
 		private Rect m_ScrollViewRect;
 		private Rect m_DrawRect;
-		//private int m_Preselected = -1;
-		//private int m_Selected = -1;
+		private int m_Selected = -1;
 
 		private EditorWindow m_Window;
 
@@ -23,7 +22,7 @@ namespace JumpTo
 		}
 
 		protected override void OnGui()
-		{
+		{	
 			List<ProjectJumpLink> projectLinks = JumpLinks.Instance.ProjectLinks;
 
 			m_DrawRect.Set(1.0f, 1.0f, m_Size.x - 2.0f, m_Size.y - 1.0f);
@@ -44,48 +43,59 @@ namespace JumpTo
 
 			m_ScrollViewPosition = GUI.BeginScrollView(m_DrawRect, m_ScrollViewPosition, m_ScrollViewRect);
 
-			//draw inside of scroll view
-			m_DrawRect.Set(0.0f, 0.0f, m_ScrollViewRect.width, GraphicAssets.LinkHeight);
-
-			for (int i = 0; i < projectLinks.Count; i++)
+			switch (Event.current.type)
 			{
-				GraphicAssets.Instance.LinkLabelStyle.normal.textColor = projectLinks[i].LinkColor;
-				
-				projectLinks[i].Visible = true;
-				projectLinks[i].Area.Set(m_DrawRect.x, m_DrawRect.y, m_DrawRect.width - 16.0f, m_DrawRect.height);
+			case EventType.MouseDown:
+				{
+					m_Selected = -1;
 
-				//if (Event.current.isMouse)
-				//{
-				//	if (Event.current.type == EventType.MouseDown)
-				//	{
-				//		if (projectLinks[i].Area.RectInternal.Contains(Event.current.mousePosition))
-				//			m_Preselected = i;
-				//	}
-				//	else if (Event.current.type == EventType.MouseUp)
-				//	{
-				//		if (m_Preselected > -1)
-				//		{
-				//			if (projectLinks[i].Area.RectInternal.Contains(Event.current.mousePosition))
-				//				m_Selected = i;
-				//			else
-				//				m_Selected = -1;
+					for (int i = 0; i < projectLinks.Count; i++)
+					{
+						if (projectLinks[i].Area.RectInternal.Contains(Event.current.mousePosition))
+						{
+							m_Selected = i;
+							break;
+						}
+					}
 
-				//			m_Preselected = -1;
+					m_Window.Repaint();
+				}
+				break;
+			case EventType.MouseUp:
+				{
+					if (m_Selected > -1)
+					{
+						if (!Event.current.control && !Event.current.command)
+							Selection.activeObject = projectLinks[m_Selected].LinkReference;
+						else
+						{
+							//TODO: handle multiple selection
+						}
 
-				//			m_Window.Repaint();
-				//		}
-				//	}
-				//}
+						m_Window.Repaint();
+					}
+				}
+				break;
+			case EventType.Repaint:
+				{
+					//draw inside of scroll view
+					m_DrawRect.Set(0.0f, 0.0f, m_ScrollViewRect.width, GraphicAssets.LinkHeight);
 
-				//if (m_Selected > -1 && m_Selected == i)
-				//	GraphicAssets.Instance.LinkLabelStyle.normal.background =
-				//		GraphicAssets.Instance.IconBackground;
+					for (int i = 0; i < projectLinks.Count; i++)
+					{
+						GraphicAssets.Instance.LinkLabelStyle.normal.textColor = projectLinks[i].LinkColor;
 
-				GUI.Label(m_DrawRect, projectLinks[i].LinkLabelContent, GraphicAssets.Instance.LinkLabelStyle);
+						projectLinks[i].Area.Set(m_DrawRect.x, m_DrawRect.y, m_DrawRect.width - 16.0f, m_DrawRect.height);
 
-				//GraphicAssets.Instance.LinkLabelStyle.normal.background = null;
+						if (m_Selected > -1 && m_Selected == i)
+							GraphicAssets.Instance.LinkLabelStyle.Draw(m_DrawRect, projectLinks[i].LinkLabelContent, false, false, true, m_Window == EditorWindow.focusedWindow);
+						else
+							GraphicAssets.Instance.LinkLabelStyle.Draw(m_DrawRect, projectLinks[i].LinkLabelContent, false, false, false, false);
 
-				m_DrawRect.y += m_DrawRect.height;
+						m_DrawRect.y += m_DrawRect.height;
+					}
+				}
+				break;
 			}
 
 			GUI.EndScrollView(true);
