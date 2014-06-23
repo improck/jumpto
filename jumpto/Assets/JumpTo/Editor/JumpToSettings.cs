@@ -29,9 +29,9 @@ public class JumpToSettings : ScriptableObject
 	[SerializeField] private bool m_Vertical = true;
 
 
-	public VisibleList Visibility { get { return m_VisibleList; } }
-	public bool ProjectFirst { get { return m_ProjectFirst; } }
-	public bool Vertical { get { return m_Vertical; } }
+	public VisibleList Visibility { get { return m_VisibleList; } set { m_VisibleList = value; } }
+	public bool ProjectFirst { get { return m_ProjectFirst; } set { m_ProjectFirst = value; } }
+	public bool Vertical { get { return m_Vertical; } set { m_Vertical = value; } }
 
 
 	public static JumpToSettings Create()

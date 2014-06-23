@@ -47,7 +47,7 @@ namespace JumpTo
 		{
 			GUISkin editorSkin = EditorGUIUtility.GetBuiltinSkin(EditorSkin.Inspector);
 
-			LinkLabelStyle = new GUIStyle(editorSkin.GetStyle("Hi Label"));
+			LinkLabelStyle = new GUIStyle(editorSkin.GetStyle("PR Label"));
 			LinkLabelStyle.name = "Link Label Style";
 			LinkLabelStyle.padding.left = 8;
 
@@ -70,9 +70,6 @@ namespace JumpTo
 			IconPrefabNormal = EditorGUIUtility.FindTexture("PrefabNormal Icon");
 			IconPrefabModel = EditorGUIUtility.FindTexture("PrefabModel Icon");
 			IconGameObject = EditorGUIUtility.FindTexture("GameObject Icon");
-
-			GUISkin editorSkin = EditorGUIUtility.GetBuiltinSkin(EditorSkin.Inspector);
-			GUIStyle toolbarStyle = editorSkin.GetStyle("Toolbar");
 
 			//TODO: load this from an embedded image
 			m_Outline = new Texture2D(32, 32, TextureFormat.RGBA32, false);
