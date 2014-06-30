@@ -33,6 +33,7 @@ namespace JumpTo
 		public GUIStyle LinkBoxStyle { get; private set; }
 		public GUIStyle ToolbarStyle { get; private set; }
 		public GUIStyle ToolbarButtonStyle { get; private set; }
+		public GUIStyle ToolbarPopupStyle { get; private set; }
 
 		//***** CONSTANTS *****
 
@@ -57,6 +58,7 @@ namespace JumpTo
 
 			ToolbarStyle = new GUIStyle(editorSkin.GetStyle("Toolbar"));
 			ToolbarButtonStyle = new GUIStyle(editorSkin.GetStyle("toolbarbutton"));
+			ToolbarPopupStyle = new GUIStyle(editorSkin.GetStyle("ToolbarPopup"));
 		}
 
 		public void Cleanup()

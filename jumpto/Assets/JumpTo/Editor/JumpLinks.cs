@@ -149,6 +149,22 @@ namespace JumpTo
 			}
 		}
 
+		public void RemoveProjectLink(int index)
+		{
+			if (index < 0 || index > m_ProjectLinks.Count - 1)
+				return;
+
+			m_ProjectLinks.RemoveAt(index);
+		}
+
+		public void RemoveHierarchyLink(int index)
+		{
+			if (index < 0 || index > m_HierarchyLinks.Count - 1)
+				return;
+
+			m_HierarchyLinks.RemoveAt(index);
+		}
+
 		private void AddProjectLink(UnityEngine.Object linkObject, PrefabType prefabType)
 		{
 			//basically, if no linked object in the list has a reference to the passed object

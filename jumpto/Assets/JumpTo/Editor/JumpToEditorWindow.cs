@@ -12,7 +12,7 @@ using JumpTo;
 //xTODO: serialize links
 //TODO: update on scene change?
 //TODO: update on project change?
-//TODO: create a toolbar
+//xTODO: create a toolbar
 //TODO: multiple selection
 //TODO: double-click behavior
 
@@ -158,14 +158,29 @@ public class JumpToEditorWindow : EditorWindow
 	}
 
 	[MenuItem("Assets/Create/Jump Link", true)]
-	public static bool JumpTo_CreateJumpLink_Validate()
+	public static bool JumpTo_AssetsCreateJumpLink_Validate()
 	{
 		Object[] selected = Selection.objects;
 		return selected != null && selected.Length > 0;
 	}
 
 	[MenuItem("Assets/Create/Jump Link", false)]
-	public static void JumpTo_CreateJumpLink()
+	public static void JumpTo_AssetsCreateJumpLink()
+	{
+		Object[] selected = Selection.objects;
+		JumpToEditorWindow window = EditorWindow.GetWindow<JumpToEditorWindow>("Jump To");
+		window.CreateMultipleJumpLinks(selected);
+	}
+
+	[MenuItem("GameObject/Create Other/Jump Link", true)]
+	public static bool JumpTo_GameObjectCreateOtherJumpLink_Validate()
+	{
+		Object[] selected = Selection.objects;
+		return selected != null && selected.Length > 0;
+	}
+
+	[MenuItem("GameObject/Create Other/Jump Link", false)]
+	public static void JumpTo_GameObjectCreateOtherJumpLink()
 	{
 		Object[] selected = Selection.objects;
 		JumpToEditorWindow window = EditorWindow.GetWindow<JumpToEditorWindow>("Jump To");

@@ -64,7 +64,7 @@ namespace JumpTo
 					else
 					{
 						adjWidth = Mathf.Floor(m_Size.x * m_Divider);
-						m_DrawRect.Set(0.0f, 0.0f, adjWidth - DividerHalfThickness, m_Size.y);
+						m_DrawRect.Set(0.0f, 0.0f, adjWidth - DividerHalfThickness, m_Size.y - 1.0f);
 
 						m_DividerRect.x = m_DrawRect.width;;
 						m_DividerRect.y = 0.0f;
@@ -82,11 +82,11 @@ namespace JumpTo
 					//draw the bottom/right box
 					if (JumpToSettings.Instance.Vertical)
 					{
-						m_DrawRect.Set(0.0f, adjHeight + DividerHalfThickness, m_Size.x, (m_Size.y - adjHeight) - DividerHalfThickness);
+						m_DrawRect.Set(0.0f, adjHeight + DividerHalfThickness, m_Size.x, ((m_Size.y - adjHeight) - DividerHalfThickness) - 1.0f);
 					}
 					else
 					{
-						m_DrawRect.Set(adjWidth + DividerHalfThickness, 0.0f, (m_Size.x - adjWidth) - DividerHalfThickness, m_Size.y);
+						m_DrawRect.Set(adjWidth + DividerHalfThickness, 0.0f, (m_Size.x - adjWidth) - DividerHalfThickness, m_Size.y - 1.0f);
 					}
 
 					if (JumpToSettings.Instance.ProjectFirst)
@@ -99,14 +99,14 @@ namespace JumpTo
 				break;
 			case JumpToSettings.VisibleList.ProjectOnly:
 				{
-					m_DrawRect.Set(0.0f, 0.0f, m_Size.x, m_Size.y);
+					m_DrawRect.Set(0.0f, 0.0f, m_Size.x, m_Size.y - 1.0f);
 
 					m_ProjectView.Draw(m_DrawRect);
 				}
 				break;
 			case JumpToSettings.VisibleList.HierarchyOnly:
 				{
-					m_DrawRect.Set(0.0f, 0.0f, m_Size.x, m_Size.y);
+					m_DrawRect.Set(0.0f, 0.0f, m_Size.x, m_Size.y - 1.0f);
 
 					m_HierarchyView.Draw(m_DrawRect);
 				}
