@@ -77,7 +77,7 @@ namespace JumpTo
 					else
 						m_HierarchyView.Draw(m_DrawRect);
 					
-					//TODO: draw a divider
+					//TODO: draw a divider icon
 
 					//draw the bottom/right box
 					if (JumpToSettings.Instance.Vertical)

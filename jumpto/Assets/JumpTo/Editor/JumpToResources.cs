@@ -18,6 +18,15 @@ namespace JumpTo
 		public static readonly int TooltipHierarchyFirst = "tooltip_hierarchyFirst".GetHashCode();
 		public static readonly int TooltipVertical = "tooltip_vertical".GetHashCode();
 		public static readonly int TooltipHorizontal = "tooltip_horizontal".GetHashCode();
+
+		public static readonly int MenuProjectView = "menu_projectView".GetHashCode();
+		public static readonly int MenuHierarchyView = "menu_hierarchyView".GetHashCode();
+		public static readonly int MenuBothView = "menu_bothView".GetHashCode();
+		public static readonly int MenuContextSetAsSelection = "menu_contextSetAsSelection".GetHashCode();
+		public static readonly int MenuContextAddToSelection = "menu_contextAddToSelection".GetHashCode();
+		public static readonly int MenuContextFrameLink = "menu_contextFrameLink".GetHashCode();
+		public static readonly int MenuContextOpenLink = "menu_contextOpenLink".GetHashCode();
+		public static readonly int MenuContextRemoveLink = "menu_contextRemoveLink".GetHashCode();
 	}
 
 	public class ResLoad
@@ -103,6 +112,15 @@ namespace JumpTo
 			m_TextResources.Add(ResId.TooltipHierarchyFirst, "Hierarchy First");
 			m_TextResources.Add(ResId.TooltipVertical, "Vertical Orientation");
 			m_TextResources.Add(ResId.TooltipHorizontal, "Horizontal Orientation");
+
+			m_TextResources.Add(ResId.MenuProjectView, "Project");
+			m_TextResources.Add(ResId.MenuHierarchyView, "Hierarchy");
+			m_TextResources.Add(ResId.MenuBothView, "Both");
+			m_TextResources.Add(ResId.MenuContextSetAsSelection, "Set Link as Selection");
+			m_TextResources.Add(ResId.MenuContextAddToSelection, "Add Link to Selection");
+			m_TextResources.Add(ResId.MenuContextFrameLink, "Frame Link in Scene");
+			m_TextResources.Add(ResId.MenuContextOpenLink, "Open Asset");
+			m_TextResources.Add(ResId.MenuContextRemoveLink, "Remove Link");
 		}
 	}
 }

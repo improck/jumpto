@@ -12,12 +12,23 @@ namespace JumpTo
 		private Rect m_ScrollViewRect;
 		private Rect m_DrawRect;
 		private int m_Selected = -1;
+		private bool m_ContextClick = false;
+
+		private GUIContent m_MenuSetAsSelection;
+		private GUIContent m_MenuAddToSelection;
+		private GUIContent m_MenuOpenLink;
+		private GUIContent m_MenuRemoveLink;
 
 		private EditorWindow m_Window;
 
 
 		public override void OnWindowEnable(EditorWindow window)
 		{
+			m_MenuSetAsSelection = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextSetAsSelection));
+			m_MenuAddToSelection = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextAddToSelection));
+			m_MenuOpenLink = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextOpenLink));
+			m_MenuRemoveLink = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextRemoveLink));
+
 			m_Window = window;
 		}
 
@@ -43,18 +54,34 @@ namespace JumpTo
 
 			m_ScrollViewPosition = GUI.BeginScrollView(m_DrawRect, m_ScrollViewPosition, m_ScrollViewRect);
 
-			switch (Event.current.type)
+			Event currentEvent = Event.current;
+			switch (currentEvent.type)
 			{
 			case EventType.MouseDown:
 				{
-					m_Selected = -1;
-
-					for (int i = 0; i < projectLinks.Count; i++)
+					if (currentEvent.button != 2)
 					{
-						if (projectLinks[i].Area.RectInternal.Contains(Event.current.mousePosition))
+						m_Selected = -1;
+
+						for (int i = 0; i < projectLinks.Count; i++)
 						{
-							m_Selected = i;
-							break;
+							if (projectLinks[i].Area.RectInternal.Contains(currentEvent.mousePosition))
+							{
+								m_Selected = i;
+
+								//on right mouse down
+								if (currentEvent.button == 1)
+								{
+									m_ContextClick = true;
+								}
+
+								if (currentEvent.clickCount == 2)
+									OpenAssets();
+
+								currentEvent.Use();
+
+								break;
+							}
 						}
 					}
 
@@ -65,13 +92,22 @@ namespace JumpTo
 				{
 					if (m_Selected > -1)
 					{
-						if (!Event.current.control && !Event.current.command)
-							Selection.activeObject = projectLinks[m_Selected].LinkReference;
-						else
+						if (m_ContextClick)
 						{
-							//TODO: handle multiple selection
+							m_ContextClick = false;
+							ShowContextMenu();
 						}
 
+						//if (!currentEvent.control && !currentEvent.command)
+						//{
+							
+						//}
+						//else
+						//{
+						//	//TODO: handle multiple selection
+						//}
+
+						currentEvent.Use();
 						m_Window.Repaint();
 					}
 				}
@@ -85,6 +121,7 @@ namespace JumpTo
 					{
 						GraphicAssets.Instance.LinkLabelStyle.normal.textColor = projectLinks[i].LinkColor;
 
+						//TODO: move this to JumpLinks
 						projectLinks[i].Area.Set(m_DrawRect.x, m_DrawRect.y, m_DrawRect.width - 16.0f, m_DrawRect.height);
 
 						if (m_Selected > -1 && m_Selected == i)
@@ -99,6 +136,48 @@ namespace JumpTo
 			}
 
 			GUI.EndScrollView(true);
+		}
+
+		private void ShowContextMenu()
+		{
+			GenericMenu menu = new GenericMenu();
+			//TODO: if multiple selection, change to "Remove Links"
+			menu.AddItem(m_MenuSetAsSelection, false, SetAsSelection);
+			menu.AddItem(m_MenuAddToSelection, false, AddToSelection);
+			menu.AddItem(m_MenuOpenLink, false, OpenAssets);
+			menu.AddSeparator(string.Empty);
+			menu.AddItem(m_MenuRemoveLink, false, RemoveSelected);
+
+			menu.ShowAsContext();
+		}
+
+		private void RemoveSelected()
+		{
+			JumpLinks.Instance.RemoveProjectLink(m_Selected);
+			m_Selected = -1;
+		}
+
+		private void SetAsSelection()
+		{
+			Object[] selection = { JumpLinks.Instance.ProjectLinks[m_Selected].LinkReference };
+			Selection.objects = selection;
+		}
+
+		private void AddToSelection()
+		{
+			Object[] selection = Selection.objects;
+
+			//TODO: filter out links that are already selected
+
+			Object[] addSelected = new Object[selection.Length + 1];
+			selection.CopyTo(addSelected, 0);
+			addSelected[selection.Length] = JumpLinks.Instance.ProjectLinks[m_Selected].LinkReference;
+			Selection.objects = addSelected;
+		}
+
+		private void OpenAssets()
+		{
+			AssetDatabase.OpenAsset(JumpLinks.Instance.ProjectLinks[m_Selected].LinkReference);
 		}
 	}
 }

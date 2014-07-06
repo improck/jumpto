@@ -91,32 +91,6 @@ namespace JumpTo
 		public List<ProjectJumpLink> ProjectLinks { get { return m_ProjectLinks; } }
 		public List<HierarchyJumpLink> HierarchyLinks { get { return m_HierarchyLinks; } }
 
-		public float ProjectMaxY
-		{
-			get
-			{
-				if (m_ProjectLinks.Count > 0)
-				{
-					return m_ProjectLinks[m_ProjectLinks.Count - 1].Area.y + GraphicAssets.LinkHeight;
-				}
-
-				return 0.0f;
-			}
-		}
-
-		public float HierarchyMaxY
-		{
-			get
-			{
-				if (m_HierarchyLinks.Count > 0)
-				{
-					return m_HierarchyLinks[m_HierarchyLinks.Count - 1].Area.y + GraphicAssets.LinkHeight;
-				}
-
-				return 0.0f;
-			}
-		}
-
 
 		//void OnEnable()
 		//{

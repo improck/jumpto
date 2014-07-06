@@ -6,15 +6,15 @@ using JumpTo;
 //xTODO: make items clickable
 //xTODO: project and hierarchy foldouts
 //xTODO: replace GUILayout.Label with m_LinkLabelStyle.Draw()
-//TODO: ability to remove items
-//TODO: context menu
+//xTODO: ability to remove items
+//xTODO: context menu
 //TODO: drag-n-drop to/from window
 //xTODO: serialize links
 //TODO: update on scene change?
 //TODO: update on project change?
 //xTODO: create a toolbar
 //TODO: multiple selection
-//TODO: double-click behavior
+//xTODO: double-click behavior
 
 
 public class JumpToEditorWindow : EditorWindow
