@@ -71,6 +71,8 @@ public class JumpToEditorWindow : EditorWindow
 			this.minSize = new Vector2(120.0f, GuiJumpLinkListView.DividerMin);
 		}
 
+		//TODO: refresh links, ensure validity
+
 		m_Toolbar.OnWindowEnable(this);
 		m_View.OnWindowEnable(this);
 	}

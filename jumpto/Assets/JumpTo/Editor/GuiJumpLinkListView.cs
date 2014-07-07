@@ -32,6 +32,8 @@ namespace JumpTo
 				m_HierarchyView = GuiBase.Create<GuiHierarchyJumpLinkView>();
 			}
 
+			JumpLinks.Instance.RefreshLinksY();
+
 			m_ProjectView.OnWindowEnable(window);
 			m_HierarchyView.OnWindowEnable(window);
 		}

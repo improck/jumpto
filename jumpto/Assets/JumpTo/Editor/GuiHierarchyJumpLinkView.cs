@@ -47,8 +47,10 @@ namespace JumpTo
 
 			m_ScrollViewRect.height = hierarchyLinks.Count * GraphicAssets.LinkHeight;
 
+			//if the vertical scrollbar is visible, adjust view rect
+			//	width by the width of the scrollbar (17.0f)
 			if (m_ScrollViewRect.height > m_DrawRect.height)
-				m_ScrollViewRect.width = m_DrawRect.width - 17.0f;	//width of the scrollbar
+				m_ScrollViewRect.width = m_DrawRect.width - 17.0f;
 			else
 				m_ScrollViewRect.width = m_DrawRect.width;
 
@@ -61,30 +63,21 @@ namespace JumpTo
 				{
 					if (currentEvent.button != 2)
 					{
-						m_Selected = -1;
-
-						for (int i = 0; i < hierarchyLinks.Count; i++)
+						int hit = JumpLinks.Instance.HierarchyLinkHitTest(currentEvent.mousePosition);
+						if (hit > -1)
 						{
-							if (hierarchyLinks[i].Area.RectInternal.Contains(currentEvent.mousePosition))
-							{
-								m_Selected = i;
+							//TODO: handle multiple selection
+							m_Selected = hit;
 
-								//on right mouse down
-								if (currentEvent.button == 1)
-								{
-									m_ContextClick = true;
-								}
+							//on right mouse down
+							m_ContextClick = currentEvent.button == 1;
 
-								if (currentEvent.clickCount == 2)
-								{
-									FrameLink();
-								}
-
-								currentEvent.Use();
-
-								break;
-							}
+							//on double-click
+							if (currentEvent.clickCount == 2)
+								FrameLink();
 						}
+
+						currentEvent.Use();
 					}
 
 					m_Window.Repaint();
@@ -123,8 +116,7 @@ namespace JumpTo
 					{
 						GraphicAssets.Instance.LinkLabelStyle.normal.textColor = hierarchyLinks[i].LinkColor;
 
-						//TODO: move this to JumpLinks
-						hierarchyLinks[i].Area.Set(m_DrawRect.x, m_DrawRect.y, m_DrawRect.width - 16.0f, m_DrawRect.height);
+						hierarchyLinks[i].Area.width = m_ScrollViewRect.width;
 
 						if (m_Selected > -1 && m_Selected == i)
 							GraphicAssets.Instance.LinkLabelStyle.Draw(m_DrawRect, hierarchyLinks[i].LinkLabelContent, false, false, true, m_Window == EditorWindow.focusedWindow);

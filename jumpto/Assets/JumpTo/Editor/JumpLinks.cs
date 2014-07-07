@@ -92,11 +92,6 @@ namespace JumpTo
 		public List<HierarchyJumpLink> HierarchyLinks { get { return m_HierarchyLinks; } }
 
 
-		//void OnEnable()
-		//{
-		//	s_Instance = this;
-		//}
-
 		public void CreateJumpLink(UnityEngine.Object linkObject)
 		{
 			PrefabType prefabType = PrefabType.None;
@@ -129,6 +124,11 @@ namespace JumpTo
 				return;
 
 			m_ProjectLinks.RemoveAt(index);
+
+			for (int i = index; i < m_ProjectLinks.Count; i++)
+			{
+				m_ProjectLinks[i].Area.y = i * GraphicAssets.LinkHeight;
+			}
 		}
 
 		public void RemoveHierarchyLink(int index)
@@ -137,6 +137,24 @@ namespace JumpTo
 				return;
 
 			m_HierarchyLinks.RemoveAt(index);
+
+			for (int i = index; i < m_ProjectLinks.Count; i++)
+			{
+				m_HierarchyLinks[i].Area.y = i * GraphicAssets.LinkHeight;
+			}
+		}
+
+		public void RefreshLinksY()
+		{
+			for (int i = 0; i < m_ProjectLinks.Count; i++)
+			{
+				m_ProjectLinks[i].Area.y = i * GraphicAssets.LinkHeight;
+			}
+
+			for (int i = 0; i < m_HierarchyLinks.Count; i++)
+			{
+				m_HierarchyLinks[i].Area.y = i * GraphicAssets.LinkHeight;
+			}
 		}
 
 		private void AddProjectLink(UnityEngine.Object linkObject, PrefabType prefabType)
@@ -195,19 +213,19 @@ namespace JumpTo
 					}
 				}
 
-				m_ProjectLinks.Add(link);
+				link.Area.Set(0.0f, m_ProjectLinks.Count * GraphicAssets.LinkHeight, 100.0f, GraphicAssets.LinkHeight);
 
-				//TODO: position it at the bottom of the list
-				if (m_ProjectLinks.Count > 1)
-				{
-					Rect lastArea = m_ProjectLinks[m_ProjectLinks.Count - 1].Area;
-					Rect linkArea = link.Area;
-					linkArea.x = lastArea.x;
-					linkArea.y = lastArea.y + GraphicAssets.LinkHeight;
-					linkArea.width = lastArea.width;
-					linkArea.height = lastArea.height;
-					link.Area.Set(linkArea);
-				}
+				m_ProjectLinks.Add(link);
+				//if (m_ProjectLinks.Count > 1)
+				//{
+				//	Rect lastArea = m_ProjectLinks[m_ProjectLinks.Count - 1].Area;
+				//	Rect linkArea = link.Area;
+				//	linkArea.x = lastArea.x;
+				//	linkArea.y = lastArea.y + GraphicAssets.LinkHeight;
+				//	linkArea.width = lastArea.width;
+				//	linkArea.height = lastArea.height;
+				//	link.Area.Set(linkArea);
+				//}
 			}
 		}
 
@@ -267,82 +285,105 @@ namespace JumpTo
 					link.LinkLabelContent.tooltip = GetTransformPath(linkTransform);
 				}
 
+				link.Area.Set(0.0f, m_HierarchyLinks.Count * GraphicAssets.LinkHeight, 100.0f, GraphicAssets.LinkHeight);
+
 				m_HierarchyLinks.Add(link);
 
-				//TODO: position it at the bottom of the list
-				if (m_HierarchyLinks.Count > 1)
-				{
-					Rect lastArea = m_HierarchyLinks[m_HierarchyLinks.Count - 1].Area;
-					Rect linkArea = link.Area;
-					linkArea.x = lastArea.x;
-					linkArea.y = lastArea.y + GraphicAssets.LinkHeight;
-					linkArea.width = lastArea.width;
-					linkArea.height = lastArea.height;
-					link.Area.Set(linkArea);
-				}
+				//if (m_HierarchyLinks.Count > 1)
+				//{
+				//	Rect lastArea = m_HierarchyLinks[m_HierarchyLinks.Count - 1].Area;
+				//	Rect linkArea = link.Area;
+				//	linkArea.x = lastArea.x;
+				//	linkArea.y = lastArea.y + GraphicAssets.LinkHeight;
+				//	linkArea.width = lastArea.width;
+				//	linkArea.height = lastArea.height;
+				//	link.Area.Set(linkArea);
+				//}
 			}
 		}
 		
-		public ProjectJumpLink ProjectLinkHitTest(Vector2 position)
+		public int ProjectLinkHitTest(Vector2 position)
 		{
-			//TODO: binary search of list sorted by y-position
+			int linkCount = m_ProjectLinks.Count;
+			if (linkCount > 0)
+			{
+				if (linkCount == 1)
+				{
+					if (m_ProjectLinks[0].Area.RectInternal.Contains(position))
+						return 0;
+				}
+				else
+				{
+					int indexMin = 0;
+					int indexMax = linkCount - 1;
+					int index = 0;
+					RectRef rect = null;
 
-			//int linkCount = m_ProjectLinks.Count;
-			//if (linkCount > 0)
-			//{
-			//	if (linkCount == 1)
-			//	{
-			//		RectRef rect = m_ProjectLinks[0].Area;
-			//		if (rect.yMin == position.y ||
-			//				(rect.yMin > position.y && rect.yMax < position.y))
-			//		{
-			//			if (m_ProjectLinks[0].Visible)
-			//				return m_ProjectLinks[0];
-			//			else
-			//				return null;
-			//		}
-			//	}
-			//	else
-			//	{
-			//		int indexMin = 0;
-			//		int indexMax = linkCount - 1;
-			//		int index = 0;
-			//		RectRef rect = null;
+					while (indexMax >= indexMin)
+					{
+						index = (indexMin + indexMax) >> 1;
 
-			//		while (indexMax >= indexMin)
-			//		{
-			//			index = (indexMin + indexMax) >> 1;
+						rect = m_ProjectLinks[index].Area;
 
-			//			rect = m_ProjectLinks[index].Area;
-						
-			//			if (rect.yMax < position.y)
-			//			{
-			//				indexMin = index + 1;
-			//			}
-			//			else if (rect.yMin > position.y)
-			//			{
-			//				indexMax = index - 1;
-			//			}
-			//			else if (rect.yMin == position.y ||
-			//				(rect.yMin > position.y && rect.yMax < position.y))
-			//			{
-			//				if (m_ProjectLinks[index].Visible)
-			//					return m_ProjectLinks[index];
-			//				else
-			//					return null;
-			//			}
-			//		}
-			//	}
-			//}
+						if (rect.yMax < position.y)
+						{
+							indexMin = index + 1;
+						}
+						else if (rect.yMin > position.y)
+						{
+							indexMax = index - 1;
+						}
+						else if (rect.RectInternal.Contains(position))
+						{
+							return index;
+						}
+					}
+				}
+			}
 
-			return null;
+			return -1;
 		}
 
-		public HierarchyJumpLink HierarchyLinkHitTest(Vector2 position)
+		public int HierarchyLinkHitTest(Vector2 position)
 		{
-			//TODO: binary search of list sorted by y-position
+			int linkCount = m_HierarchyLinks.Count;
+			if (linkCount > 0)
+			{
+				if (linkCount == 1)
+				{
+					if (m_HierarchyLinks[0].Area.RectInternal.Contains(position))
+						return 0;
+				}
+				else
+				{
+					int indexMin = 0;
+					int indexMax = linkCount - 1;
+					int index = 0;
+					RectRef rect = null;
 
-			return null;
+					while (indexMax >= indexMin)
+					{
+						index = (indexMin + indexMax) >> 1;
+
+						rect = m_HierarchyLinks[index].Area;
+
+						if (rect.yMax < position.y)
+						{
+							indexMin = index + 1;
+						}
+						else if (rect.yMin > position.y)
+						{
+							indexMax = index - 1;
+						}
+						else if (rect.RectInternal.Contains(position))
+						{
+							return index;
+						}
+					}
+				}
+			}
+
+			return -1;
 		}
 
 		public void CheckHierarchyLinks()
