@@ -92,12 +92,35 @@ namespace JumpTo
 		public List<HierarchyJumpLink> HierarchyLinks { get { return m_HierarchyLinks; } }
 
 
-		public void CreateJumpLink(UnityEngine.Object linkObject)
+		public static bool WouldBeProjectLink(UnityEngine.Object linkReference)
 		{
-			PrefabType prefabType = PrefabType.None;
-			if (linkObject is GameObject)
+			if (!(linkReference is GameObject))
 			{
-				prefabType = PrefabUtility.GetPrefabType(linkObject);
+				return true;
+			}
+
+			PrefabType prefabType = PrefabUtility.GetPrefabType(linkReference);
+			return prefabType == PrefabType.ModelPrefab || prefabType == PrefabType.Prefab;
+		}
+
+		public static bool WouldBeHierarchyLink(UnityEngine.Object linkReference)
+		{
+			PrefabType prefabType = PrefabUtility.GetPrefabType(linkReference);
+			return linkReference is GameObject &&
+				(prefabType == PrefabType.None ||
+				   prefabType == PrefabType.PrefabInstance ||
+				   prefabType == PrefabType.ModelPrefabInstance ||
+				   prefabType == PrefabType.DisconnectedPrefabInstance ||
+				   prefabType == PrefabType.DisconnectedModelPrefabInstance ||
+				   prefabType == PrefabType.MissingPrefabInstance);
+		}
+
+
+		public void CreateJumpLink(UnityEngine.Object linkReference)
+		{
+			if (linkReference is GameObject)
+			{
+				PrefabType prefabType = PrefabUtility.GetPrefabType(linkReference);
 				if (prefabType == PrefabType.None ||
 					prefabType == PrefabType.PrefabInstance ||
 					prefabType == PrefabType.ModelPrefabInstance ||
@@ -105,16 +128,48 @@ namespace JumpTo
 					prefabType == PrefabType.DisconnectedModelPrefabInstance ||
 					prefabType == PrefabType.MissingPrefabInstance)
 				{
-					AddHierarchyLink(linkObject, prefabType);
+					AddHierarchyLink(linkReference, prefabType);
 				}
 				else
 				{
-					AddProjectLink(linkObject, prefabType);
+					AddProjectLink(linkReference, prefabType);
 				}
 			}
-			else
+			else if (!(linkReference is Component))
 			{
-				AddProjectLink(linkObject, prefabType);
+				AddProjectLink(linkReference, PrefabType.None);
+			}
+		}
+
+		public void CreateOnlyProjectJumpLink(UnityEngine.Object linkReference)
+		{
+			if (linkReference is Component)
+				return;
+
+			PrefabType prefabType = PrefabUtility.GetPrefabType(linkReference);
+			if (!(linkReference is GameObject) ||
+				prefabType == PrefabType.ModelPrefab ||
+				prefabType == PrefabType.Prefab)
+			{
+				AddProjectLink(linkReference, prefabType);
+			}
+		}
+
+		public void CreateOnlyHierarchyJumpLink(UnityEngine.Object linkReference)
+		{
+			if (linkReference is Component)
+				return;
+
+			PrefabType prefabType = PrefabUtility.GetPrefabType(linkReference);
+			if (linkReference is GameObject &&
+				(prefabType == PrefabType.None ||
+				   prefabType == PrefabType.PrefabInstance ||
+				   prefabType == PrefabType.ModelPrefabInstance ||
+				   prefabType == PrefabType.DisconnectedPrefabInstance ||
+				   prefabType == PrefabType.DisconnectedModelPrefabInstance ||
+				   prefabType == PrefabType.MissingPrefabInstance))
+			{
+				AddHierarchyLink(linkReference, prefabType);
 			}
 		}
 
@@ -138,7 +193,7 @@ namespace JumpTo
 
 			m_HierarchyLinks.RemoveAt(index);
 
-			for (int i = index; i < m_ProjectLinks.Count; i++)
+			for (int i = index; i < m_HierarchyLinks.Count; i++)
 			{
 				m_HierarchyLinks[i].Area.y = i * GraphicAssets.LinkHeight;
 			}
@@ -157,28 +212,28 @@ namespace JumpTo
 			}
 		}
 
-		private void AddProjectLink(UnityEngine.Object linkObject, PrefabType prefabType)
+		private void AddProjectLink(UnityEngine.Object linkReference, PrefabType prefabType)
 		{
 			//basically, if no linked object in the list has a reference to the passed object
-			if (!m_ProjectLinks.Exists(linked => linked.LinkReference == linkObject))
+			if (!m_ProjectLinks.Exists(linked => linked.LinkReference == linkReference))
 			{
 				ProjectJumpLink link = ScriptableObject.CreateInstance<ProjectJumpLink>();
 				link.hideFlags = HideFlags.HideAndDontSave;
-				link.LinkReference = linkObject;
+				link.LinkReference = linkReference;
 
-				GUIContent linkContent = EditorGUIUtility.ObjectContent(linkObject, linkObject.GetType());
+				GUIContent linkContent = EditorGUIUtility.ObjectContent(linkReference, linkReference.GetType());
 				link.LinkLabelContent.image = linkContent.image;
-				link.LinkLabelContent.tooltip = AssetDatabase.GetAssetPath(linkObject);
+				link.LinkLabelContent.tooltip = AssetDatabase.GetAssetPath(linkReference);
 
 				if (linkContent.text == string.Empty)
 				{
-					if (linkObject.name != string.Empty)
+					if (linkReference.name != string.Empty)
 					{
-						link.LinkLabelContent.text = linkObject.name;
+						link.LinkLabelContent.text = linkReference.name;
 					}
 					else
 					{
-						string assetName = AssetDatabase.GetAssetPath(linkObject.GetInstanceID());
+						string assetName = AssetDatabase.GetAssetPath(linkReference.GetInstanceID());
 						int slash = assetName.LastIndexOf('/');
 						int dot = assetName.LastIndexOf('.');
 						link.LinkLabelContent.text = assetName.Substring(slash + 1, dot - slash - 1);
@@ -189,7 +244,7 @@ namespace JumpTo
 					link.LinkLabelContent.text = linkContent.text;
 				}
 
-				if (linkObject is GameObject)
+				if (linkReference is GameObject)
 				{
 					GraphicAssets graphicAssets = GraphicAssets.Instance;
 
@@ -229,20 +284,20 @@ namespace JumpTo
 			}
 		}
 
-		private void AddHierarchyLink(UnityEngine.Object linkObject, PrefabType prefabType)
+		private void AddHierarchyLink(UnityEngine.Object linkReference, PrefabType prefabType)
 		{
 			//basically, if no linked object in the list has a reference to the passed object
-			if (!m_HierarchyLinks.Exists(linked => linked.LinkReference == linkObject))
+			if (!m_HierarchyLinks.Exists(linked => linked.LinkReference == linkReference))
 			{
 				HierarchyJumpLink link = ScriptableObject.CreateInstance<HierarchyJumpLink>();
 				link.hideFlags = HideFlags.HideAndDontSave;
-				link.LinkReference = linkObject;
+				link.LinkReference = linkReference;
 
-				GUIContent linkContent = EditorGUIUtility.ObjectContent(linkObject, linkObject.GetType());
+				GUIContent linkContent = EditorGUIUtility.ObjectContent(linkReference, linkReference.GetType());
 				link.LinkLabelContent.text = linkContent.text != string.Empty ? linkContent.text : "[Unnamed]";
 				link.LinkLabelContent.image = linkContent.image;
 
-				if (linkObject is GameObject)
+				if (linkReference is GameObject)
 				{
 					GraphicAssets graphicAssets = GraphicAssets.Instance;
 
@@ -281,7 +336,7 @@ namespace JumpTo
 						//color = black
 					}
 
-					Transform linkTransform = (linkObject as GameObject).transform;
+					Transform linkTransform = (linkReference as GameObject).transform;
 					link.LinkLabelContent.tooltip = GetTransformPath(linkTransform);
 				}
 

@@ -40,6 +40,8 @@ namespace JumpTo
 
 		protected override void OnGui()
 		{
+			HandleDragAndDrop();
+
 			Vector2 iconSizeBak = EditorGUIUtility.GetIconSize();
 			EditorGUIUtility.SetIconSize(IconSize);
 
@@ -167,6 +169,129 @@ namespace JumpTo
 					}
 				}
 				break;
+			}
+		}
+
+		private void HandleDragAndDrop()
+		{
+			Event currentEvent = Event.current;
+			switch (currentEvent.type)
+			{
+			//raised repeatedly while a drag op is hovering
+			case EventType.DragUpdated:
+				{
+					if (DragAndDrop.visualMode == DragAndDropVisualMode.None &&
+						DragAndDrop.objectReferences.Length > 0)
+					{
+						//reject component links
+						if (DragAndDrop.objectReferences[0] is Component)
+							DragAndDrop.visualMode = DragAndDropVisualMode.Rejected;
+
+						//TODO: component links??
+
+						switch (JumpToSettings.Instance.Visibility)
+						{
+						case JumpToSettings.VisibleList.ProjectAndHierarchy:
+							{
+								DragAndDrop.visualMode = DragAndDropVisualMode.Link;
+							}
+							break;
+						case JumpToSettings.VisibleList.HierarchyOnly:
+							{
+								UnityEngine.Object[] objectReferences = DragAndDrop.objectReferences;
+								for (int i = 0; i < objectReferences.Length; i++)
+								{
+									if (JumpLinks.WouldBeHierarchyLink(objectReferences[i]))
+									{
+										DragAndDrop.visualMode = DragAndDropVisualMode.Link;
+										break;
+									}
+								}
+							}
+							break;
+						case JumpToSettings.VisibleList.ProjectOnly:
+							{
+								UnityEngine.Object[] objectReferences = DragAndDrop.objectReferences;
+								for (int i = 0; i < objectReferences.Length; i++)
+								{
+									if (JumpLinks.WouldBeProjectLink(objectReferences[i]))
+									{
+										DragAndDrop.visualMode = DragAndDropVisualMode.Link;
+										break;
+									}
+								}
+							}
+							break;
+						}	//switch on visibility
+					}	//if drop data valid and not already examined
+				}	//case DragUpdated
+				break;
+			//raised on mouse-up if DragAndDrop.visualMode != None or Rejected
+			case EventType.DragPerform:
+				{
+					switch (JumpToSettings.Instance.Visibility)
+					{
+					case JumpToSettings.VisibleList.ProjectAndHierarchy:
+						{
+							OnDropProjectAndHierarchy();
+						}
+						break;
+					case JumpToSettings.VisibleList.HierarchyOnly:
+						{
+							OnDropHierarchyOnly();
+						}
+						break;
+					case JumpToSettings.VisibleList.ProjectOnly:
+						{
+							OnDropProjectOnly();
+						}
+						break;
+					}
+
+					//reset drag & drop data
+					DragAndDrop.PrepareStartDrag();
+				}	//case DragPerform
+				break;
+			//raised after DragPerformed OR if escape is pressed;
+			//	use for any cleanup of stuff initialized during
+			//	DragUpdated event
+			//***** case EventType.DragExited: *****
+			}
+		}
+
+		private void OnDropProjectAndHierarchy()
+		{
+			UnityEngine.Object[] objectReferences = DragAndDrop.objectReferences;
+			if (objectReferences.Length > 0)
+			{
+				for (int i = 0; i < objectReferences.Length; i++)
+				{
+					JumpLinks.Instance.CreateJumpLink(objectReferences[i]);
+				}
+			}
+		}
+
+		private void OnDropHierarchyOnly()
+		{
+			UnityEngine.Object[] objectReferences = DragAndDrop.objectReferences;
+			if (objectReferences.Length > 0)
+			{
+				for (int i = 0; i < objectReferences.Length; i++)
+				{
+					JumpLinks.Instance.CreateOnlyHierarchyJumpLink(objectReferences[i]);
+				}
+			}
+		}
+
+		private void OnDropProjectOnly()
+		{
+			UnityEngine.Object[] objectReferences = DragAndDrop.objectReferences;
+			if (objectReferences.Length > 0)
+			{
+				for (int i = 0; i < objectReferences.Length; i++)
+				{
+					JumpLinks.Instance.CreateOnlyProjectJumpLink(objectReferences[i]);
+				}
 			}
 		}
 	}

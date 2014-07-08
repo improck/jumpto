@@ -83,6 +83,7 @@ namespace JumpTo
 					m_Window.Repaint();
 				}
 				break;
+			//not raised during DragAndDrop operation
 			case EventType.MouseUp:
 				{
 					if (m_Selected > -1)
@@ -107,6 +108,13 @@ namespace JumpTo
 					}
 				}
 				break;
+			//MouseDrag for intra-window dragging
+			//TODO: handle reordering using MouseDrag/MouseUp
+			//case EventType.MouseDrag:
+			//	{
+			//		Debug.Log(currentEvent.type);
+			//	}
+			//	break;
 			case EventType.Repaint:
 				{
 					//draw inside of scroll view

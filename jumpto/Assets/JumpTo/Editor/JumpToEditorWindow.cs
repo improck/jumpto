@@ -8,13 +8,17 @@ using JumpTo;
 //xTODO: replace GUILayout.Label with m_LinkLabelStyle.Draw()
 //xTODO: ability to remove items
 //xTODO: context menu
-//TODO: drag-n-drop to/from window
+//xTODO: drag-n-drop to window
+//TODO: drag-n-drop from window
 //xTODO: serialize links
 //TODO: update on scene change?
 //TODO: update on project change?
 //xTODO: create a toolbar
 //TODO: multiple selection
 //xTODO: double-click behavior
+//TODO: serialize to a file
+//TODO: clear all links from gui
+//TODO: move to a dll assembly
 
 
 public class JumpToEditorWindow : EditorWindow
@@ -140,11 +144,43 @@ public class JumpToEditorWindow : EditorWindow
 	//**********************************
 
 
-	private void CreateMultipleJumpLinks(UnityEngine.Object[] linkObjects)
+	private void CreateMultipleJumpLinks(UnityEngine.Object[] linkReferences)
 	{
-		for (int i = 0; i < linkObjects.Length; i++)
+		#region Removed Filtering
+		//NOTE: already fully tested, but decided against it due
+		//		to a potentially negative user experience
+		//switch (JumpToSettings.Instance.Visibility)
+		//{
+		//case JumpToSettings.VisibleList.ProjectAndHierarchy:
+		//	{
+		//		for (int i = 0; i < linkReferences.Length; i++)
+		//		{
+		//			m_JumpLinks.CreateJumpLink(linkReferences[i]);
+		//		}
+		//	}
+		//	break;
+		//case JumpToSettings.VisibleList.HierarchyOnly:
+		//	{
+		//		for (int i = 0; i < linkReferences.Length; i++)
+		//		{
+		//			m_JumpLinks.CreateOnlyHierarchyJumpLink(linkReferences[i]);
+		//		}
+		//	}
+		//	break;
+		//case JumpToSettings.VisibleList.ProjectOnly:
+		//	{
+		//		for (int i = 0; i < linkReferences.Length; i++)
+		//		{
+		//			m_JumpLinks.CreateOnlyProjectJumpLink(linkReferences[i]);
+		//		}
+		//	}
+		//	break;
+		//}
+		#endregion
+
+		for (int i = 0; i < linkReferences.Length; i++)
 		{
-			m_JumpLinks.CreateJumpLink(linkObjects[i]);
+			m_JumpLinks.CreateJumpLink(linkReferences[i]);
 		}
 
 		Repaint();
@@ -163,7 +199,7 @@ public class JumpToEditorWindow : EditorWindow
 	public static bool JumpTo_AssetsCreateJumpLink_Validate()
 	{
 		Object[] selected = Selection.objects;
-		return selected != null && selected.Length > 0;
+		return JumpLinks.Instance != null && selected != null && selected.Length > 0;
 	}
 
 	[MenuItem("Assets/Create/Jump Link", false)]
@@ -178,7 +214,7 @@ public class JumpToEditorWindow : EditorWindow
 	public static bool JumpTo_GameObjectCreateOtherJumpLink_Validate()
 	{
 		Object[] selected = Selection.objects;
-		return selected != null && selected.Length > 0;
+		return JumpLinks.Instance != null && selected != null && selected.Length > 0;
 	}
 
 	[MenuItem("GameObject/Create Other/Jump Link", false)]
