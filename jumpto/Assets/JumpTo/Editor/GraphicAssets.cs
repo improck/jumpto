@@ -38,7 +38,7 @@ namespace JumpTo
 		//***** CONSTANTS *****
 
 		public readonly Color ColorViolet = new Color(0.6f, 0.27f, 0.67f, 1.0f);
-		public const float LinkHeight = 19.0f;
+		public const float LinkHeight = 17.0f;
 
 
 		private Texture2D m_Outline;

@@ -443,12 +443,23 @@ namespace JumpTo
 
 		public void CheckHierarchyLinks()
 		{
-			//TODO: how?
+			for (int i = 0; i < m_HierarchyLinks.Count; i++)
+			{
+				//TODO: how?
+
+				//NOTE: seems to be causing a crash
+				//m_HierarchyLinks[i].Area.Set(0.0f, i * GraphicAssets.LinkHeight, 100.0f, GraphicAssets.LinkHeight);
+			}
 		}
 
 		public void CheckProjectLinks()
 		{
-			//TODO: how?
+			for (int i = 0; i < m_ProjectLinks.Count; i++)
+			{
+				//TODO: how?
+
+				//m_ProjectLinks[i].Area.Set(0.0f, i * GraphicAssets.LinkHeight, 100.0f, GraphicAssets.LinkHeight);
+			}
 		}
 
 		private string GetTransformPath(Transform transform)

@@ -11,9 +11,12 @@ namespace JumpTo
 
 		private Rect m_ScrollViewRect;
 		private Rect m_DrawRect;
+		private Rect m_DropArea;
 		private int m_Selected = -1;
+		private int m_Grabbed = -1;
 		private bool m_ContextClick = false;
-
+		private bool m_DragOwner = false;
+		
 		private GUIContent m_MenuSetAsSelection;
 		private GUIContent m_MenuAddToSelection;
 		private GUIContent m_MenuOpenLink;
@@ -22,6 +25,9 @@ namespace JumpTo
 		private EditorWindow m_Window;
 
 
+		public bool IsDragOwner { get { return m_DragOwner; } }
+
+		
 		public override void OnWindowEnable(EditorWindow window)
 		{
 			m_MenuSetAsSelection = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextSetAsSelection));
@@ -33,12 +39,14 @@ namespace JumpTo
 		}
 
 		protected override void OnGui()
-		{	
+		{
 			List<ProjectJumpLink> projectLinks = JumpLinks.Instance.ProjectLinks;
 
 			m_DrawRect.Set(1.0f, 1.0f, m_Size.x - 2.0f, m_Size.y - 1.0f);
 
 			GUI.Box(m_DrawRect, ResLoad.Instance.GetText(ResId.LabelProjectLinks), GraphicAssets.Instance.LinkBoxStyle);
+
+			m_DropArea = m_DrawRect;
 
 			m_DrawRect.x = 2.0f;
 			m_DrawRect.y += 17.0f;
@@ -61,25 +69,37 @@ namespace JumpTo
 			{
 			case EventType.MouseDown:
 				{
+					//TODO: rewrite this with better mouse state management?
 					if (currentEvent.button != 2)
 					{
-						m_Selected = JumpLinks.Instance.ProjectLinkHitTest(currentEvent.mousePosition);
-						if (m_Selected > -1)
+						//TODO: handle multiple selection
+
+						int hit = JumpLinks.Instance.ProjectLinkHitTest(currentEvent.mousePosition);
+						if (currentEvent.button == 0)
 						{
-							//TODO: handle multiple selection
-							
-							//on right mouse down
-							m_ContextClick = currentEvent.button == 1;
+							if (hit != m_Selected)
+								m_Window.Repaint();
+
+							m_Selected = hit;
+							m_Grabbed = hit;
 
 							//on double-click
 							if (currentEvent.clickCount == 2)
 								OpenAssets();
+
+							currentEvent.Use();
 						}
+						else if (currentEvent.button == 1)
+						{
+							if (hit != m_Selected)
+								m_Window.Repaint();
 
-						currentEvent.Use();
+							m_Selected = hit;
+							m_ContextClick = true;
+
+							currentEvent.Use();
+						}
 					}
-
-					m_Window.Repaint();
 				}
 				break;
 			//not raised during DragAndDrop operation
@@ -87,11 +107,16 @@ namespace JumpTo
 				{
 					if (m_Selected > -1)
 					{
-						if (m_ContextClick)
+						m_Grabbed = -1;
+
+						if (m_ContextClick && currentEvent.button == 1)
 						{
-							m_ContextClick = false;
 							ShowContextMenu();
+
+							currentEvent.Use();
 						}
+
+						m_ContextClick = false;
 
 						//if (!currentEvent.control && !currentEvent.command)
 						//{
@@ -101,19 +126,64 @@ namespace JumpTo
 						//{
 						//	//TODO: handle multiple selection
 						//}
-
-						currentEvent.Use();
-						m_Window.Repaint();
 					}
 				}
 				break;
-			//MouseDrag for intra-window dragging
+			//MouseDrag for inter-/intra-window dragging
 				//TODO: handle reordering using MouseDrag/MouseUp
-			//case EventType.MouseDrag:
-			//	{
-			//		Debug.Log(currentEvent.type);
-			//	}
-			//	break;
+			case EventType.MouseDrag:
+				{
+					if (m_DropArea.Contains(currentEvent.mousePosition))
+					{
+						if (m_Grabbed > -1 && !(projectLinks[m_Grabbed].Area.RectInternal.Contains(currentEvent.mousePosition)))
+						{
+							m_DragOwner = true;
+
+							Debug.Log("Start Drag");
+							DragAndDrop.objectReferences = new Object[] { projectLinks[m_Grabbed].LinkReference };
+							DragAndDrop.StartDrag("Project Reference(s)");
+							//NOTE: tried to set the visual mode here. always got reset to none.
+
+							currentEvent.Use();
+						}
+					}
+				}
+				break;
+			case EventType.DragUpdated:
+				{
+					if (m_DragOwner)
+					{
+						Debug.Log(currentEvent.type + ", project view");
+
+						if (m_DropArea.Contains(currentEvent.mousePosition))
+						{
+							if (!(projectLinks[m_Selected].Area.RectInternal.Contains(currentEvent.mousePosition)))
+							{
+								DragAndDrop.visualMode = DragAndDropVisualMode.Move;
+
+								//TODO: update the drop position indicator
+							}
+							else
+							{
+								DragAndDrop.visualMode = DragAndDropVisualMode.Rejected;
+
+								//TODO: turn off the drop position indicator
+							}
+						}
+						else
+						{
+							DragAndDrop.visualMode = DragAndDropVisualMode.Rejected;
+						}
+					}
+				}
+				break;
+			case EventType.DragExited:
+				{
+					Debug.Log(currentEvent.type);
+
+					m_DragOwner = false;
+				}
+				break;
 			case EventType.Repaint:
 				{
 					//draw inside of scroll view

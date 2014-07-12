@@ -180,55 +180,66 @@ namespace JumpTo
 			//raised repeatedly while a drag op is hovering
 			case EventType.DragUpdated:
 				{
-					if (DragAndDrop.visualMode == DragAndDropVisualMode.None &&
-						DragAndDrop.objectReferences.Length > 0)
+					if (m_ProjectView.IsDragOwner)
+						break;
+
+					//drag most like came from another window, figure out
+					//	if it can be accepted and where it would go
+					if (DragAndDrop.visualMode == DragAndDropVisualMode.None)
 					{
-						//reject component links
-						if (DragAndDrop.objectReferences[0] is Component)
-							DragAndDrop.visualMode = DragAndDropVisualMode.Rejected;
-
-						//TODO: component links??
-
-						switch (JumpToSettings.Instance.Visibility)
+						if (DragAndDrop.objectReferences.Length > 0)
 						{
-						case JumpToSettings.VisibleList.ProjectAndHierarchy:
+							//reject component links
+							if (DragAndDrop.objectReferences[0] is Component)
+								DragAndDrop.visualMode = DragAndDropVisualMode.Rejected;
+
+							//TODO: component links??
+
+							switch (JumpToSettings.Instance.Visibility)
 							{
-								DragAndDrop.visualMode = DragAndDropVisualMode.Link;
-							}
-							break;
-						case JumpToSettings.VisibleList.HierarchyOnly:
-							{
-								UnityEngine.Object[] objectReferences = DragAndDrop.objectReferences;
-								for (int i = 0; i < objectReferences.Length; i++)
+							case JumpToSettings.VisibleList.ProjectAndHierarchy:
 								{
-									if (JumpLinks.WouldBeHierarchyLink(objectReferences[i]))
+									DragAndDrop.visualMode = DragAndDropVisualMode.Link;
+								}
+								break;
+							case JumpToSettings.VisibleList.HierarchyOnly:
+								{
+									UnityEngine.Object[] objectReferences = DragAndDrop.objectReferences;
+									for (int i = 0; i < objectReferences.Length; i++)
 									{
-										DragAndDrop.visualMode = DragAndDropVisualMode.Link;
-										break;
+										if (JumpLinks.WouldBeHierarchyLink(objectReferences[i]))
+										{
+											DragAndDrop.visualMode = DragAndDropVisualMode.Link;
+											break;
+										}
 									}
 								}
-							}
-							break;
-						case JumpToSettings.VisibleList.ProjectOnly:
-							{
-								UnityEngine.Object[] objectReferences = DragAndDrop.objectReferences;
-								for (int i = 0; i < objectReferences.Length; i++)
+								break;
+							case JumpToSettings.VisibleList.ProjectOnly:
 								{
-									if (JumpLinks.WouldBeProjectLink(objectReferences[i]))
+									UnityEngine.Object[] objectReferences = DragAndDrop.objectReferences;
+									for (int i = 0; i < objectReferences.Length; i++)
 									{
-										DragAndDrop.visualMode = DragAndDropVisualMode.Link;
-										break;
+										if (JumpLinks.WouldBeProjectLink(objectReferences[i]))
+										{
+											DragAndDrop.visualMode = DragAndDropVisualMode.Link;
+											break;
+										}
 									}
 								}
-							}
-							break;
-						}	//switch on visibility
-					}	//if drop data valid and not already examined
+								break;
+							}	//switch on visibility
+						}
+					}
+
+					currentEvent.Use();
 				}	//case DragUpdated
 				break;
 			//raised on mouse-up if DragAndDrop.visualMode != None or Rejected
 			case EventType.DragPerform:
 				{
+					DragAndDrop.AcceptDrag();
+
 					switch (JumpToSettings.Instance.Visibility)
 					{
 					case JumpToSettings.VisibleList.ProjectAndHierarchy:
@@ -247,6 +258,8 @@ namespace JumpTo
 						}
 						break;
 					}
+
+					currentEvent.Use();
 
 					//reset drag & drop data
 					DragAndDrop.PrepareStartDrag();
