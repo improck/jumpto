@@ -238,6 +238,9 @@ namespace JumpTo
 			//raised on mouse-up if DragAndDrop.visualMode != None or Rejected
 			case EventType.DragPerform:
 				{
+					if (m_ProjectView.IsDragOwner)
+						break;
+
 					DragAndDrop.AcceptDrag();
 
 					switch (JumpToSettings.Instance.Visibility)

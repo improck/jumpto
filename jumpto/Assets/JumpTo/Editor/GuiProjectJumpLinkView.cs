@@ -12,10 +12,13 @@ namespace JumpTo
 		private Rect m_ScrollViewRect;
 		private Rect m_DrawRect;
 		private Rect m_DropArea;
+		private Rect m_InsertionDrawRect;
 		private int m_Selected = -1;
 		private int m_Grabbed = -1;
+		private int m_Hovered = -1;
 		private bool m_ContextClick = false;
 		private bool m_DragOwner = false;
+		private bool m_DragInsert = false;
 		
 		private GUIContent m_MenuSetAsSelection;
 		private GUIContent m_MenuAddToSelection;
@@ -84,7 +87,7 @@ namespace JumpTo
 							m_Grabbed = hit;
 
 							//on double-click
-							if (currentEvent.clickCount == 2)
+							if (currentEvent.clickCount == 2 && m_Selected > -1)
 								OpenAssets();
 
 							currentEvent.Use();
@@ -130,7 +133,6 @@ namespace JumpTo
 				}
 				break;
 			//MouseDrag for inter-/intra-window dragging
-				//TODO: handle reordering using MouseDrag/MouseUp
 			case EventType.MouseDrag:
 				{
 					if (m_DropArea.Contains(currentEvent.mousePosition))
@@ -153,27 +155,49 @@ namespace JumpTo
 				{
 					if (m_DragOwner)
 					{
-						Debug.Log(currentEvent.type + ", project view");
+						//Debug.Log(currentEvent.type + ", project view");
 
 						if (m_DropArea.Contains(currentEvent.mousePosition))
 						{
-							if (!(projectLinks[m_Selected].Area.RectInternal.Contains(currentEvent.mousePosition)))
-							{
-								DragAndDrop.visualMode = DragAndDropVisualMode.Move;
+							DragAndDrop.visualMode = DragAndDropVisualMode.Move;
 
-								//TODO: update the drop position indicator
-							}
-							else
-							{
-								DragAndDrop.visualMode = DragAndDropVisualMode.Rejected;
+							m_DragInsert = true;
 
-								//TODO: turn off the drop position indicator
+							int hit = JumpLinks.Instance.ProjectLinkHitTest(currentEvent.mousePosition);
+							if (hit > -1)
+							{
+								m_Hovered = hit;
+
+								m_InsertionDrawRect = projectLinks[m_Hovered].Area;
+								m_InsertionDrawRect.x += 8.0f;
+								m_InsertionDrawRect.height = GraphicAssets.Instance.DragDropInsertionStyle.fixedHeight;
+								if ((currentEvent.mousePosition.y - m_InsertionDrawRect.y) < (GraphicAssets.LinkHeight * 0.5f))
+									m_InsertionDrawRect.y -= GraphicAssets.LinkHeight;
+								m_InsertionDrawRect.width -= 8.0f;
 							}
 						}
 						else
 						{
 							DragAndDrop.visualMode = DragAndDropVisualMode.Rejected;
 						}
+
+						currentEvent.Use();
+					}
+				}
+				break;
+			case EventType.DragPerform:
+				{
+					if (m_DragOwner && m_DropArea.Contains(currentEvent.mousePosition))
+					{
+						DragAndDrop.AcceptDrag();
+						//TODO: move jump link
+
+						m_DragInsert = false;
+						m_DragOwner = false;
+						m_Grabbed = -1;
+						m_Hovered = -1;
+
+						currentEvent.Use();
 					}
 				}
 				break;
@@ -181,7 +205,10 @@ namespace JumpTo
 				{
 					Debug.Log(currentEvent.type);
 
+					m_DragInsert = false;
 					m_DragOwner = false;
+					m_Grabbed = -1;
+					m_Hovered = -1;
 				}
 				break;
 			case EventType.Repaint:
@@ -201,6 +228,11 @@ namespace JumpTo
 							GraphicAssets.Instance.LinkLabelStyle.Draw(m_DrawRect, projectLinks[i].LinkLabelContent, false, false, false, false);
 
 						m_DrawRect.y += m_DrawRect.height;
+					}
+
+					if (m_DragInsert && m_Hovered > -1)
+					{
+						GraphicAssets.Instance.DragDropInsertionStyle.Draw(m_InsertionDrawRect, false, false, false, false);
 					}
 				}
 				break;

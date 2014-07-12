@@ -271,16 +271,6 @@ namespace JumpTo
 				link.Area.Set(0.0f, m_ProjectLinks.Count * GraphicAssets.LinkHeight, 100.0f, GraphicAssets.LinkHeight);
 
 				m_ProjectLinks.Add(link);
-				//if (m_ProjectLinks.Count > 1)
-				//{
-				//	Rect lastArea = m_ProjectLinks[m_ProjectLinks.Count - 1].Area;
-				//	Rect linkArea = link.Area;
-				//	linkArea.x = lastArea.x;
-				//	linkArea.y = lastArea.y + GraphicAssets.LinkHeight;
-				//	linkArea.width = lastArea.width;
-				//	linkArea.height = lastArea.height;
-				//	link.Area.Set(linkArea);
-				//}
 			}
 		}
 
@@ -343,17 +333,6 @@ namespace JumpTo
 				link.Area.Set(0.0f, m_HierarchyLinks.Count * GraphicAssets.LinkHeight, 100.0f, GraphicAssets.LinkHeight);
 
 				m_HierarchyLinks.Add(link);
-
-				//if (m_HierarchyLinks.Count > 1)
-				//{
-				//	Rect lastArea = m_HierarchyLinks[m_HierarchyLinks.Count - 1].Area;
-				//	Rect linkArea = link.Area;
-				//	linkArea.x = lastArea.x;
-				//	linkArea.y = lastArea.y + GraphicAssets.LinkHeight;
-				//	linkArea.width = lastArea.width;
-				//	linkArea.height = lastArea.height;
-				//	link.Area.Set(linkArea);
-				//}
 			}
 		}
 		
@@ -388,7 +367,7 @@ namespace JumpTo
 						{
 							indexMax = index - 1;
 						}
-						else if (rect.RectInternal.Contains(position))
+						else if (position.x > rect.xMin && position.x < rect.xMax)
 						{
 							return index;
 						}
@@ -430,7 +409,7 @@ namespace JumpTo
 						{
 							indexMax = index - 1;
 						}
-						else if (rect.RectInternal.Contains(position))
+						else if (position.x > rect.xMin && position.x < rect.xMax)
 						{
 							return index;
 						}

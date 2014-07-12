@@ -26,7 +26,7 @@ namespace JumpTo
 		public Texture2D IconPrefabNormal { get; private set; }
 		public Texture2D IconPrefabModel { get; private set; }
 		public Texture2D IconGameObject { get; private set; }
-
+		
 		//***** GUI STYLES *****
 
 		public GUIStyle LinkLabelStyle { get; private set; }
@@ -34,11 +34,12 @@ namespace JumpTo
 		public GUIStyle ToolbarStyle { get; private set; }
 		public GUIStyle ToolbarButtonStyle { get; private set; }
 		public GUIStyle ToolbarPopupStyle { get; private set; }
+		public GUIStyle DragDropInsertionStyle { get; private set; }
 
 		//***** CONSTANTS *****
 
 		public readonly Color ColorViolet = new Color(0.6f, 0.27f, 0.67f, 1.0f);
-		public const float LinkHeight = 17.0f;
+		public const float LinkHeight = 16.0f;
 
 
 		private Texture2D m_Outline;
@@ -59,6 +60,9 @@ namespace JumpTo
 			ToolbarStyle = new GUIStyle(editorSkin.GetStyle("Toolbar"));
 			ToolbarButtonStyle = new GUIStyle(editorSkin.GetStyle("toolbarbutton"));
 			ToolbarPopupStyle = new GUIStyle(editorSkin.GetStyle("ToolbarPopup"));
+			DragDropInsertionStyle = new GUIStyle(editorSkin.GetStyle("PR Insertion"));
+			DragDropInsertionStyle.imagePosition = ImagePosition.ImageOnly;
+			DragDropInsertionStyle.contentOffset = new Vector2(0.0f, -16.0f);
 		}
 
 		public void Cleanup()
@@ -72,7 +76,7 @@ namespace JumpTo
 			IconPrefabNormal = EditorGUIUtility.FindTexture("PrefabNormal Icon");
 			IconPrefabModel = EditorGUIUtility.FindTexture("PrefabModel Icon");
 			IconGameObject = EditorGUIUtility.FindTexture("GameObject Icon");
-
+			
 			//TODO: load this from an embedded image
 			m_Outline = new Texture2D(32, 32, TextureFormat.RGBA32, false);
 			Color[] outline = new Color[32 * 32];
