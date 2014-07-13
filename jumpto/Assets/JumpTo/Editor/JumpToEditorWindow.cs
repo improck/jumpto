@@ -9,16 +9,20 @@ using JumpTo;
 //xTODO: ability to remove items
 //xTODO: context menu
 //xTODO: drag-n-drop to window
-//TODO: drag-n-drop from window
+//xTODO: double-click behavior
 //xTODO: serialize links
+//xTODO: create a toolbar
+//xTODO: drag-n-drop from project window
+//xTODO: drag-n-drop from hierarchy window
 //TODO: update on scene change?
 //TODO: update on project change?
-//xTODO: create a toolbar
 //TODO: multiple selection
-//xTODO: double-click behavior
 //TODO: serialize to a file
 //TODO: clear all links from gui
 //TODO: move to a dll assembly
+//TODO: assembly resource text, multiple languages
+//TODO: load images from assembly resources
+//TODO: comment all of this code
 
 
 public class JumpToEditorWindow : EditorWindow

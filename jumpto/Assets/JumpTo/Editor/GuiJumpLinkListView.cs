@@ -180,7 +180,7 @@ namespace JumpTo
 			//raised repeatedly while a drag op is hovering
 			case EventType.DragUpdated:
 				{
-					if (m_ProjectView.IsDragOwner)
+					if (m_ProjectView.IsDragOwner || m_HierarchyView.IsDragOwner)
 						break;
 
 					//drag most like came from another window, figure out
@@ -238,7 +238,7 @@ namespace JumpTo
 			//raised on mouse-up if DragAndDrop.visualMode != None or Rejected
 			case EventType.DragPerform:
 				{
-					if (m_ProjectView.IsDragOwner)
+					if (m_ProjectView.IsDragOwner || m_HierarchyView.IsDragOwner)
 						break;
 
 					DragAndDrop.AcceptDrag();
