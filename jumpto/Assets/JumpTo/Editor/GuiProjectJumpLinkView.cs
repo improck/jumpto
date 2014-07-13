@@ -15,7 +15,7 @@ namespace JumpTo
 		private Rect m_InsertionDrawRect;
 		private int m_Selected = -1;
 		private int m_Grabbed = -1;
-		private int m_Hovered = -1;
+		private int m_InsertionIndex = -1;
 		private bool m_ContextClick = false;
 		private bool m_DragOwner = false;
 		private bool m_DragInsert = false;
@@ -166,14 +166,22 @@ namespace JumpTo
 							int hit = JumpLinks.Instance.ProjectLinkHitTest(currentEvent.mousePosition);
 							if (hit > -1)
 							{
-								m_Hovered = hit;
+								m_InsertionIndex = hit;
 
-								m_InsertionDrawRect = projectLinks[m_Hovered].Area;
+								m_InsertionDrawRect = projectLinks[hit].Area;
 								m_InsertionDrawRect.x += 8.0f;
-								m_InsertionDrawRect.height = GraphicAssets.Instance.DragDropInsertionStyle.fixedHeight;
-								if ((currentEvent.mousePosition.y - m_InsertionDrawRect.y) < (GraphicAssets.LinkHeight * 0.5f))
-									m_InsertionDrawRect.y -= GraphicAssets.LinkHeight;
 								m_InsertionDrawRect.width -= 8.0f;
+								m_InsertionDrawRect.height = GraphicAssets.Instance.DragDropInsertionStyle.fixedHeight;
+
+								if ((currentEvent.mousePosition.y - m_InsertionDrawRect.y) < (GraphicAssets.LinkHeight * 0.5f))
+								{
+									m_InsertionIndex = hit;
+									m_InsertionDrawRect.y -= GraphicAssets.LinkHeight;
+								}
+								else
+								{
+									m_InsertionIndex++;
+								}
 							}
 						}
 						else
@@ -190,14 +198,17 @@ namespace JumpTo
 					if (m_DragOwner && m_DropArea.Contains(currentEvent.mousePosition))
 					{
 						DragAndDrop.AcceptDrag();
-						//TODO: move jump link
+						
+						JumpLinks.Instance.MoveProjectLink(m_Grabbed, m_InsertionIndex);
 
 						m_DragInsert = false;
 						m_DragOwner = false;
 						m_Grabbed = -1;
-						m_Hovered = -1;
+						m_InsertionIndex = -1;
 
 						currentEvent.Use();
+
+						m_Window.Repaint();
 					}
 				}
 				break;
@@ -208,7 +219,7 @@ namespace JumpTo
 					m_DragInsert = false;
 					m_DragOwner = false;
 					m_Grabbed = -1;
-					m_Hovered = -1;
+					m_InsertionIndex = -1;
 				}
 				break;
 			case EventType.Repaint:
@@ -230,7 +241,7 @@ namespace JumpTo
 						m_DrawRect.y += m_DrawRect.height;
 					}
 
-					if (m_DragInsert && m_Hovered > -1)
+					if (m_DragInsert && m_InsertionIndex > -1)
 					{
 						GraphicAssets.Instance.DragDropInsertionStyle.Draw(m_InsertionDrawRect, false, false, false, false);
 					}

@@ -199,6 +199,68 @@ namespace JumpTo
 			}
 		}
 
+		public void MoveProjectLink(int from, int to)
+		{
+			if (from == to)
+				return;
+
+			ProjectJumpLink link = m_ProjectLinks[from];
+			m_ProjectLinks.RemoveAt(from);
+
+			int min = 0;
+			int max = 0;
+			if (to > from)
+			{
+				to--;
+
+				min = from;
+				max = to + 1;
+			}
+			else
+			{
+				min = to;
+				max = from + 1;
+			}
+
+			m_ProjectLinks.Insert(to, link);
+
+			for (; min < max; min++)
+			{
+				m_ProjectLinks[min].Area.y = min * GraphicAssets.LinkHeight;
+			}
+		}
+
+		public void MoveHierarchyLink(int from, int to)
+		{
+			if (from == to)
+				return;
+
+			HierarchyJumpLink link = m_HierarchyLinks[from];
+			m_HierarchyLinks.RemoveAt(from);
+
+			int min = 0;
+			int max = 0;
+			if (to > from)
+			{
+				to--;
+
+				min = from;
+				max = to + 1;
+			}
+			else
+			{
+				min = to;
+				max = from + 1;
+			}
+
+			m_HierarchyLinks.Insert(to, link);
+
+			for (; min < max; min++)
+			{
+				m_HierarchyLinks[min].Area.y = min * GraphicAssets.LinkHeight;
+			}
+		}
+
 		public void RefreshLinksY()
 		{
 			for (int i = 0; i < m_ProjectLinks.Count; i++)
