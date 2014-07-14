@@ -6,11 +6,11 @@ using System.Collections.Generic;
 namespace JumpTo
 {
 	[System.Serializable]
-	public class ProjectJumpLink : ScriptableObject
+	public abstract class JumpLink : ScriptableObject
 	{
-		[SerializeField] private UnityEngine.Object m_LinkReference;
-		[SerializeField] private GUIContent m_LinkLabelContent = new GUIContent();
-		[SerializeField] private Color m_LinkColor = Color.black;
+		[SerializeField] protected UnityEngine.Object m_LinkReference;
+		[SerializeField] protected GUIContent m_LinkLabelContent = new GUIContent();
+		[SerializeField] protected Color m_LinkColor = Color.black;
 
 
 		public UnityEngine.Object LinkReference { get { return m_LinkReference; } set { m_LinkReference = value; } }
@@ -19,193 +19,73 @@ namespace JumpTo
 		public RectRef Area { get; set; }
 
 
-		public ProjectJumpLink()
+		public JumpLink()
 		{
 			Area = new RectRef();
 		}
 
-		void OnSerialize()
+		public abstract void OnSerialize();
+		public abstract void OnDeserialize();
+	}
+
+
+	[System.Serializable]
+	public class ProjectJumpLink : JumpLink
+	{
+		public override void OnSerialize()
 		{
 		}
 
-		void OnDeserialize()
+		public override void OnDeserialize()
 		{
 		}
 	}
 
 
 	[System.Serializable]
-	public class HierarchyJumpLink : ScriptableObject
+	public class HierarchyJumpLink : JumpLink
 	{
-		[SerializeField] private UnityEngine.Object m_LinkReference;
-		[SerializeField] private GUIContent m_LinkLabelContent = new GUIContent();
-		[SerializeField] private Color m_LinkColor = Color.black;
-
-
-		public UnityEngine.Object LinkReference { get { return m_LinkReference; } set { m_LinkReference = value; } }
-		public GUIContent LinkLabelContent { get { return m_LinkLabelContent; } set { m_LinkLabelContent = value; } }
-		public Color LinkColor { get { return m_LinkColor; } set { m_LinkColor = value; } }
-		public RectRef Area { get; set; }
-
-
-		public HierarchyJumpLink()
-		{
-			Area = new RectRef();
-		}
-
-		void OnSerialize()
+		public override void OnSerialize()
 		{
 		}
 
-		void OnDeserialize()
+		public override void OnDeserialize()
 		{
 		}
 	}
 
-	
+
 	[System.Serializable]
-	public class JumpLinks : ScriptableObject
+	public abstract class JumpLinkContainer<T> : ScriptableObject where T : JumpLink
 	{
-		#region Pseudo-Singleton
-		private static JumpLinks s_Instance = null;
+		[SerializeField] protected List<T> m_Links = new List<T>();
 
-		public static JumpLinks Instance { get { return s_Instance; } }
 
-		public static JumpLinks Create()
+		public List<T> Links { get { return m_Links; } }
+
+
+		public abstract void AddLink(UnityEngine.Object linkReference, PrefabType prefabType);
+
+		public void RemoveLink(int index)
 		{
-			JumpLinks instance = ScriptableObject.CreateInstance<JumpLinks>();
-			instance.hideFlags = HideFlags.HideAndDontSave;
-
-			return instance;
-		}
-
-
-		protected JumpLinks() { s_Instance = this; }
-		#endregion
-
-
-		[SerializeField] private List<ProjectJumpLink> m_ProjectLinks = new List<ProjectJumpLink>();
-		[SerializeField] private List<HierarchyJumpLink> m_HierarchyLinks = new List<HierarchyJumpLink>();
-
-
-		public List<ProjectJumpLink> ProjectLinks { get { return m_ProjectLinks; } }
-		public List<HierarchyJumpLink> HierarchyLinks { get { return m_HierarchyLinks; } }
-
-
-		public static bool WouldBeProjectLink(UnityEngine.Object linkReference)
-		{
-			if (!(linkReference is GameObject))
-			{
-				return true;
-			}
-
-			PrefabType prefabType = PrefabUtility.GetPrefabType(linkReference);
-			return prefabType == PrefabType.ModelPrefab || prefabType == PrefabType.Prefab;
-		}
-
-		public static bool WouldBeHierarchyLink(UnityEngine.Object linkReference)
-		{
-			PrefabType prefabType = PrefabUtility.GetPrefabType(linkReference);
-			return linkReference is GameObject &&
-				(prefabType == PrefabType.None ||
-				   prefabType == PrefabType.PrefabInstance ||
-				   prefabType == PrefabType.ModelPrefabInstance ||
-				   prefabType == PrefabType.DisconnectedPrefabInstance ||
-				   prefabType == PrefabType.DisconnectedModelPrefabInstance ||
-				   prefabType == PrefabType.MissingPrefabInstance);
-		}
-
-
-		public void CreateJumpLink(UnityEngine.Object linkReference)
-		{
-			if (linkReference is GameObject)
-			{
-				PrefabType prefabType = PrefabUtility.GetPrefabType(linkReference);
-				if (prefabType == PrefabType.None ||
-					prefabType == PrefabType.PrefabInstance ||
-					prefabType == PrefabType.ModelPrefabInstance ||
-					prefabType == PrefabType.DisconnectedPrefabInstance ||
-					prefabType == PrefabType.DisconnectedModelPrefabInstance ||
-					prefabType == PrefabType.MissingPrefabInstance)
-				{
-					AddHierarchyLink(linkReference, prefabType);
-				}
-				else
-				{
-					AddProjectLink(linkReference, prefabType);
-				}
-			}
-			else if (!(linkReference is Component))
-			{
-				AddProjectLink(linkReference, PrefabType.None);
-			}
-		}
-
-		public void CreateOnlyProjectJumpLink(UnityEngine.Object linkReference)
-		{
-			if (linkReference is Component)
+			if (index < 0 || index > m_Links.Count - 1)
 				return;
 
-			PrefabType prefabType = PrefabUtility.GetPrefabType(linkReference);
-			if (!(linkReference is GameObject) ||
-				prefabType == PrefabType.ModelPrefab ||
-				prefabType == PrefabType.Prefab)
+			m_Links.RemoveAt(index);
+
+			for (int i = index; i < m_Links.Count; i++)
 			{
-				AddProjectLink(linkReference, prefabType);
+				m_Links[i].Area.y = i * GraphicAssets.LinkHeight;
 			}
 		}
 
-		public void CreateOnlyHierarchyJumpLink(UnityEngine.Object linkReference)
-		{
-			if (linkReference is Component)
-				return;
-
-			PrefabType prefabType = PrefabUtility.GetPrefabType(linkReference);
-			if (linkReference is GameObject &&
-				(prefabType == PrefabType.None ||
-				   prefabType == PrefabType.PrefabInstance ||
-				   prefabType == PrefabType.ModelPrefabInstance ||
-				   prefabType == PrefabType.DisconnectedPrefabInstance ||
-				   prefabType == PrefabType.DisconnectedModelPrefabInstance ||
-				   prefabType == PrefabType.MissingPrefabInstance))
-			{
-				AddHierarchyLink(linkReference, prefabType);
-			}
-		}
-
-		public void RemoveProjectLink(int index)
-		{
-			if (index < 0 || index > m_ProjectLinks.Count - 1)
-				return;
-
-			m_ProjectLinks.RemoveAt(index);
-
-			for (int i = index; i < m_ProjectLinks.Count; i++)
-			{
-				m_ProjectLinks[i].Area.y = i * GraphicAssets.LinkHeight;
-			}
-		}
-
-		public void RemoveHierarchyLink(int index)
-		{
-			if (index < 0 || index > m_HierarchyLinks.Count - 1)
-				return;
-
-			m_HierarchyLinks.RemoveAt(index);
-
-			for (int i = index; i < m_HierarchyLinks.Count; i++)
-			{
-				m_HierarchyLinks[i].Area.y = i * GraphicAssets.LinkHeight;
-			}
-		}
-
-		public void MoveProjectLink(int from, int to)
+		public void MoveLink(int from, int to)
 		{
 			if (from == to)
 				return;
 
-			ProjectJumpLink link = m_ProjectLinks[from];
-			m_ProjectLinks.RemoveAt(from);
+			T link = m_Links[from];
+			m_Links.RemoveAt(from);
 
 			int min = 0;
 			int max = 0;
@@ -222,62 +102,88 @@ namespace JumpTo
 				max = from + 1;
 			}
 
-			m_ProjectLinks.Insert(to, link);
+			m_Links.Insert(to, link);
 
 			for (; min < max; min++)
 			{
-				m_ProjectLinks[min].Area.y = min * GraphicAssets.LinkHeight;
+				m_Links[min].Area.y = min * GraphicAssets.LinkHeight;
 			}
 		}
 
-		public void MoveHierarchyLink(int from, int to)
+		public void RefreshLinks()
 		{
-			if (from == to)
-				return;
-
-			HierarchyJumpLink link = m_HierarchyLinks[from];
-			m_HierarchyLinks.RemoveAt(from);
-
-			int min = 0;
-			int max = 0;
-			if (to > from)
+			for (int i = 0; i < m_Links.Count; i++)
 			{
-				to--;
-
-				min = from;
-				max = to + 1;
-			}
-			else
-			{
-				min = to;
-				max = from + 1;
-			}
-
-			m_HierarchyLinks.Insert(to, link);
-
-			for (; min < max; min++)
-			{
-				m_HierarchyLinks[min].Area.y = min * GraphicAssets.LinkHeight;
 			}
 		}
 
 		public void RefreshLinksY()
 		{
-			for (int i = 0; i < m_ProjectLinks.Count; i++)
+			for (int i = 0; i < m_Links.Count; i++)
 			{
-				m_ProjectLinks[i].Area.y = i * GraphicAssets.LinkHeight;
-			}
-
-			for (int i = 0; i < m_HierarchyLinks.Count; i++)
-			{
-				m_HierarchyLinks[i].Area.y = i * GraphicAssets.LinkHeight;
+				m_Links[i].Area.y = i * GraphicAssets.LinkHeight;
 			}
 		}
 
-		private void AddProjectLink(UnityEngine.Object linkReference, PrefabType prefabType)
+		public int LinkHitTest(Vector2 position)
+		{
+			int linkCount = m_Links.Count;
+			if (linkCount > 0)
+			{
+				if (linkCount == 1)
+				{
+					if (m_Links[0].Area.RectInternal.Contains(position))
+						return 0;
+				}
+				else
+				{
+					int indexMin = 0;
+					int indexMax = linkCount - 1;
+					int index = 0;
+					RectRef rect = null;
+
+					while (indexMax >= indexMin)
+					{
+						index = (indexMin + indexMax) >> 1;
+
+						rect = m_Links[index].Area;
+
+						//if below the link rect
+						if (rect.yMax < position.y)
+						{
+							indexMin = index + 1;
+						}
+						//if above the link rect
+						else if (rect.yMin > position.y)
+						{
+							indexMax = index - 1;
+						}
+						//if within the link rect
+						else if (position.x >= rect.xMin && position.x <= rect.xMax)
+						{
+							return index;
+						}
+						//not within any link rect
+						else
+						{
+							break;
+						}
+					}
+				}
+			}
+
+			return -1;
+		}
+	}
+
+
+	[System.Serializable]
+	public class ProjectJumpLinkContainer : JumpLinkContainer<ProjectJumpLink>
+	{
+		public override void AddLink(UnityEngine.Object linkReference, PrefabType prefabType)
 		{
 			//basically, if no linked object in the list has a reference to the passed object
-			if (!m_ProjectLinks.Exists(linked => linked.LinkReference == linkReference))
+			if (!m_Links.Exists(linked => linked.LinkReference == linkReference))
 			{
 				ProjectJumpLink link = ScriptableObject.CreateInstance<ProjectJumpLink>();
 				link.hideFlags = HideFlags.HideAndDontSave;
@@ -330,16 +236,21 @@ namespace JumpTo
 					}
 				}
 
-				link.Area.Set(0.0f, m_ProjectLinks.Count * GraphicAssets.LinkHeight, 100.0f, GraphicAssets.LinkHeight);
+				link.Area.Set(0.0f, m_Links.Count * GraphicAssets.LinkHeight, 100.0f, GraphicAssets.LinkHeight);
 
-				m_ProjectLinks.Add(link);
+				m_Links.Add(link);
 			}
 		}
+	}
 
-		private void AddHierarchyLink(UnityEngine.Object linkReference, PrefabType prefabType)
+
+	[System.Serializable]
+	public class HierarchyJumpLinkContainer : JumpLinkContainer<HierarchyJumpLink>
+	{
+		public override void AddLink(UnityEngine.Object linkReference, PrefabType prefabType)
 		{
 			//basically, if no linked object in the list has a reference to the passed object
-			if (!m_HierarchyLinks.Exists(linked => linked.LinkReference == linkReference))
+			if (!m_Links.Exists(linked => linked.LinkReference == linkReference))
 			{
 				HierarchyJumpLink link = ScriptableObject.CreateInstance<HierarchyJumpLink>();
 				link.hideFlags = HideFlags.HideAndDontSave;
@@ -392,114 +303,9 @@ namespace JumpTo
 					link.LinkLabelContent.tooltip = GetTransformPath(linkTransform);
 				}
 
-				link.Area.Set(0.0f, m_HierarchyLinks.Count * GraphicAssets.LinkHeight, 100.0f, GraphicAssets.LinkHeight);
+				link.Area.Set(0.0f, m_Links.Count * GraphicAssets.LinkHeight, 100.0f, GraphicAssets.LinkHeight);
 
-				m_HierarchyLinks.Add(link);
-			}
-		}
-		
-		public int ProjectLinkHitTest(Vector2 position)
-		{
-			int linkCount = m_ProjectLinks.Count;
-			if (linkCount > 0)
-			{
-				if (linkCount == 1)
-				{
-					if (m_ProjectLinks[0].Area.RectInternal.Contains(position))
-						return 0;
-				}
-				else
-				{
-					int indexMin = 0;
-					int indexMax = linkCount - 1;
-					int index = 0;
-					RectRef rect = null;
-
-					while (indexMax >= indexMin)
-					{
-						index = (indexMin + indexMax) >> 1;
-
-						rect = m_ProjectLinks[index].Area;
-
-						if (rect.yMax < position.y)
-						{
-							indexMin = index + 1;
-						}
-						else if (rect.yMin > position.y)
-						{
-							indexMax = index - 1;
-						}
-						else if (position.x > rect.xMin && position.x < rect.xMax)
-						{
-							return index;
-						}
-					}
-				}
-			}
-
-			return -1;
-		}
-
-		public int HierarchyLinkHitTest(Vector2 position)
-		{
-			int linkCount = m_HierarchyLinks.Count;
-			if (linkCount > 0)
-			{
-				if (linkCount == 1)
-				{
-					if (m_HierarchyLinks[0].Area.RectInternal.Contains(position))
-						return 0;
-				}
-				else
-				{
-					int indexMin = 0;
-					int indexMax = linkCount - 1;
-					int index = 0;
-					RectRef rect = null;
-
-					while (indexMax >= indexMin)
-					{
-						index = (indexMin + indexMax) >> 1;
-
-						rect = m_HierarchyLinks[index].Area;
-
-						if (rect.yMax < position.y)
-						{
-							indexMin = index + 1;
-						}
-						else if (rect.yMin > position.y)
-						{
-							indexMax = index - 1;
-						}
-						else if (position.x > rect.xMin && position.x < rect.xMax)
-						{
-							return index;
-						}
-					}
-				}
-			}
-
-			return -1;
-		}
-
-		public void CheckHierarchyLinks()
-		{
-			for (int i = 0; i < m_HierarchyLinks.Count; i++)
-			{
-				//TODO: how?
-
-				//NOTE: seems to be causing a crash
-				//m_HierarchyLinks[i].Area.Set(0.0f, i * GraphicAssets.LinkHeight, 100.0f, GraphicAssets.LinkHeight);
-			}
-		}
-
-		public void CheckProjectLinks()
-		{
-			for (int i = 0; i < m_ProjectLinks.Count; i++)
-			{
-				//TODO: how?
-
-				//m_ProjectLinks[i].Area.Set(0.0f, i * GraphicAssets.LinkHeight, 100.0f, GraphicAssets.LinkHeight);
+				m_Links.Add(link);
 			}
 		}
 
@@ -513,6 +319,137 @@ namespace JumpTo
 			}
 
 			return path;
+		}
+	}
+
+	
+	[System.Serializable]
+	public class JumpLinks : ScriptableObject
+	{
+		#region Pseudo-Singleton
+		private static JumpLinks s_Instance = null;
+
+		public static JumpLinks Instance { get { return s_Instance; } }
+
+		public static JumpLinks Create()
+		{
+			JumpLinks instance = ScriptableObject.CreateInstance<JumpLinks>();
+			instance.hideFlags = HideFlags.HideAndDontSave;
+
+			instance.m_ProjectLinkContainer = ScriptableObject.CreateInstance<ProjectJumpLinkContainer>();
+			instance.m_ProjectLinkContainer.hideFlags = HideFlags.HideAndDontSave;
+			instance.m_HierarchyLinkContainer = ScriptableObject.CreateInstance<HierarchyJumpLinkContainer>();
+			instance.m_HierarchyLinkContainer.hideFlags = HideFlags.HideAndDontSave;
+
+			return instance;
+		}
+
+
+		protected JumpLinks() { s_Instance = this; }
+		#endregion
+
+
+		[SerializeField] private ProjectJumpLinkContainer m_ProjectLinkContainer;
+		[SerializeField] private HierarchyJumpLinkContainer m_HierarchyLinkContainer;
+
+
+		public JumpLinkContainer<T> GetJumpLinkContainer<T>() where T : JumpLink
+		{
+			if (typeof(T) == typeof(ProjectJumpLink))
+				return m_ProjectLinkContainer as JumpLinkContainer<T>;
+			else
+				return m_HierarchyLinkContainer as JumpLinkContainer<T>;
+		}
+
+		public static bool WouldBeProjectLink(UnityEngine.Object linkReference)
+		{
+			if (!(linkReference is GameObject))
+			{
+				return true;
+			}
+
+			PrefabType prefabType = PrefabUtility.GetPrefabType(linkReference);
+			return prefabType == PrefabType.ModelPrefab || prefabType == PrefabType.Prefab;
+		}
+
+		public static bool WouldBeHierarchyLink(UnityEngine.Object linkReference)
+		{
+			PrefabType prefabType = PrefabUtility.GetPrefabType(linkReference);
+			return linkReference is GameObject &&
+				(prefabType == PrefabType.None ||
+				   prefabType == PrefabType.PrefabInstance ||
+				   prefabType == PrefabType.ModelPrefabInstance ||
+				   prefabType == PrefabType.DisconnectedPrefabInstance ||
+				   prefabType == PrefabType.DisconnectedModelPrefabInstance ||
+				   prefabType == PrefabType.MissingPrefabInstance);
+		}
+
+
+		public void CreateJumpLink(UnityEngine.Object linkReference)
+		{
+			if (linkReference is GameObject)
+			{
+				PrefabType prefabType = PrefabUtility.GetPrefabType(linkReference);
+				if (prefabType == PrefabType.None ||
+					prefabType == PrefabType.PrefabInstance ||
+					prefabType == PrefabType.ModelPrefabInstance ||
+					prefabType == PrefabType.DisconnectedPrefabInstance ||
+					prefabType == PrefabType.DisconnectedModelPrefabInstance ||
+					prefabType == PrefabType.MissingPrefabInstance)
+				{
+					m_HierarchyLinkContainer.AddLink(linkReference, prefabType);
+				}
+				else
+				{
+					m_ProjectLinkContainer.AddLink(linkReference, prefabType);
+				}
+			}
+			else if (!(linkReference is Component))
+			{
+				m_ProjectLinkContainer.AddLink(linkReference, PrefabType.None);
+			}
+		}
+
+		public void CreateOnlyProjectJumpLink(UnityEngine.Object linkReference)
+		{
+			if (linkReference is Component)
+				return;
+
+			PrefabType prefabType = PrefabUtility.GetPrefabType(linkReference);
+			if (!(linkReference is GameObject) ||
+				prefabType == PrefabType.ModelPrefab ||
+				prefabType == PrefabType.Prefab)
+			{
+				m_ProjectLinkContainer.AddLink(linkReference, prefabType);
+			}
+		}
+
+		public void CreateOnlyHierarchyJumpLink(UnityEngine.Object linkReference)
+		{
+			if (linkReference is Component)
+				return;
+
+			PrefabType prefabType = PrefabUtility.GetPrefabType(linkReference);
+			if (linkReference is GameObject &&
+				(prefabType == PrefabType.None ||
+				   prefabType == PrefabType.PrefabInstance ||
+				   prefabType == PrefabType.ModelPrefabInstance ||
+				   prefabType == PrefabType.DisconnectedPrefabInstance ||
+				   prefabType == PrefabType.DisconnectedModelPrefabInstance ||
+				   prefabType == PrefabType.MissingPrefabInstance))
+			{
+				m_HierarchyLinkContainer.AddLink(linkReference, prefabType);
+			}
+		}
+
+		public void CheckHierarchyLinks()
+		{
+			m_HierarchyLinkContainer.RefreshLinks();
+		}
+
+		public void CheckProjectLinks()
+		{
+			m_ProjectLinkContainer.RefreshLinks();
 		}
 	}
 }
