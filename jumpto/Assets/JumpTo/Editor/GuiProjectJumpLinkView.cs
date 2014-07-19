@@ -9,6 +9,7 @@ namespace JumpTo
 	{
 		protected GUIContent m_MenuOpenLink;
 
+
 		public override void OnWindowEnable(EditorWindow window)
 		{
 			base.OnWindowEnable(window);
@@ -16,6 +17,7 @@ namespace JumpTo
 			m_ControlTitle = new GUIContent(ResLoad.Instance.GetText(ResId.LabelProjectLinks));
 			m_MenuOpenLink = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextOpenLink));
 		}
+
 		protected override void ShowContextMenu()
 		{
 			GenericMenu menu = new GenericMenu();
@@ -37,7 +39,9 @@ namespace JumpTo
 
 		private void OpenAssets()
 		{
-			AssetDatabase.OpenAsset(m_LinkContainer.Links[m_Selected].LinkReference);
+			ProjectJumpLink activeSelection = m_LinkContainer.ActiveSelection;
+			if (activeSelection != null)
+				AssetDatabase.OpenAsset(activeSelection.LinkReference);
 		}
 	}
 }

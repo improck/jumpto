@@ -11,12 +11,14 @@ namespace JumpTo
 		[SerializeField] protected UnityEngine.Object m_LinkReference;
 		[SerializeField] protected GUIContent m_LinkLabelContent = new GUIContent();
 		[SerializeField] protected Color m_LinkColor = Color.black;
+		[SerializeField] protected bool m_Selected = false;
 
 
 		public UnityEngine.Object LinkReference { get { return m_LinkReference; } set { m_LinkReference = value; } }
 		public GUIContent LinkLabelContent { get { return m_LinkLabelContent; } set { m_LinkLabelContent = value; } }
 		public Color LinkColor { get { return m_LinkColor; } set { m_LinkColor = value; } }
 		public RectRef Area { get; set; }
+		public bool Selected { get { return m_Selected; } set { m_Selected = value; } }
 
 
 		public JumpLink()
@@ -59,9 +61,56 @@ namespace JumpTo
 	public abstract class JumpLinkContainer<T> : ScriptableObject where T : JumpLink
 	{
 		[SerializeField] protected List<T> m_Links = new List<T>();
+		[SerializeField] int m_ActiveSelection = -1;
 
 
 		public List<T> Links { get { return m_Links; } }
+		public T ActiveSelection { get { return m_ActiveSelection > -1 ? m_Links[m_ActiveSelection] : null; } }
+
+		public T this[int index]
+		{
+			get
+			{
+				if (index < 0 || index >= m_Links.Count)
+					throw new System.IndexOutOfRangeException(typeof(T) + ": Link index out of range (" + index + "/" + m_Links.Count + ")");
+
+				return m_Links[index];
+			}
+		}
+
+		public bool HasSelection
+		{
+			get
+			{
+				for (int i = 0; i < m_Links.Count; i++)
+				{
+					if (m_Links[i].Selected)
+						return true;
+				}
+
+				return false;
+			}
+		}
+
+		public T[] Selection
+		{
+			get
+			{
+				if (m_Links.Count == 0)
+					return null;
+				else
+				{
+					List<T> selection = new List<T>();
+					for (int i = 0; i < m_Links.Count; i++)
+					{
+						if (m_Links[i].Selected)
+							selection.Add(m_Links[i]);
+					}
+
+					return selection.ToArray();
+				}
+			}
+		}
 
 
 		public abstract void AddLink(UnityEngine.Object linkReference, PrefabType prefabType);
@@ -77,6 +126,17 @@ namespace JumpTo
 			{
 				m_Links[i].Area.y = i * GraphicAssets.LinkHeight;
 			}
+		}
+
+		public void RemoveSelected()
+		{
+			for (int i = m_Links.Count - 1; i >= 0; i--)
+			{
+				if (m_Links[i].Selected)
+					m_Links.RemoveAt(i);
+			}
+
+			m_ActiveSelection = -1;
 		}
 
 		public void MoveLink(int from, int to)
@@ -108,6 +168,53 @@ namespace JumpTo
 			{
 				m_Links[min].Area.y = min * GraphicAssets.LinkHeight;
 			}
+		}
+
+		public void MoveSelected(int to)
+		{
+			//TODO: make sure the 'to' is not within the selection
+
+			//TODO: move multiple selection
+
+			//TODO: refresh link areas
+		}
+
+		public void LinkSelectionSet(int index)
+		{
+			for (int i = 0; i < m_Links.Count; i++)
+			{
+				m_Links[i].Selected = i == index;
+			}
+
+			m_ActiveSelection = Mathf.Clamp(index, -1, m_Links.Count - 1);
+		}
+
+		public void LinkSelectionAdd(int index)
+		{
+			if (index >= 0 && index < m_Links.Count)
+			{
+				m_Links[index].Selected = true;
+				m_ActiveSelection = index;
+			}
+		}
+
+		public void LinkSelectionRemove(int index)
+		{
+			if (index >= 0 && index < m_Links.Count)
+			{
+				m_Links[index].Selected = false;
+				m_ActiveSelection = index;
+			}
+		}
+
+		public void LinkSelectionClear()
+		{
+			for (int i = 0; i < m_Links.Count; i++)
+			{
+				m_Links[i].Selected = false;
+			}
+
+			m_ActiveSelection = -1;
 		}
 
 		public void RefreshLinks()
@@ -173,6 +280,17 @@ namespace JumpTo
 			}
 
 			return -1;
+		}
+
+		public bool SelectionHitTest(Vector2 position)
+		{
+			for (int i = 0; i < m_Links.Count; i++)
+			{
+				if (m_Links[i].Selected && m_Links[i].Area.RectInternal.Contains(position))
+					return true;
+			}
+
+			return false;
 		}
 	}
 

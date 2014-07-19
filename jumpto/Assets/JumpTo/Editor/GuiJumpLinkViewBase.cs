@@ -7,13 +7,14 @@ namespace JumpTo
 {
 	public abstract class GuiJumpLinkViewBase<T> : GuiBase where T : JumpLink
 	{
-		[SerializeField]
-		protected Vector2 m_ScrollViewPosition;
+		[SerializeField] protected Vector2 m_ScrollViewPosition;
+		[SerializeField] protected bool m_HasFocus = false;
 
 		protected Rect m_ScrollViewRect;
 		protected Rect m_DrawRect;
 		protected Rect m_InsertionDrawRect;
-		protected int m_Selected = -1;
+		protected Rect m_ControlRect;
+		//protected int m_Selected = -1;
 		protected int m_Grabbed = -1;
 		protected int m_InsertionIndex = -1;
 		protected bool m_ContextClick = false;
@@ -33,6 +34,8 @@ namespace JumpTo
 
 
 		public bool IsDragOwner { get { return m_DragOwner; } }
+		public bool HasFocus { get { return m_HasFocus; } set { m_HasFocus = value; } }
+		public bool IsFocusedControl { get { return m_Window == EditorWindow.focusedWindow && m_HasFocus; } }
 
 
 		protected abstract void ShowContextMenu();
@@ -53,7 +56,10 @@ namespace JumpTo
 
 		protected override void OnGui()
 		{
-			List<T> projectLinks = m_LinkContainer.Links;
+			m_ControlRect.width = m_Size.x;
+			m_ControlRect.height = m_Size.y;
+
+			List<T> links = m_LinkContainer.Links;
 
 			m_DrawRect.Set(1.0f, 1.0f, m_Size.x - 2.0f, m_Size.y - 1.0f);
 
@@ -64,7 +70,7 @@ namespace JumpTo
 			m_DrawRect.width = m_Size.x - m_DrawRect.x * 2.0f;
 			m_DrawRect.height = m_Size.y - (m_DrawRect.y + 1.0f);
 
-			m_ScrollViewRect.height = projectLinks.Count * GraphicAssets.LinkHeight;
+			m_ScrollViewRect.height = links.Count * GraphicAssets.LinkHeight;
 
 			//if the vertical scrollbar is visible, adjust view rect
 			//	width by the width of the scrollbar (17.0f)
@@ -92,12 +98,12 @@ namespace JumpTo
 			//MouseDrag for inter-/intra-window dragging
 			case EventType.MouseDrag:
 				{
-					OnMouseDrag(projectLinks);
+					OnMouseDrag(links);
 				}
 				break;
 			case EventType.DragUpdated:
 				{
-					OnDragUpdated(projectLinks);
+					OnDragUpdated(links);
 				}
 				break;
 			case EventType.DragPerform:
@@ -112,7 +118,7 @@ namespace JumpTo
 				break;
 			case EventType.Repaint:
 				{
-					OnRepaint(projectLinks);
+					OnRepaint(links);
 				}
 				break;
 			}
@@ -125,32 +131,91 @@ namespace JumpTo
 		{
 			Event currentEvent = Event.current;
 
+			if (!m_ControlRect.Contains(currentEvent.mousePosition))
+				return;
+
+			if (!m_HasFocus)
+				m_Window.Repaint();
+
+			m_HasFocus = true;
+
 			if (currentEvent.button != 2)
 			{
-				//TODO: handle multiple selection
-
+				//determine where the mouse clicked
 				int hit = m_LinkContainer.LinkHitTest(currentEvent.mousePosition);
 				if (currentEvent.button == 0)
 				{
-					if (hit != m_Selected)
-						m_Window.Repaint();
+					//if links are currently selected
+					if (m_LinkContainer.HasSelection)
+					{
+						//and the click was not on a link (below last link)
+						if (hit == -1)
+						{
+							//clear selection
+							m_LinkContainer.LinkSelectionClear();
+							m_Window.Repaint();
+						}
+						//or the click was on a link and the control/command key was down
+						else if ((currentEvent.modifiers & EventModifiers.Command) == EventModifiers.Command ||
+								(currentEvent.modifiers & EventModifiers.Control) == EventModifiers.Control)
+						{
+							//toggle clicked link selection state
+							if (!m_LinkContainer[hit].Selected)
+								m_LinkContainer.LinkSelectionAdd(hit);
+							else
+								m_LinkContainer.LinkSelectionRemove(hit);
 
-					m_Selected = hit;
+							m_Window.Repaint();
+						}
+						//or the clicked link was not already selected
+						else if (!m_LinkContainer[hit].Selected)
+						{
+							//set the selection to the clicked link
+							m_LinkContainer.LinkSelectionSet(hit);
+							m_Window.Repaint();
+						}
+					}
+					else if (hit > -1)
+					{
+						//set the selection to the clicked link
+						m_LinkContainer.LinkSelectionSet(hit);
+						m_Window.Repaint();
+					}
+
+					//TODO: should grabbed become the active selection?
 					m_Grabbed = hit;
+					//NOTE: this may need to be set to the midline of the grabbed link
 					m_GrabPosition = currentEvent.mousePosition;
 
 					//on double-click
-					if (currentEvent.clickCount == 2 && m_Selected > -1)
+					if (currentEvent.clickCount == 2 && hit > -1 && m_LinkContainer[hit].Selected)
 						OnDoubleClick();
 
 					currentEvent.Use();
 				}
 				else if (currentEvent.button == 1)
 				{
-					if (hit != m_Selected)
-						m_Window.Repaint();
+					if (m_LinkContainer.HasSelection)
+					{
+						if (hit == -1)
+						{
+							m_LinkContainer.LinkSelectionClear();
+							//TODO: show a new context menu
 
-					m_Selected = hit;
+							m_Window.Repaint();
+						}
+						else if (!m_LinkContainer[hit].Selected)
+						{
+							m_LinkContainer.LinkSelectionSet(hit);
+							m_Window.Repaint();
+						}
+					}
+					else if (hit > -1)
+					{
+						m_LinkContainer.LinkSelectionSet(hit);
+						m_Window.Repaint();
+					}
+
 					m_ContextClick = true;
 
 					currentEvent.Use();
@@ -160,7 +225,7 @@ namespace JumpTo
 
 		protected void OnMouseUp()
 		{
-			if (m_Selected > -1)
+			if (m_LinkContainer.HasSelection)
 			{
 				m_Grabbed = -1;
 
@@ -173,31 +238,22 @@ namespace JumpTo
 				}
 
 				m_ContextClick = false;
-
-				//if (!currentEvent.control && !currentEvent.command)
-				//{
-
-				//}
-				//else
-				//{
-				//	//TODO: handle multiple selection
-				//}
 			}
 		}
 
-		protected void OnMouseDrag(List<T> projectLinks)
+		protected void OnMouseDrag(List<T> links)
 		{
 			Event currentEvent = Event.current;
 			if (m_ScrollViewRect.Contains(currentEvent.mousePosition))
 			{
 				if (m_Grabbed > -1 && Vector2.Distance(m_GrabPosition, currentEvent.mousePosition) > 4.0f)
 				//NOTE: this was preventing a drag to other windows when there was only one link in the list
-				//!(projectLinks[m_Grabbed].Area.RectInternal.Contains(currentEvent.mousePosition)))
+				//	!(links[m_Grabbed].Area.RectInternal.Contains(currentEvent.mousePosition)))
 				{
 					m_DragOwner = true;
 
 					Debug.Log("Start Drag");
-					DragAndDrop.objectReferences = new Object[] { projectLinks[m_Grabbed].LinkReference };
+					DragAndDrop.objectReferences = new Object[] { links[m_Grabbed].LinkReference };
 					DragAndDrop.StartDrag("Project Reference(s)");
 					//NOTE: tried to set the visual mode here. always got reset to none.
 
@@ -206,7 +262,7 @@ namespace JumpTo
 			}
 		}
 
-		protected void OnDragUpdated(List<T> projectLinks)
+		protected void OnDragUpdated(List<T> links)
 		{
 			if (m_DragOwner)
 			{
@@ -224,7 +280,7 @@ namespace JumpTo
 					{
 						m_InsertionIndex = hit;
 
-						m_InsertionDrawRect = projectLinks[hit].Area;
+						m_InsertionDrawRect = links[hit].Area;
 						m_InsertionDrawRect.x += 8.0f;
 						m_InsertionDrawRect.width -= 8.0f;
 						m_InsertionDrawRect.height = GraphicAssets.Instance.DragDropInsertionStyle.fixedHeight;
@@ -257,7 +313,7 @@ namespace JumpTo
 			{
 				DragAndDrop.AcceptDrag();
 
-				m_LinkContainer.MoveLink(m_Grabbed, m_InsertionIndex);
+				m_LinkContainer.MoveSelected(m_InsertionIndex);
 
 				m_DragInsert = false;
 				m_DragOwner = false;
@@ -278,21 +334,21 @@ namespace JumpTo
 			m_InsertionIndex = -1;
 		}
 
-		protected void OnRepaint(List<T> projectLinks)
+		protected void OnRepaint(List<T> links)
 		{
 			//draw inside of scroll view
 			m_DrawRect.Set(0.0f, 0.0f, m_ScrollViewRect.width, GraphicAssets.LinkHeight);
 
-			for (int i = 0; i < projectLinks.Count; i++)
+			for (int i = 0; i < links.Count; i++)
 			{
-				GraphicAssets.Instance.LinkLabelStyle.normal.textColor = projectLinks[i].LinkColor;
+				GraphicAssets.Instance.LinkLabelStyle.normal.textColor = links[i].LinkColor;
 
-				projectLinks[i].Area.width = m_ScrollViewRect.width;
+				links[i].Area.width = m_ScrollViewRect.width;
 
-				if (m_Selected > -1 && m_Selected == i)
-					GraphicAssets.Instance.LinkLabelStyle.Draw(m_DrawRect, projectLinks[i].LinkLabelContent, false, false, true, m_Window == EditorWindow.focusedWindow);
+				if (links[i].Selected)
+					GraphicAssets.Instance.LinkLabelStyle.Draw(m_DrawRect, links[i].LinkLabelContent, false, false, true, IsFocusedControl);
 				else
-					GraphicAssets.Instance.LinkLabelStyle.Draw(m_DrawRect, projectLinks[i].LinkLabelContent, false, false, false, false);
+					GraphicAssets.Instance.LinkLabelStyle.Draw(m_DrawRect, links[i].LinkLabelContent, false, false, false, false);
 
 				m_DrawRect.y += m_DrawRect.height;
 			}
@@ -305,31 +361,50 @@ namespace JumpTo
 
 		protected void RemoveSelected()
 		{
-			m_LinkContainer.RemoveLink(m_Selected);
-			m_Selected = -1;
+			m_LinkContainer.RemoveSelected();
 		}
 
 		protected void PingSelectedLink()
 		{
-			EditorGUIUtility.PingObject(m_LinkContainer.Links[m_Selected].LinkReference);
+			T activeSelection = m_LinkContainer.ActiveSelection;
+			if (activeSelection != null)
+				EditorGUIUtility.PingObject(activeSelection.LinkReference);
 		}
 
 		protected void SetAsSelection()
 		{
-			Object[] selection = { m_LinkContainer.Links[m_Selected].LinkReference };
-			Selection.objects = selection;
+			T[] selectedLinks = m_LinkContainer.Selection;
+			if (selectedLinks != null)
+			{
+				Object[] selectionSet = new Object[selectedLinks.Length];
+				for (int i = 0; i < selectedLinks.Length; i++)
+				{
+					selectionSet[i] = selectedLinks[i].LinkReference;
+				}
+			}
+			else
+			{
+				Selection.objects = null;
+			}
 		}
 
 		protected void AddToSelection()
 		{
-			Object[] selection = Selection.objects;
+			T[] selectedLinks = m_LinkContainer.Selection;
 
-			//TODO: filter out links that are already selected
+			//NOTE: may or may not be the most efficient way to do this, but
+			//		it's easy to read
+			if (selectedLinks != null)
+			{
+				List<Object> selectionAdd = new List<Object>(Selection.objects);
+				for (int i = 0; i < selectedLinks.Length; i++)
+				{
+					if (!selectionAdd.Contains(selectedLinks[i].LinkReference))
+						selectionAdd.Add(selectedLinks[i].LinkReference);
+				}
 
-			Object[] addSelected = new Object[selection.Length + 1];
-			selection.CopyTo(addSelected, 0);
-			addSelected[selection.Length] = m_LinkContainer.Links[m_Selected].LinkReference;
-			Selection.objects = addSelected;
+				Selection.objects = selectionAdd.ToArray();
+			}
 		}
 	}
 }

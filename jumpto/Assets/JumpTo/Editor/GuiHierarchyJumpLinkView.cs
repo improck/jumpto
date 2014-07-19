@@ -51,11 +51,21 @@ namespace JumpTo
 
 			if (sceneView != null)
 			{
-				Object[] selection = Selection.objects;
-				Object[] tempSelection = { m_LinkContainer.Links[m_Selected].LinkReference };
-				Selection.objects = tempSelection;
-				sceneView.FrameSelected();
-				Selection.objects = selection;
+				HierarchyJumpLink[] selectedLinks = m_LinkContainer.Selection;
+				if (selectedLinks != null)
+				{
+					Object[] selection = Selection.objects;
+					Object[] tempSelection = new Object[selectedLinks.Length];
+
+					for (int i = 0; i < selectedLinks.Length; i++)
+					{
+						tempSelection[i] = selectedLinks[i].LinkReference;
+					}
+
+					Selection.objects = tempSelection;
+					sceneView.FrameSelected();
+					Selection.objects = selection;
+				}
 			}
 		}
 

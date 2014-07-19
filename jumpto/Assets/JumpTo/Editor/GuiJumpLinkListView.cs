@@ -77,9 +77,17 @@ namespace JumpTo
 					}
 
 					if (JumpToSettings.Instance.ProjectFirst)
+					{
 						m_ProjectView.Draw(m_DrawRect);
+						if (m_ProjectView.HasFocus)
+							m_HierarchyView.HasFocus = false;
+					}
 					else
+					{
 						m_HierarchyView.Draw(m_DrawRect);
+						if (m_HierarchyView.HasFocus)
+							m_ProjectView.HasFocus = false;
+					}
 					
 					//TODO: draw a divider icon
 
@@ -94,9 +102,17 @@ namespace JumpTo
 					}
 
 					if (JumpToSettings.Instance.ProjectFirst)
+					{
 						m_HierarchyView.Draw(m_DrawRect);
+						if (m_HierarchyView.HasFocus)
+							m_ProjectView.HasFocus = false;
+					}
 					else
+					{
 						m_ProjectView.Draw(m_DrawRect);
+						if (m_ProjectView.HasFocus)
+							m_HierarchyView.HasFocus = false;
+					}
 
 					OnDividerGui();
 				}
@@ -105,6 +121,8 @@ namespace JumpTo
 				{
 					m_DrawRect.Set(0.0f, 0.0f, m_Size.x, m_Size.y - 1.0f);
 
+					m_ProjectView.HasFocus = true;
+					m_HierarchyView.HasFocus = false;
 					m_ProjectView.Draw(m_DrawRect);
 				}
 				break;
@@ -112,6 +130,8 @@ namespace JumpTo
 				{
 					m_DrawRect.Set(0.0f, 0.0f, m_Size.x, m_Size.y - 1.0f);
 
+					m_ProjectView.HasFocus = false;
+					m_HierarchyView.HasFocus = true;
 					m_HierarchyView.Draw(m_DrawRect);
 				}
 				break;
