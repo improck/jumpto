@@ -144,12 +144,16 @@ namespace JumpTo
 
 		public void MoveLink(int from, int to)
 		{
+			//can't move a link to itself
 			if (from == to)
 				return;
 
+			//get the link, then remove it from the list
 			T link = m_Links[from];
 			m_Links.RemoveAt(from);
 
+			//find the range of links that will shift
+			//	within the list as a result of the move
 			int min = 0;
 			int max = 0;
 			if (to > from)
@@ -165,8 +169,11 @@ namespace JumpTo
 				max = from + 1;
 			}
 
+			//re-insert the link
 			m_Links.Insert(to, link);
 
+			//adjust the y-positions of the affected links
+			//	instead of all of the links
 			for (; min < max; min++)
 			{
 				m_Links[min].Area.y = min * GraphicAssets.LinkHeight;
@@ -175,11 +182,14 @@ namespace JumpTo
 
 		public void MoveSelected(int to)
 		{
+			//get the indices of the selected links
 			List<int> selection = new List<int>();
 			for (int i = 0; i < m_Links.Count; i++)
 			{
 				if (m_Links[i].Selected)
 				{
+					//early return if trying to move the
+					//	selection into itself
 					if (i == to)
 						return;
 
@@ -187,8 +197,25 @@ namespace JumpTo
 				}
 			}
 
-			//TODO: move multiple selection
+			//grab an array of the selected object before removal
+			T[] selectionObjects = Selection;
 
+			//remove the selected links from the list
+			int toAdjusted = to;
+			for (int i = selection.Count - 1; i >= 0; i--)
+			{
+				m_Links.RemoveAt(selection[i]);
+
+				//modify the insertion index for selected links
+				//	above it
+				if (selection[i] < to)
+					toAdjusted--;
+			}
+
+			//re-insert the selection
+			m_Links.InsertRange(toAdjusted, selectionObjects);
+
+			//fix all of the y-positions
 			RefreshLinksY();
 		}
 
