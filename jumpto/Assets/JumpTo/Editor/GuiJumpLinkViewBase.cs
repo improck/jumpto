@@ -14,7 +14,6 @@ namespace JumpTo
 		protected Rect m_DrawRect;
 		protected Rect m_InsertionDrawRect;
 		protected Rect m_ControlRect;
-		//protected int m_Selected = -1;
 		protected int m_Grabbed = -1;
 		protected int m_InsertionIndex = -1;
 		protected bool m_ContextClick = false;
@@ -156,8 +155,7 @@ namespace JumpTo
 							m_Window.Repaint();
 						}
 						//or the click was on a link and the control/command key was down
-						else if ((currentEvent.modifiers & EventModifiers.Command) == EventModifiers.Command ||
-								(currentEvent.modifiers & EventModifiers.Control) == EventModifiers.Control)
+						else if (currentEvent.control || currentEvent.command)
 						{
 							//toggle clicked link selection state
 							if (!m_LinkContainer[hit].Selected)
@@ -165,6 +163,12 @@ namespace JumpTo
 							else
 								m_LinkContainer.LinkSelectionRemove(hit);
 
+							m_Window.Repaint();
+						}
+						//or the click was on a link and the shift key was down
+						else if (currentEvent.shift)
+						{
+							m_LinkContainer.LinkSelectionSetRange(m_LinkContainer.ActiveSelection, hit);
 							m_Window.Repaint();
 						}
 						//or the clicked link was not already selected
@@ -182,7 +186,6 @@ namespace JumpTo
 						m_Window.Repaint();
 					}
 
-					//TODO: should grabbed become the active selection?
 					m_Grabbed = hit;
 					//NOTE: this may need to be set to the midline of the grabbed link
 					m_GrabPosition = currentEvent.mousePosition;
@@ -195,21 +198,30 @@ namespace JumpTo
 				}
 				else if (currentEvent.button == 1)
 				{
+					//if links are currently selected
 					if (m_LinkContainer.HasSelection)
 					{
+						//and the click was not on a link (below last link)
 						if (hit == -1)
 						{
-							m_LinkContainer.LinkSelectionClear();
+							//m_LinkContainer.LinkSelectionClear();
 							//TODO: show a new context menu
 
-							m_Window.Repaint();
+							//m_Window.Repaint();
 						}
-						else if (!m_LinkContainer[hit].Selected)
+						//or the link that was clicked was already selected
+						else if (m_LinkContainer[hit].Selected)
+						{
+							m_LinkContainer.ActiveSelection = hit;
+						}
+						//or a new link was selected
+						else
 						{
 							m_LinkContainer.LinkSelectionSet(hit);
 							m_Window.Repaint();
 						}
 					}
+					//no links are selected, if a link was clicked
 					else if (hit > -1)
 					{
 						m_LinkContainer.LinkSelectionSet(hit);
@@ -287,7 +299,6 @@ namespace JumpTo
 
 						if ((currentEvent.mousePosition.y - m_InsertionDrawRect.y) < (GraphicAssets.LinkHeight * 0.5f))
 						{
-							m_InsertionIndex = hit;
 							m_InsertionDrawRect.y -= GraphicAssets.LinkHeight;
 						}
 						else
@@ -366,7 +377,7 @@ namespace JumpTo
 
 		protected void PingSelectedLink()
 		{
-			T activeSelection = m_LinkContainer.ActiveSelection;
+			T activeSelection = m_LinkContainer.ActiveSelectedObject;
 			if (activeSelection != null)
 				EditorGUIUtility.PingObject(activeSelection.LinkReference);
 		}
@@ -381,6 +392,8 @@ namespace JumpTo
 				{
 					selectionSet[i] = selectedLinks[i].LinkReference;
 				}
+
+				Selection.objects = selectionSet;
 			}
 			else
 			{

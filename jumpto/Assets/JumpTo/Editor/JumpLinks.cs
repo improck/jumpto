@@ -65,7 +65,8 @@ namespace JumpTo
 
 
 		public List<T> Links { get { return m_Links; } }
-		public T ActiveSelection { get { return m_ActiveSelection > -1 ? m_Links[m_ActiveSelection] : null; } }
+		public int ActiveSelection { get { return m_ActiveSelection; } set { m_ActiveSelection = Mathf.Clamp(value, -1, m_Links.Count - 1); } }
+		public T ActiveSelectedObject { get { return m_ActiveSelection > -1 ? m_Links[m_ActiveSelection] : null; } }
 
 		public T this[int index]
 		{
@@ -137,6 +138,8 @@ namespace JumpTo
 			}
 
 			m_ActiveSelection = -1;
+
+			RefreshLinksY();
 		}
 
 		public void MoveLink(int from, int to)
@@ -172,11 +175,21 @@ namespace JumpTo
 
 		public void MoveSelected(int to)
 		{
-			//TODO: make sure the 'to' is not within the selection
+			List<int> selection = new List<int>();
+			for (int i = 0; i < m_Links.Count; i++)
+			{
+				if (m_Links[i].Selected)
+				{
+					if (i == to)
+						return;
+
+					selection.Add(i);
+				}
+			}
 
 			//TODO: move multiple selection
 
-			//TODO: refresh link areas
+			RefreshLinksY();
 		}
 
 		public void LinkSelectionSet(int index)
@@ -187,6 +200,31 @@ namespace JumpTo
 			}
 
 			m_ActiveSelection = Mathf.Clamp(index, -1, m_Links.Count - 1);
+		}
+
+		public void LinkSelectionSetRange(int from, int to)
+		{
+			if (from > to)
+			{
+				int temp = to;
+				to = from;
+				from = temp;
+			}
+
+			for (int i = 0; i < from; i++)
+			{
+				m_Links[i].Selected = false;
+			}
+
+			for (int i = from; i <= to; i++)
+			{
+				m_Links[i].Selected = true;
+			}
+
+			for (int i = to + 1; i < m_Links.Count; i++)
+			{
+				m_Links[i].Selected = false;
+			}
 		}
 
 		public void LinkSelectionAdd(int index)

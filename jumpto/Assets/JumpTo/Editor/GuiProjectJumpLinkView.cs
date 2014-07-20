@@ -39,7 +39,7 @@ namespace JumpTo
 
 		private void OpenAssets()
 		{
-			ProjectJumpLink activeSelection = m_LinkContainer.ActiveSelection;
+			ProjectJumpLink activeSelection = m_LinkContainer.ActiveSelectedObject;
 			if (activeSelection != null)
 				AssetDatabase.OpenAsset(activeSelection.LinkReference);
 		}
