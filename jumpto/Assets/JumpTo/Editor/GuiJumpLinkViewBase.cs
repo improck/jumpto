@@ -265,7 +265,7 @@ namespace JumpTo
 					m_DragOwner = true;
 
 					Debug.Log("Start Drag");
-					DragAndDrop.objectReferences = new Object[] { links[m_Grabbed].LinkReference };
+					DragAndDrop.objectReferences = m_LinkContainer.SelectedLinkReferences;
 					DragAndDrop.StartDrag("Project Reference(s)");
 					//NOTE: tried to set the visual mode here. always got reset to none.
 
@@ -384,26 +384,13 @@ namespace JumpTo
 
 		protected void SetAsSelection()
 		{
-			T[] selectedLinks = m_LinkContainer.Selection;
-			if (selectedLinks != null)
-			{
-				Object[] selectionSet = new Object[selectedLinks.Length];
-				for (int i = 0; i < selectedLinks.Length; i++)
-				{
-					selectionSet[i] = selectedLinks[i].LinkReference;
-				}
-
-				Selection.objects = selectionSet;
-			}
-			else
-			{
-				Selection.objects = null;
-			}
+			Object[] selectedLinks = m_LinkContainer.SelectedLinkReferences;
+			Selection.objects = selectedLinks;
 		}
 
 		protected void AddToSelection()
 		{
-			T[] selectedLinks = m_LinkContainer.Selection;
+			Object[] selectedLinks = m_LinkContainer.SelectedLinkReferences;
 
 			//NOTE: may or may not be the most efficient way to do this, but
 			//		it's easy to read
@@ -412,8 +399,8 @@ namespace JumpTo
 				List<Object> selectionAdd = new List<Object>(Selection.objects);
 				for (int i = 0; i < selectedLinks.Length; i++)
 				{
-					if (!selectionAdd.Contains(selectedLinks[i].LinkReference))
-						selectionAdd.Add(selectedLinks[i].LinkReference);
+					if (!selectionAdd.Contains(selectedLinks[i]))
+						selectionAdd.Add(selectedLinks[i]);
 				}
 
 				Selection.objects = selectionAdd.ToArray();

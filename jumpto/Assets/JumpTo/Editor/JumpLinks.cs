@@ -93,7 +93,7 @@ namespace JumpTo
 			}
 		}
 
-		public T[] Selection
+		public T[] SelectedLinks
 		{
 			get
 			{
@@ -106,6 +106,26 @@ namespace JumpTo
 					{
 						if (m_Links[i].Selected)
 							selection.Add(m_Links[i]);
+					}
+
+					return selection.ToArray();
+				}
+			}
+		}
+
+		public Object[] SelectedLinkReferences
+		{
+			get
+			{
+				if (m_Links.Count == 0)
+					return null;
+				else
+				{
+					List<Object> selection = new List<Object>();
+					for (int i = 0; i < m_Links.Count; i++)
+					{
+						if (m_Links[i].Selected)
+							selection.Add(m_Links[i].LinkReference);
 					}
 
 					return selection.ToArray();
@@ -198,7 +218,7 @@ namespace JumpTo
 			}
 
 			//grab an array of the selected object before removal
-			T[] selectionObjects = Selection;
+			T[] selectionObjects = SelectedLinks;
 
 			//remove the selected links from the list
 			int toAdjusted = to;

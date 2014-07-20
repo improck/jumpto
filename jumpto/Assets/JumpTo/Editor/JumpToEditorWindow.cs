@@ -14,9 +14,9 @@ using JumpTo;
 //xTODO: create a toolbar
 //xTODO: drag-n-drop from project window
 //xTODO: drag-n-drop from hierarchy window
+//xTODO: multiple selection
 //TODO: update on scene change?
 //TODO: update on project change?
-//TODO: multiple selection
 //TODO: serialize to a file
 //TODO: clear all links from gui
 //TODO: move to a dll assembly
