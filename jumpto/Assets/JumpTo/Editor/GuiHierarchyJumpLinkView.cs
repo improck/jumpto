@@ -8,6 +8,7 @@ namespace JumpTo
 	public class GuiHierarchyJumpLinkView : GuiJumpLinkViewBase<HierarchyJumpLink>
 	{
 		private GUIContent m_MenuFrameLink;
+		private GUIContent m_MenuFrameLinkPlural;
 		
 		
 		public override void OnWindowEnable(EditorWindow window)
@@ -16,24 +17,53 @@ namespace JumpTo
 
 			m_ControlTitle = new GUIContent(ResLoad.Instance.GetText(ResId.LabelHierarchyLinks));
 			m_MenuFrameLink = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextFrameLink));
+			m_MenuFrameLinkPlural = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextFrameLinkPlural));
 		}
 
 		protected override void ShowContextMenu()
 		{
 			GenericMenu menu = new GenericMenu();
-			//TODO: use pluralized text for multiple selection
-			menu.AddItem(m_MenuPingLink, false, PingSelectedLink);
-			menu.AddItem(m_MenuSetAsSelection, false, SetAsSelection);
-			menu.AddItem(m_MenuAddToSelection, false, AddToSelection);
+
+			//NOTE: a space followed by an underscore (" _") will cause all text following that
+			//		to appear right-justified and all caps in a GenericMenu. the name is being
+			//		parsed for hotkeys, and " _" indicates 'no modifiers' in the hotkey string.
+			//		See: http://docs.unity3d.com/ScriptReference/MenuItem.html
+			m_MenuPingLink.text = ResLoad.Instance.GetText(ResId.MenuContextPingLink) + " \"" + m_LinkContainer.ActiveSelectedObject.LinkReference.name + "\"";
+
+			int selectionCount = m_LinkContainer.SelectionCount;
+			if (selectionCount == 0)
+			{
+			}
+			else if (selectionCount == 1)
+			{
+				menu.AddItem(m_MenuPingLink, false, PingSelectedLink);
+				menu.AddItem(m_MenuSetAsSelection, false, SetAsSelection);
+				menu.AddItem(m_MenuAddToSelection, false, AddToSelection);
 			
-			if (ValidateSceneView())
-				menu.AddItem(m_MenuFrameLink, false, FrameLink);
-			else
-				menu.AddDisabledItem(m_MenuFrameLink);
+				if (ValidateSceneView())
+					menu.AddItem(m_MenuFrameLink, false, FrameLink);
+				else
+					menu.AddDisabledItem(m_MenuFrameLink);
 
-			menu.AddSeparator(string.Empty);
+				menu.AddSeparator(string.Empty);
 
-			menu.AddItem(m_MenuRemoveLink, false, RemoveSelected);
+				menu.AddItem(m_MenuRemoveLink, false, RemoveSelected);
+			}
+			else if (selectionCount > 1)
+			{
+				menu.AddItem(m_MenuPingLink, false, PingSelectedLink);
+				menu.AddItem(m_MenuSetAsSelectionPlural, false, SetAsSelection);
+				menu.AddItem(m_MenuAddToSelectionPlural, false, AddToSelection);
+
+				if (ValidateSceneView())
+					menu.AddItem(m_MenuFrameLinkPlural, false, FrameLink);
+				else
+					menu.AddDisabledItem(m_MenuFrameLinkPlural);
+
+				menu.AddSeparator(string.Empty);
+
+				menu.AddItem(m_MenuRemoveLinkPlural, false, RemoveSelected);
+			}
 
 			menu.ShowAsContext();
 		}

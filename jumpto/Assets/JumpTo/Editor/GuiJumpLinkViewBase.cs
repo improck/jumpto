@@ -26,6 +26,9 @@ namespace JumpTo
 		protected GUIContent m_MenuSetAsSelection;
 		protected GUIContent m_MenuAddToSelection;
 		protected GUIContent m_MenuRemoveLink;
+		protected GUIContent m_MenuSetAsSelectionPlural;
+		protected GUIContent m_MenuAddToSelectionPlural;
+		protected GUIContent m_MenuRemoveLinkPlural;
 
 		protected EditorWindow m_Window;
 
@@ -47,6 +50,9 @@ namespace JumpTo
 			m_MenuSetAsSelection = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextSetAsSelection));
 			m_MenuAddToSelection = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextAddToSelection));
 			m_MenuRemoveLink = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextRemoveLink));
+			m_MenuSetAsSelectionPlural = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextSetAsSelectionPlural));
+			m_MenuAddToSelectionPlural = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextAddToSelectionPlural));
+			m_MenuRemoveLinkPlural = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextRemoveLinkPlural));
 
 			m_Window = window;
 

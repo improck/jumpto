@@ -67,7 +67,7 @@ namespace JumpTo
 		public List<T> Links { get { return m_Links; } }
 		public int ActiveSelection { get { return m_ActiveSelection; } set { m_ActiveSelection = Mathf.Clamp(value, -1, m_Links.Count - 1); } }
 		public T ActiveSelectedObject { get { return m_ActiveSelection > -1 ? m_Links[m_ActiveSelection] : null; } }
-
+		
 		public T this[int index]
 		{
 			get
@@ -90,6 +90,21 @@ namespace JumpTo
 				}
 
 				return false;
+			}
+		}
+
+		public int SelectionCount
+		{
+			get
+			{
+				int count = 0;
+				for (int i = 0; i < m_Links.Count; i++)
+				{
+					if (m_Links[i].Selected)
+						count++;
+				}
+
+				return count;
 			}
 		}
 
