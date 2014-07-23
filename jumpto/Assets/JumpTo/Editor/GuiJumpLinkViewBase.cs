@@ -26,6 +26,7 @@ namespace JumpTo
 		protected GUIContent m_MenuSetAsSelection;
 		protected GUIContent m_MenuAddToSelection;
 		protected GUIContent m_MenuRemoveLink;
+		protected GUIContent m_MenuRemoveAll;
 		protected GUIContent m_MenuSetAsSelectionPlural;
 		protected GUIContent m_MenuAddToSelectionPlural;
 		protected GUIContent m_MenuRemoveLinkPlural;
@@ -50,6 +51,7 @@ namespace JumpTo
 			m_MenuSetAsSelection = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextSetAsSelection));
 			m_MenuAddToSelection = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextAddToSelection));
 			m_MenuRemoveLink = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextRemoveLink));
+			m_MenuRemoveAll = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextRemoveAll));
 			m_MenuSetAsSelectionPlural = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextSetAsSelectionPlural));
 			m_MenuAddToSelectionPlural = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextAddToSelectionPlural));
 			m_MenuRemoveLinkPlural = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextRemoveLinkPlural));
@@ -69,6 +71,16 @@ namespace JumpTo
 			m_DrawRect.Set(1.0f, 1.0f, m_Size.x - 2.0f, m_Size.y - 1.0f);
 
 			GUI.Box(m_DrawRect, m_ControlTitle, GraphicAssets.Instance.LinkBoxStyle);
+
+			//HACK: just testing the remove all feature
+			if (Event.current.type == EventType.MouseUp &&
+				Event.current.button == 1 &&
+				m_DrawRect.Contains(Event.current.mousePosition) &&
+				Event.current.mousePosition.y < 17.0f)
+			{
+				ShowTitleContextMenu();
+				Event.current.Use();
+			}
 
 			m_DrawRect.x = 2.0f;
 			m_DrawRect.y += 17.0f;
@@ -243,12 +255,13 @@ namespace JumpTo
 
 		protected void OnMouseUp()
 		{
+			Event currentEvent = Event.current;
+
 			if (m_LinkContainer.HasSelection)
 			{
 				m_Grabbed = -1;
 
-				Event currentEvent = Event.current;
-				if (m_ContextClick && currentEvent.button == 1)
+				if (currentEvent.button == 1 && m_ContextClick)
 				{
 					ShowContextMenu();
 
@@ -373,6 +386,30 @@ namespace JumpTo
 			if (m_DragInsert && m_InsertionIndex > -1)
 			{
 				GraphicAssets.Instance.DragDropInsertionStyle.Draw(m_InsertionDrawRect, false, false, false, false);
+			}
+		}
+
+		protected void ShowTitleContextMenu()
+		{
+			if (m_LinkContainer.Links.Count > 0)
+			{
+				GenericMenu menu = new GenericMenu();
+
+				menu.AddItem(m_MenuRemoveAll, false, RemoveAll);
+
+				menu.ShowAsContext();
+			}
+		}
+
+		protected void RemoveAll()
+		{
+			//if confirmed, remove all
+			if (EditorUtility.DisplayDialog(ResLoad.Instance.GetText(ResId.DialogRemoveAllTitle),
+				ResLoad.Instance.GetText(ResId.DialogRemoveAllMessage),
+				ResLoad.Instance.GetText(ResId.DialogYes),
+				ResLoad.Instance.GetText(ResId.DialogNo)))
+			{
+				m_LinkContainer.RemoveAll();
 			}
 		}
 

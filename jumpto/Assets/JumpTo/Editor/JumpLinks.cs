@@ -177,6 +177,27 @@ namespace JumpTo
 			RefreshLinksY();
 		}
 
+		public void RemoveNonSelected()
+		{
+			T active = ActiveSelectedObject;
+
+			for (int i = m_Links.Count - 1; i >= 0; i--)
+			{
+				if (!m_Links[i].Selected)
+					m_Links.RemoveAt(i);
+			}
+
+			m_ActiveSelection = m_Links.IndexOf(active);
+
+			RefreshLinksY();
+		}
+
+		public void RemoveAll()
+		{
+			m_Links.Clear();
+			m_ActiveSelection = -1;
+		}
+
 		public void MoveLink(int from, int to)
 		{
 			//can't move a link to itself
@@ -286,6 +307,14 @@ namespace JumpTo
 			for (int i = to + 1; i < m_Links.Count; i++)
 			{
 				m_Links[i].Selected = false;
+			}
+		}
+
+		public void LinkSelectionInvert()
+		{
+			for (int i = 0; i < m_Links.Count; i++)
+			{
+				m_Links[i].Selected = !m_Links[i].Selected;
 			}
 		}
 

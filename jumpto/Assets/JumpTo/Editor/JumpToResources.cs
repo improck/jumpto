@@ -28,12 +28,18 @@ namespace JumpTo
 		public static readonly int MenuContextFrameLink = "menu_contextFrameLink".GetHashCode();
 		public static readonly int MenuContextOpenLink = "menu_contextOpenLink".GetHashCode();
 		public static readonly int MenuContextRemoveLink = "menu_contextRemoveLink".GetHashCode();
+		public static readonly int MenuContextRemoveAll = "menu_contextRemoveAll".GetHashCode();
 		
 		public static readonly int MenuContextSetAsSelectionPlural = "menu_contextSetAsSelectionPlural".GetHashCode();
 		public static readonly int MenuContextAddToSelectionPlural = "menu_contextAddToSelectionPlural".GetHashCode();
 		public static readonly int MenuContextFrameLinkPlural = "menu_contextFrameLinkPlural".GetHashCode();
 		public static readonly int MenuContextOpenLinkPlural = "menu_contextOpenLinkPlural".GetHashCode();
 		public static readonly int MenuContextRemoveLinkPlural = "menu_contextRemoveLinkPlural".GetHashCode();
+
+		public static readonly int DialogRemoveAllTitle = "dialog_removeAllTitle".GetHashCode();
+		public static readonly int DialogRemoveAllMessage = "dialog_removeAllMessage".GetHashCode();
+		public static readonly int DialogYes = "dialog_yes".GetHashCode();
+		public static readonly int DialogNo = "dialog_no".GetHashCode();
 	}
 
 	public class ResLoad
@@ -129,11 +135,17 @@ namespace JumpTo
 			m_TextResources.Add(ResId.MenuContextFrameLink, "Frame This in Scene");
 			m_TextResources.Add(ResId.MenuContextOpenLink, "Open This");
 			m_TextResources.Add(ResId.MenuContextRemoveLink, "Remove This");
+			m_TextResources.Add(ResId.MenuContextRemoveAll, "Remove All");
 			m_TextResources.Add(ResId.MenuContextSetAsSelectionPlural, "Set These as Selection");
 			m_TextResources.Add(ResId.MenuContextAddToSelectionPlural, "Add These to Selection");
 			m_TextResources.Add(ResId.MenuContextFrameLinkPlural, "Frame These in Scene");
 			m_TextResources.Add(ResId.MenuContextOpenLinkPlural, "Open These");
 			m_TextResources.Add(ResId.MenuContextRemoveLinkPlural, "Remove These");
+
+			m_TextResources.Add(ResId.DialogRemoveAllTitle, "Confirm Remove All");
+			m_TextResources.Add(ResId.DialogRemoveAllMessage, "Are you sure you want to remove all links from the list?");
+			m_TextResources.Add(ResId.DialogYes, "Yes");
+			m_TextResources.Add(ResId.DialogNo, "No");
 		}
 	}
 }

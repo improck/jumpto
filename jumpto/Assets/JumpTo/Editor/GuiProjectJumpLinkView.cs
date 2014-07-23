@@ -42,6 +42,8 @@ namespace JumpTo
 				menu.AddItem(m_MenuOpenLink, false, OpenAssets);
 				menu.AddSeparator(string.Empty);
 				menu.AddItem(m_MenuRemoveLink, false, RemoveSelected);
+				//TODO: remove all but selected
+				//TODO: invert selection
 			}
 			else if (selectionCount > 1)
 			{
@@ -51,6 +53,8 @@ namespace JumpTo
 				menu.AddItem(m_MenuOpenLinkPlural, false, OpenAssets);
 				menu.AddSeparator(string.Empty);
 				menu.AddItem(m_MenuRemoveLinkPlural, false, RemoveSelected);
+				//TODO: remove all but selected
+				//TODO: invert selection
 			}
 
 			menu.ShowAsContext();

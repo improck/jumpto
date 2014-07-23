@@ -15,10 +15,11 @@ using JumpTo;
 //xTODO: drag-n-drop from project window
 //xTODO: drag-n-drop from hierarchy window
 //xTODO: multiple selection
+//xTODO: clear all links from gui
+//TODO: right-click hamburger menu for list view control
 //TODO: update on scene change?
 //TODO: update on project change?
 //TODO: serialize to a file
-//TODO: clear all links from gui
 //TODO: move to a dll assembly
 //TODO: assembly resource text, multiple languages
 //TODO: load images from assembly resources
