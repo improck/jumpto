@@ -35,6 +35,7 @@ namespace JumpTo
 		public GUIStyle ToolbarButtonStyle { get; private set; }
 		public GUIStyle ToolbarPopupStyle { get; private set; }
 		public GUIStyle DragDropInsertionStyle { get; private set; }
+		public GUIStyle DividerStyle { get; private set; }
 
 		//***** CONSTANTS *****
 
@@ -55,7 +56,11 @@ namespace JumpTo
 
 			LinkBoxStyle = new GUIStyle(GUI.skin.box);
 			LinkBoxStyle.fontStyle = FontStyle.Bold;
+			LinkBoxStyle.alignment = TextAnchor.UpperLeft;
 			LinkBoxStyle.normal.background = m_Outline;
+			Vector2 contentOffset = LinkBoxStyle.contentOffset;
+			contentOffset.x = 2.0f;
+			LinkBoxStyle.contentOffset = contentOffset;
 
 			ToolbarStyle = new GUIStyle(editorSkin.GetStyle("Toolbar"));
 			ToolbarButtonStyle = new GUIStyle(editorSkin.GetStyle("toolbarbutton"));
@@ -63,6 +68,25 @@ namespace JumpTo
 			DragDropInsertionStyle = new GUIStyle(editorSkin.GetStyle("PR Insertion"));
 			DragDropInsertionStyle.imagePosition = ImagePosition.ImageOnly;
 			DragDropInsertionStyle.contentOffset = new Vector2(0.0f, -16.0f);
+			DividerStyle = new GUIStyle();
+			DividerStyle.name = "JumpTo Divider";
+			DividerStyle.normal.background = ToolbarStyle.normal.background;
+			DividerStyle.border = new RectOffset(0, 0, 2, 2);
+
+			//Texture2D dividerHorizontal = DividerStyle.normal.background;
+			//Color[] pixelsHorizontal = dividerHorizontal.GetPixels();
+			
+			//Texture2D dividerVertical =
+			//	new Texture2D(dividerHorizontal.height, dividerHorizontal.width, dividerHorizontal.format, false);
+
+			//Color[] pixelsVertical = new Color[pixelsHorizontal.Length];
+			//for (int i = 0; i < pixelsVertical.Length; i += dividerVertical.width)
+			//{
+			//	for (int j = 0; j < pixelsHorizontal.Length; j += dividerHorizontal.width)
+			//	{
+			//		pixelsVertical[i + dividerVertical.width] = pixelsHorizontal[i];
+			//	}
+			//}
 		}
 
 		public void Cleanup()

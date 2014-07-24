@@ -10,8 +10,8 @@ namespace JumpTo
 		[SerializeField] protected Vector2 m_ScrollViewPosition;
 		[SerializeField] protected bool m_HasFocus = false;
 
-		protected Rect m_ScrollViewRect;
 		protected Rect m_DrawRect;
+		protected Rect m_ScrollViewRect;
 		protected Rect m_InsertionDrawRect;
 		protected Rect m_ControlRect;
 		protected int m_Grabbed = -1;

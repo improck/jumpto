@@ -16,13 +16,16 @@ using JumpTo;
 //xTODO: drag-n-drop from hierarchy window
 //xTODO: multiple selection
 //xTODO: clear all links from gui
+//xTODO: update on scene change
+//xTODO: update on project change
+//TODO: change the view control look-and-feel
+//TODO: draw a grab bar as the divider, horizontal and vertical
 //TODO: right-click hamburger menu for list view control
-//TODO: update on scene change?
-//TODO: update on project change?
 //TODO: serialize to a file
 //TODO: move to a dll assembly
 //TODO: assembly resource text, multiple languages
 //TODO: load images from assembly resources
+//TODO: find the minimum editorwindow width
 //TODO: comment all of this code
 
 

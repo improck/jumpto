@@ -89,8 +89,6 @@ namespace JumpTo
 							m_ProjectView.HasFocus = false;
 					}
 					
-					//TODO: draw a divider icon
-
 					//draw the bottom/right box
 					if (JumpToSettings.Instance.Vertical)
 					{
@@ -144,7 +142,7 @@ namespace JumpTo
 
 		private void OnDividerGui()
 		{
-			int controlId = GUIUtility.GetControlID(DividerHash, FocusType. Passive, m_DividerRect);
+			int controlId = GUIUtility.GetControlID(DividerHash, FocusType.Passive, m_DividerRect);
 
 			if (JumpToSettings.Instance.Vertical)
 				EditorGUIUtility.AddCursorRect(m_DividerRect, MouseCursor.SplitResizeUpDown, controlId);
@@ -187,6 +185,12 @@ namespace JumpTo
 
 						current.Use();
 					}
+				}
+				break;
+			case EventType.Repaint:
+				{
+					//TODO: draw a divider icon
+					GraphicAssets.Instance.DividerStyle.Draw(m_DividerRect, false, false, false, false);
 				}
 				break;
 			}

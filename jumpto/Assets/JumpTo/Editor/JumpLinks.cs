@@ -151,11 +151,13 @@ namespace JumpTo
 
 		public abstract void AddLink(UnityEngine.Object linkReference, PrefabType prefabType);
 
+
 		public void RemoveLink(int index)
 		{
 			if (index < 0 || index > m_Links.Count - 1)
 				return;
 
+			DestroyImmediate(m_Links[index]);
 			m_Links.RemoveAt(index);
 
 			for (int i = index; i < m_Links.Count; i++)
@@ -169,7 +171,10 @@ namespace JumpTo
 			for (int i = m_Links.Count - 1; i >= 0; i--)
 			{
 				if (m_Links[i].Selected)
+				{
+					DestroyImmediate(m_Links[i]);
 					m_Links.RemoveAt(i);
+				}
 			}
 
 			m_ActiveSelection = -1;
@@ -184,7 +189,10 @@ namespace JumpTo
 			for (int i = m_Links.Count - 1; i >= 0; i--)
 			{
 				if (!m_Links[i].Selected)
+				{
+					DestroyImmediate(m_Links[i]);
 					m_Links.RemoveAt(i);
+				}
 			}
 
 			m_ActiveSelection = m_Links.IndexOf(active);
@@ -348,9 +356,20 @@ namespace JumpTo
 
 		public void RefreshLinks()
 		{
-			for (int i = 0; i < m_Links.Count; i++)
+			for (int i = m_Links.Count - 1; i >= 0; i--)
 			{
+				if (m_Links[i].LinkReference == null)
+				{
+					DestroyImmediate(m_Links[i]);
+					m_Links.RemoveAt(i);
+				}
+				else if (m_Links[i].LinkLabelContent.text != m_Links[i].LinkReference.name)
+				{
+					m_Links[i].LinkLabelContent.text = m_Links[i].LinkReference.name;
+				}
 			}
+
+			RefreshLinksY();
 		}
 
 		public void RefreshLinksY()
