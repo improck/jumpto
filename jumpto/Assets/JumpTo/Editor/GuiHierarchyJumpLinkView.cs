@@ -23,7 +23,6 @@ namespace JumpTo
 		protected override void ShowContextMenu()
 		{
 			GenericMenu menu = new GenericMenu();
-			Debug.Log(m_LinkContainer.ActiveSelectedObject.LinkReference == null);
 
 			//NOTE: a space followed by an underscore (" _") will cause all text following that
 			//		to appear right-justified and all caps in a GenericMenu. the name is being

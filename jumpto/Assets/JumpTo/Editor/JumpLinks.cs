@@ -354,6 +354,7 @@ namespace JumpTo
 			m_ActiveSelection = -1;
 		}
 
+		//TODO: make this function abstract, move implementation to subclasses
 		public void RefreshLinks()
 		{
 			for (int i = m_Links.Count - 1; i >= 0; i--)
@@ -363,10 +364,13 @@ namespace JumpTo
 					DestroyImmediate(m_Links[i]);
 					m_Links.RemoveAt(i);
 				}
+				//TODO: this is breaking empty prefabs in the project view
 				else if (m_Links[i].LinkLabelContent.text != m_Links[i].LinkReference.name)
 				{
 					m_Links[i].LinkLabelContent.text = m_Links[i].LinkReference.name;
 				}
+
+				//TODO: check for guicontent changes per item
 			}
 
 			RefreshLinksY();
@@ -459,12 +463,15 @@ namespace JumpTo
 				link.LinkLabelContent.image = linkContent.image;
 				link.LinkLabelContent.tooltip = AssetDatabase.GetAssetPath(linkReference);
 
+				//empty prefabs have no content text
 				if (linkContent.text == string.Empty)
 				{
+					//try to get the name from the link reference itself
 					if (linkReference.name != string.Empty)
 					{
 						link.LinkLabelContent.text = linkReference.name;
 					}
+					//otherwise pull the object name straight from the filename
 					else
 					{
 						string assetName = AssetDatabase.GetAssetPath(linkReference.GetInstanceID());

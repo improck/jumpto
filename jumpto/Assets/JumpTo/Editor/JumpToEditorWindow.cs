@@ -18,9 +18,9 @@ using JumpTo;
 //xTODO: clear all links from gui
 //xTODO: update on scene change
 //xTODO: update on project change
-//TODO: change the view control look-and-feel
+//xTODO: change the view control look-and-feel
 //TODO: draw a grab bar as the divider, horizontal and vertical
-//TODO: right-click hamburger menu for list view control
+//TODO: left-click hamburger menu for list view control
 //TODO: serialize to a file
 //TODO: move to a dll assembly
 //TODO: assembly resource text, multiple languages
@@ -118,7 +118,7 @@ public class JumpToEditorWindow : EditorWindow
 		//position.x & y are the position of the window in Unity, i think
 		//	maybe it's the window position on the desktop
 		//	either way it wasn't the value i expected, so i force (0, 0)
-		m_Position.Set(0.0f, 0.0f, position.width, 18.0f);
+		m_Position.Set(0.0f, 0.0f, position.width, 17.0f);
 		m_Toolbar.Draw(m_Position);
 
 		m_Position.y = m_Position.height;

@@ -31,7 +31,7 @@ namespace JumpTo
 		protected GUIContent m_MenuAddToSelectionPlural;
 		protected GUIContent m_MenuRemoveLinkPlural;
 
-		protected EditorWindow m_Window;
+		protected JumpToEditorWindow m_Window;
 
 		protected JumpLinkContainer<T> m_LinkContainer = null;
 
@@ -56,43 +56,70 @@ namespace JumpTo
 			m_MenuAddToSelectionPlural = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextAddToSelectionPlural));
 			m_MenuRemoveLinkPlural = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextRemoveLinkPlural));
 
-			m_Window = window;
+			m_Window = window as JumpToEditorWindow;
 
 			m_LinkContainer = JumpLinks.Instance.GetJumpLinkContainer<T>();
+
+			m_ControlRect.y = 2.0f;
+			m_ControlRect.width = 16.0f;
+			m_ControlRect.height = 16.0f;
 		}
 
 		protected override void OnGui()
 		{
-			m_ControlRect.width = m_Size.x;
-			m_ControlRect.height = m_Size.y;
+			HandleTitleHeader();
+			HandleLinksScrollView();
+		}
 
+		protected void HandleTitleHeader()
+		{
+			m_DrawRect.Set(0.0f, 0.0f, m_Size.x, 22.0f);
+
+			Event currentEvent = Event.current;
+			switch (currentEvent.type)
+			{
+			case EventType.MouseDown:
+				{
+					m_ControlRect.x = m_Size.x - (m_ControlRect.width + 6.0f);
+
+					if (currentEvent.button == 0)
+					{
+						if (m_ControlRect.Contains(currentEvent.mousePosition))
+						{
+							ShowTitleContextMenu();
+							currentEvent.Use();
+						}
+						else if (m_DrawRect.Contains(currentEvent.mousePosition))
+						{
+							m_HasFocus = true;
+							m_Window.Repaint();
+						}
+					}
+				}
+				break;
+			case EventType.Repaint:
+				{
+					GraphicAssets.Instance.LinkViewTitleStyle.Draw(m_DrawRect, m_ControlTitle, false, false, false, false);
+				}
+				break;
+			};
+		}
+
+		protected void HandleLinksScrollView()
+		{
 			List<T> links = m_LinkContainer.Links;
 
-			m_DrawRect.Set(1.0f, 1.0f, m_Size.x - 2.0f, m_Size.y - 1.0f);
-
-			GUI.Box(m_DrawRect, m_ControlTitle, GraphicAssets.Instance.LinkBoxStyle);
-
-			//HACK: just testing the remove all feature
-			if (Event.current.type == EventType.MouseUp &&
-				Event.current.button == 1 &&
-				m_DrawRect.Contains(Event.current.mousePosition) &&
-				Event.current.mousePosition.y < 17.0f)
-			{
-				ShowTitleContextMenu();
-				Event.current.Use();
-			}
-
-			m_DrawRect.x = 2.0f;
-			m_DrawRect.y += 17.0f;
-			m_DrawRect.width = m_Size.x - m_DrawRect.x * 2.0f;
-			m_DrawRect.height = m_Size.y - (m_DrawRect.y + 1.0f);
+			m_DrawRect.x = 0.0f;
+			m_DrawRect.y += m_DrawRect.height;	//height of the title header
+			m_DrawRect.width = m_Size.x;
+			m_DrawRect.height = m_Size.y - m_DrawRect.y;
 
 			m_ScrollViewRect.height = links.Count * GraphicAssets.LinkHeight;
 
 			//if the vertical scrollbar is visible, adjust view rect
 			//	width by the width of the scrollbar (17.0f)
 			if (m_ScrollViewRect.height > m_DrawRect.height)
-				m_ScrollViewRect.width = m_DrawRect.width - 17.0f;
+				m_ScrollViewRect.width = m_DrawRect.width - 15.0f;
 			else
 				m_ScrollViewRect.width = m_DrawRect.width;
 
@@ -148,7 +175,7 @@ namespace JumpTo
 		{
 			Event currentEvent = Event.current;
 
-			if (!m_ControlRect.Contains(currentEvent.mousePosition))
+			if (!m_ScrollViewRect.Contains(currentEvent.mousePosition))
 				return;
 
 			if (!m_HasFocus)
@@ -283,7 +310,7 @@ namespace JumpTo
 				{
 					m_DragOwner = true;
 
-					Debug.Log("Start Drag");
+					//Debug.Log("Start Drag");
 					DragAndDrop.objectReferences = m_LinkContainer.SelectedLinkReferences;
 					DragAndDrop.StartDrag("Project Reference(s)");
 					//NOTE: tried to set the visual mode here. always got reset to none.
