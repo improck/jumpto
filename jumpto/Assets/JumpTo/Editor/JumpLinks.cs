@@ -6,17 +6,29 @@ using System.Collections.Generic;
 namespace JumpTo
 {
 	[System.Serializable]
+	public enum LinkReferenceType
+	{
+		Asset = 0,
+		GameObject = 0,
+		Model = 1,
+		ModelInstance = 1,
+		Prefab = 2,
+		PrefabInstance = 2,
+		PrefabInstanceBroken = 3
+	}
+
+	[System.Serializable]
 	public abstract class JumpLink : ScriptableObject
 	{
 		[SerializeField] protected UnityEngine.Object m_LinkReference;
 		[SerializeField] protected GUIContent m_LinkLabelContent = new GUIContent();
-		[SerializeField] protected Color m_LinkColor = Color.black;
+		[SerializeField] protected LinkReferenceType m_ReferenceType = LinkReferenceType.Asset;
 		[SerializeField] protected bool m_Selected = false;
 
 
 		public UnityEngine.Object LinkReference { get { return m_LinkReference; } set { m_LinkReference = value; } }
 		public GUIContent LinkLabelContent { get { return m_LinkLabelContent; } set { m_LinkLabelContent = value; } }
-		public Color LinkColor { get { return m_LinkColor; } set { m_LinkColor = value; } }
+		public LinkReferenceType ReferenceType { get { return m_ReferenceType; } set { m_ReferenceType = value; } }
 		public RectRef Area { get; set; }
 		public bool Selected { get { return m_Selected; } set { m_Selected = value; } }
 
@@ -150,6 +162,7 @@ namespace JumpTo
 
 
 		public abstract void AddLink(UnityEngine.Object linkReference, PrefabType prefabType);
+		protected abstract void UpdateLinkInfo(T link, PrefabType prefabType);
 
 
 		public void RemoveLink(int index)
@@ -354,7 +367,6 @@ namespace JumpTo
 			m_ActiveSelection = -1;
 		}
 
-		//TODO: make this function abstract, move implementation to subclasses
 		public void RefreshLinks()
 		{
 			for (int i = m_Links.Count - 1; i >= 0; i--)
@@ -364,13 +376,10 @@ namespace JumpTo
 					DestroyImmediate(m_Links[i]);
 					m_Links.RemoveAt(i);
 				}
-				//TODO: this is breaking empty prefabs in the project view
-				else if (m_Links[i].LinkLabelContent.text != m_Links[i].LinkReference.name)
+				else
 				{
-					m_Links[i].LinkLabelContent.text = m_Links[i].LinkReference.name;
+					UpdateLinkInfo(m_Links[i], PrefabUtility.GetPrefabType(m_Links[i].LinkReference));
 				}
-
-				//TODO: check for guicontent changes per item
 			}
 
 			RefreshLinksY();
@@ -459,59 +468,68 @@ namespace JumpTo
 				link.hideFlags = HideFlags.HideAndDontSave;
 				link.LinkReference = linkReference;
 
-				GUIContent linkContent = EditorGUIUtility.ObjectContent(linkReference, linkReference.GetType());
-				link.LinkLabelContent.image = linkContent.image;
-				link.LinkLabelContent.tooltip = AssetDatabase.GetAssetPath(linkReference);
-
-				//empty prefabs have no content text
-				if (linkContent.text == string.Empty)
-				{
-					//try to get the name from the link reference itself
-					if (linkReference.name != string.Empty)
-					{
-						link.LinkLabelContent.text = linkReference.name;
-					}
-					//otherwise pull the object name straight from the filename
-					else
-					{
-						string assetName = AssetDatabase.GetAssetPath(linkReference.GetInstanceID());
-						int slash = assetName.LastIndexOf('/');
-						int dot = assetName.LastIndexOf('.');
-						link.LinkLabelContent.text = assetName.Substring(slash + 1, dot - slash - 1);
-					}
-				}
-				else
-				{
-					link.LinkLabelContent.text = linkContent.text;
-				}
-
-				if (linkReference is GameObject)
-				{
-					GraphicAssets graphicAssets = GraphicAssets.Instance;
-
-					if (prefabType == PrefabType.Prefab)
-					{
-						if (link.LinkLabelContent.image == null)
-							link.LinkLabelContent.image = graphicAssets.IconPrefabNormal;
-
-						link.LinkColor = Color.blue;
-					}
-					else if (prefabType == PrefabType.ModelPrefab)
-					{
-						if (link.LinkLabelContent.image == null)
-							link.LinkLabelContent.image = graphicAssets.IconPrefabModel;
-						link.LinkColor = graphicAssets.ColorViolet;
-					}
-					else if (link.LinkLabelContent.image == null)
-					{
-						link.LinkLabelContent.image = graphicAssets.IconGameObject;
-						//color = black
-					}
-				}
+				UpdateLinkInfo(link, prefabType);
 
 				link.Area.Set(0.0f, m_Links.Count * GraphicAssets.LinkHeight, 100.0f, GraphicAssets.LinkHeight);
 
 				m_Links.Add(link);
+			}
+		}
+
+		protected override void UpdateLinkInfo(ProjectJumpLink link, PrefabType prefabType)
+		{
+			UnityEngine.Object linkReference = link.LinkReference;
+			GUIContent linkContent = EditorGUIUtility.ObjectContent(linkReference, linkReference.GetType());
+			link.LinkLabelContent.image = linkContent.image;
+			link.LinkLabelContent.tooltip = AssetDatabase.GetAssetPath(linkReference);
+
+			//empty prefabs have no content text
+			if (linkContent.text == string.Empty)
+			{
+				//try to get the name from the link reference itself
+				if (linkReference.name != string.Empty)
+				{
+					link.LinkLabelContent.text = linkReference.name;
+				}
+				//otherwise pull the object name straight from the filename
+				else
+				{
+					string assetName = AssetDatabase.GetAssetPath(linkReference.GetInstanceID());
+					int slash = assetName.LastIndexOf('/');
+					int dot = assetName.LastIndexOf('.');
+					link.LinkLabelContent.text = assetName.Substring(slash + 1, dot - slash - 1);
+				}
+			}
+			else
+			{
+				link.LinkLabelContent.text = linkContent.text;
+			}
+
+			if (linkReference is GameObject)
+			{
+				GraphicAssets graphicAssets = GraphicAssets.Instance;
+
+				if (prefabType == PrefabType.Prefab)
+				{
+					link.ReferenceType = LinkReferenceType.Prefab;
+
+					if (link.LinkLabelContent.image == null)
+						link.LinkLabelContent.image = graphicAssets.IconPrefabNormal;
+				}
+				else if (prefabType == PrefabType.ModelPrefab)
+				{
+					link.ReferenceType = LinkReferenceType.Model;
+
+					if (link.LinkLabelContent.image == null)
+						link.LinkLabelContent.image = graphicAssets.IconPrefabModel;
+				}
+				else
+				{
+					link.ReferenceType = LinkReferenceType.Asset;
+
+					if (link.LinkLabelContent.image == null)
+						link.LinkLabelContent.image = graphicAssets.IconGameObject;
+				}
 			}
 		}
 	}
@@ -529,56 +547,59 @@ namespace JumpTo
 				link.hideFlags = HideFlags.HideAndDontSave;
 				link.LinkReference = linkReference;
 
-				GUIContent linkContent = EditorGUIUtility.ObjectContent(linkReference, linkReference.GetType());
-				link.LinkLabelContent.text = linkContent.text != string.Empty ? linkContent.text : "[Unnamed]";
-				link.LinkLabelContent.image = linkContent.image;
-
-				if (linkReference is GameObject)
-				{
-					GraphicAssets graphicAssets = GraphicAssets.Instance;
-
-					if (prefabType == PrefabType.PrefabInstance)
-					{
-						if (link.LinkLabelContent.image == null)
-							link.LinkLabelContent.image = graphicAssets.IconPrefabNormal;
-
-						link.LinkColor = Color.blue;
-					}
-					else if (prefabType == PrefabType.ModelPrefabInstance)
-					{
-						if (link.LinkLabelContent.image == null)
-							link.LinkLabelContent.image = graphicAssets.IconPrefabModel;
-						link.LinkColor = graphicAssets.ColorViolet;
-					}
-					else if (prefabType == PrefabType.DisconnectedPrefabInstance ||
-						prefabType == PrefabType.DisconnectedModelPrefabInstance ||
-						prefabType == PrefabType.MissingPrefabInstance)
-					{
-						if (link.LinkLabelContent.image == null)
-							link.LinkLabelContent.image = graphicAssets.IconPrefabNormal;
-
-						link.LinkColor = Color.red;
-					}
-					//else if (prefabType == PrefabType.DisconnectedModelPrefabInstance)
-					//{
-					//	if (link.LinkLabelContent.image == null)
-					//		link.LinkLabelContent.image = graphicAssets.IconPrefabModel;
-
-					//	link.LinkColor = Color.red;
-					//}
-					else if (link.LinkLabelContent.image == null)
-					{
-						link.LinkLabelContent.image = graphicAssets.IconGameObject;
-						//color = black
-					}
-
-					Transform linkTransform = (linkReference as GameObject).transform;
-					link.LinkLabelContent.tooltip = GetTransformPath(linkTransform);
-				}
+				UpdateLinkInfo(link, prefabType);
 
 				link.Area.Set(0.0f, m_Links.Count * GraphicAssets.LinkHeight, 100.0f, GraphicAssets.LinkHeight);
 
 				m_Links.Add(link);
+			}
+		}
+
+		protected override void UpdateLinkInfo(HierarchyJumpLink link, PrefabType prefabType)
+		{
+			UnityEngine.Object linkReference = link.LinkReference;
+
+			GUIContent linkContent = EditorGUIUtility.ObjectContent(linkReference, linkReference.GetType());
+			link.LinkLabelContent.text = linkContent.text != string.Empty ? linkContent.text : "[Unnamed]";
+			link.LinkLabelContent.image = linkContent.image;
+
+			if (linkReference is GameObject)
+			{
+				GraphicAssets graphicAssets = GraphicAssets.Instance;
+
+				if (prefabType == PrefabType.PrefabInstance)
+				{
+					link.ReferenceType = LinkReferenceType.PrefabInstance;
+
+					if (link.LinkLabelContent.image == null)
+						link.LinkLabelContent.image = graphicAssets.IconPrefabNormal;
+				}
+				else if (prefabType == PrefabType.ModelPrefabInstance)
+				{
+					link.ReferenceType = LinkReferenceType.ModelInstance;
+
+					if (link.LinkLabelContent.image == null)
+						link.LinkLabelContent.image = graphicAssets.IconPrefabModel;
+				}
+				else if (prefabType == PrefabType.DisconnectedPrefabInstance ||
+					prefabType == PrefabType.DisconnectedModelPrefabInstance ||
+					prefabType == PrefabType.MissingPrefabInstance)
+				{
+					link.ReferenceType = LinkReferenceType.PrefabInstanceBroken;
+
+					if (link.LinkLabelContent.image == null)
+						link.LinkLabelContent.image = graphicAssets.IconPrefabNormal;
+				}
+				else
+				{
+					link.ReferenceType = LinkReferenceType.GameObject;
+
+					if (link.LinkLabelContent.image == null)
+						link.LinkLabelContent.image = graphicAssets.IconGameObject;
+				}
+
+				Transform linkTransform = (linkReference as GameObject).transform;
+				link.LinkLabelContent.tooltip = GetTransformPath(linkTransform);
 			}
 		}
 

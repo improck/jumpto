@@ -16,8 +16,6 @@ namespace JumpTo
 		private GraphicAssets()
 		{
 			InitAssets();
-
-			ColorViolet = new Color(0.6f, 0.27f, 0.67f, 1.0f);
 		}
 		#endregion
 
@@ -38,9 +36,14 @@ namespace JumpTo
 		public GUIStyle DragDropInsertionStyle { get; private set; }
 		public GUIStyle DividerStyle { get; private set; }
 
+		//***** COLORS *****
+
+		public Color[] LinkTextColors { get; private set; }
+		public Color[] SelectedLinkTextColors { get; private set; }
+
 		//***** CONSTANTS *****
 
-		public readonly Color ColorViolet = new Color(0.6f, 0.27f, 0.67f, 1.0f);
+		public readonly Color DisabledColorModifier = new Color(0.0f, 0.0f, 0.0f, 0.4f);
 		public const float LinkHeight = 16.0f;
 
 
@@ -106,7 +109,34 @@ namespace JumpTo
 			m_Outline.Apply();
 			m_Outline.hideFlags = HideFlags.HideAndDontSave;
 
-			//see ctor for definition of ColorViolet
+			if (EditorGUIUtility.isProSkin)
+			{
+				LinkTextColors = new Color[]
+				{
+					new Color(0.7f, 0.7f, 0.7f, 1.0f),		//normal
+					new Color(0.6f, 0.27f, 0.67f, 1.0f),	//model
+					new Color(0.3f, 0.5f, 0.85f, 1.0f),		//prefab
+					new Color(0.7f, 0.4f, 0.4f, 1.0f)		//broken prefab
+				};
+			}
+			else
+			{
+				LinkTextColors = new Color[]
+				{
+					Color.black,							//normal
+					new Color(0.6f, 0.27f, 0.67f, 1.0f),	//model
+					new Color(0.0f, 0.3f, 0.6f, 1.0f),		//prefab
+					new Color(0.4f, 0.0f, 0.0f, 1.0f)		//broken prefab
+				};											
+			}
+
+			SelectedLinkTextColors = new Color[]
+			{
+				Color.white,								//normal
+				new Color(0.25f, 0.1f, 0.4f, 1.0f),			//model
+				new Color(0.7f, 0.75f, 1.0f, 1.0f),			//prefab
+				new Color(1.0f, 0.7f, 0.7f, 1.0f)			//broken prefab
+			};												
 		}
 	}
 }

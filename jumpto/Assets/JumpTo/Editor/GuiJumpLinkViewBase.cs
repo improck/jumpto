@@ -393,26 +393,33 @@ namespace JumpTo
 
 		protected void OnRepaint(List<T> links)
 		{
-			//draw inside of scroll view
+			//draw links
 			m_DrawRect.Set(0.0f, 0.0f, m_ScrollViewRect.width, GraphicAssets.LinkHeight);
+
+			GraphicAssets graphicAssets = GraphicAssets.Instance;
+			GUIStyle linkLabelStyle = graphicAssets.LinkLabelStyle;
 
 			for (int i = 0; i < links.Count; i++)
 			{
-				GraphicAssets.Instance.LinkLabelStyle.normal.textColor = links[i].LinkColor;
+				linkLabelStyle.normal.textColor = graphicAssets.LinkTextColors[(int)links[i].ReferenceType];
+				linkLabelStyle.hover.textColor = graphicAssets.LinkTextColors[(int)links[i].ReferenceType];
+				linkLabelStyle.active.textColor = graphicAssets.LinkTextColors[(int)links[i].ReferenceType];
+				linkLabelStyle.focused.textColor = graphicAssets.LinkTextColors[(int)links[i].ReferenceType];
+				linkLabelStyle.onNormal.textColor = graphicAssets.SelectedLinkTextColors[(int)links[i].ReferenceType];
+				linkLabelStyle.onHover.textColor = graphicAssets.SelectedLinkTextColors[(int)links[i].ReferenceType];
+				linkLabelStyle.onActive.textColor = graphicAssets.SelectedLinkTextColors[(int)links[i].ReferenceType];
+				linkLabelStyle.onFocused.textColor = graphicAssets.SelectedLinkTextColors[(int)links[i].ReferenceType];
 
 				links[i].Area.width = m_ScrollViewRect.width;
 
-				if (links[i].Selected)
-					GraphicAssets.Instance.LinkLabelStyle.Draw(m_DrawRect, links[i].LinkLabelContent, false, false, true, IsFocusedControl);
-				else
-					GraphicAssets.Instance.LinkLabelStyle.Draw(m_DrawRect, links[i].LinkLabelContent, false, false, false, false);
+				linkLabelStyle.Draw(m_DrawRect, links[i].LinkLabelContent, false, false, links[i].Selected, links[i].Selected && IsFocusedControl);
 
 				m_DrawRect.y += m_DrawRect.height;
 			}
 
 			if (m_DragInsert && m_InsertionIndex > -1)
 			{
-				GraphicAssets.Instance.DragDropInsertionStyle.Draw(m_InsertionDrawRect, false, false, false, false);
+				graphicAssets.DragDropInsertionStyle.Draw(m_InsertionDrawRect, false, false, false, false);
 			}
 		}
 

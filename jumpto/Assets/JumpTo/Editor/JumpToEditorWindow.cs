@@ -139,14 +139,14 @@ public class JumpToEditorWindow : EditorWindow
 	//***** Only called if focused *****
 	void OnHierarchyChange()
 	{
-		Debug.Log("Hierarchy changed");
+		//Debug.Log("Hierarchy changed");
 		m_JumpLinks.CheckHierarchyLinks();
 		Repaint();
 	}
 
 	void OnProjectChange()
 	{
-		Debug.Log("Project changed");
+		//Debug.Log("Project changed");
 		m_JumpLinks.CheckProjectLinks();
 		Repaint();
 	}
