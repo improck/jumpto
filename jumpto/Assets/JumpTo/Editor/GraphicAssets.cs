@@ -114,7 +114,7 @@ namespace JumpTo
 				LinkTextColors = new Color[]
 				{
 					new Color(0.7f, 0.7f, 0.7f, 1.0f),		//normal
-					new Color(0.6f, 0.27f, 0.67f, 1.0f),	//model
+					new Color(0.84f, 0.6f, 0.92f, 1.0f),	//model
 					new Color(0.3f, 0.5f, 0.85f, 1.0f),		//prefab
 					new Color(0.7f, 0.4f, 0.4f, 1.0f)		//broken prefab
 				};
@@ -124,7 +124,7 @@ namespace JumpTo
 				LinkTextColors = new Color[]
 				{
 					Color.black,							//normal
-					new Color(0.6f, 0.27f, 0.67f, 1.0f),	//model
+					new Color(0.6f, 0.0f, 0.8f, 1.0f),		//model
 					new Color(0.0f, 0.3f, 0.6f, 1.0f),		//prefab
 					new Color(0.4f, 0.0f, 0.0f, 1.0f)		//broken prefab
 				};											
@@ -133,7 +133,7 @@ namespace JumpTo
 			SelectedLinkTextColors = new Color[]
 			{
 				Color.white,								//normal
-				new Color(0.25f, 0.1f, 0.4f, 1.0f),			//model
+				new Color(0.92f, 0.8f, 1.0f, 1.0f),			//model
 				new Color(0.7f, 0.75f, 1.0f, 1.0f),			//prefab
 				new Color(1.0f, 0.7f, 0.7f, 1.0f)			//broken prefab
 			};												

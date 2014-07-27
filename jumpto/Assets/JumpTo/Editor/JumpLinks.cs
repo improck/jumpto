@@ -59,6 +59,12 @@ namespace JumpTo
 	[System.Serializable]
 	public class HierarchyJumpLink : JumpLink
 	{
+		[SerializeField] protected bool m_Active = true;
+
+
+		public bool Active { get { return m_Active; } set { m_Active = value; } }
+
+
 		public override void OnSerialize()
 		{
 		}
@@ -566,6 +572,8 @@ namespace JumpTo
 			if (linkReference is GameObject)
 			{
 				GraphicAssets graphicAssets = GraphicAssets.Instance;
+
+				link.Active = (link.LinkReference as GameObject).activeInHierarchy;
 
 				if (prefabType == PrefabType.PrefabInstance)
 				{

@@ -20,6 +20,22 @@ namespace JumpTo
 			m_MenuFrameLinkPlural = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextFrameLinkPlural));
 		}
 
+		protected override Color DetermineNormalTextColor(HierarchyJumpLink link)
+		{
+			if (!link.Active)
+				return GraphicAssets.Instance.LinkTextColors[(int)link.ReferenceType] - GraphicAssets.Instance.DisabledColorModifier;
+			else
+				return GraphicAssets.Instance.LinkTextColors[(int)link.ReferenceType];
+		}
+
+		protected override Color DetermineOnNormalTextColor(HierarchyJumpLink link)
+		{
+			if (!link.Active)
+				return GraphicAssets.Instance.SelectedLinkTextColors[(int)link.ReferenceType] - GraphicAssets.Instance.DisabledColorModifier;
+			else
+				return GraphicAssets.Instance.SelectedLinkTextColors[(int)link.ReferenceType];
+		}
+
 		protected override void ShowContextMenu()
 		{
 			GenericMenu menu = new GenericMenu();

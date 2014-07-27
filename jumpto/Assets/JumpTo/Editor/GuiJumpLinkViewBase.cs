@@ -391,6 +391,16 @@ namespace JumpTo
 			m_InsertionIndex = -1;
 		}
 
+		protected virtual Color DetermineNormalTextColor(T link)
+		{
+			return GraphicAssets.Instance.LinkTextColors[(int)link.ReferenceType];
+		}
+
+		protected virtual Color DetermineOnNormalTextColor(T link)
+		{
+			return GraphicAssets.Instance.SelectedLinkTextColors[(int)link.ReferenceType];
+		}
+
 		protected void OnRepaint(List<T> links)
 		{
 			//draw links
@@ -401,14 +411,14 @@ namespace JumpTo
 
 			for (int i = 0; i < links.Count; i++)
 			{
-				linkLabelStyle.normal.textColor = graphicAssets.LinkTextColors[(int)links[i].ReferenceType];
-				linkLabelStyle.hover.textColor = graphicAssets.LinkTextColors[(int)links[i].ReferenceType];
-				linkLabelStyle.active.textColor = graphicAssets.LinkTextColors[(int)links[i].ReferenceType];
-				linkLabelStyle.focused.textColor = graphicAssets.LinkTextColors[(int)links[i].ReferenceType];
-				linkLabelStyle.onNormal.textColor = graphicAssets.SelectedLinkTextColors[(int)links[i].ReferenceType];
-				linkLabelStyle.onHover.textColor = graphicAssets.SelectedLinkTextColors[(int)links[i].ReferenceType];
-				linkLabelStyle.onActive.textColor = graphicAssets.SelectedLinkTextColors[(int)links[i].ReferenceType];
-				linkLabelStyle.onFocused.textColor = graphicAssets.SelectedLinkTextColors[(int)links[i].ReferenceType];
+				linkLabelStyle.normal.textColor = DetermineNormalTextColor(links[i]);
+				linkLabelStyle.hover.textColor = linkLabelStyle.normal.textColor;
+				linkLabelStyle.active.textColor = linkLabelStyle.normal.textColor;
+				linkLabelStyle.focused.textColor = linkLabelStyle.normal.textColor;
+				linkLabelStyle.onNormal.textColor = DetermineOnNormalTextColor(links[i]);
+				linkLabelStyle.onHover.textColor = linkLabelStyle.onNormal.textColor;
+				linkLabelStyle.onActive.textColor = linkLabelStyle.onNormal.textColor;
+				linkLabelStyle.onFocused.textColor = linkLabelStyle.onNormal.textColor;
 
 				links[i].Area.width = m_ScrollViewRect.width;
 
