@@ -83,8 +83,8 @@ public class JumpToEditorWindow : EditorWindow
 			this.minSize = new Vector2(120.0f, GuiJumpLinkListView.DividerMin);
 		}
 
-		m_JumpLinks.CheckHierarchyLinks();
-		m_JumpLinks.CheckProjectLinks();
+		m_JumpLinks.RefreshHierarchyLinks();
+		m_JumpLinks.RefreshProjectLinks();
 
 		m_Toolbar.OnWindowEnable(this);
 		m_View.OnWindowEnable(this);
@@ -131,8 +131,8 @@ public class JumpToEditorWindow : EditorWindow
 		//apparently OnFocus() gets called before OnEnable()!
 		if (m_JumpLinks != null)
 		{
-			m_JumpLinks.CheckHierarchyLinks();
-			m_JumpLinks.CheckProjectLinks();
+			m_JumpLinks.RefreshHierarchyLinks();
+			m_JumpLinks.RefreshProjectLinks();
 		}
 	}
 
@@ -140,14 +140,14 @@ public class JumpToEditorWindow : EditorWindow
 	void OnHierarchyChange()
 	{
 		//Debug.Log("Hierarchy changed");
-		m_JumpLinks.CheckHierarchyLinks();
+		m_JumpLinks.RefreshHierarchyLinks();
 		Repaint();
 	}
 
 	void OnProjectChange()
 	{
 		//Debug.Log("Project changed");
-		m_JumpLinks.CheckProjectLinks();
+		m_JumpLinks.RefreshProjectLinks();
 		Repaint();
 	}
 	//**********************************
@@ -195,42 +195,50 @@ public class JumpToEditorWindow : EditorWindow
 		Repaint();
 	}
 
-	
+
+	public static JumpToEditorWindow GetOrCreateWindow()
+	{
+		return EditorWindow.GetWindow<JumpToEditorWindow>("Jump To");
+	}	
 	
 	[MenuItem("Tools/Jump To")]
 	public static void JumpTo_InitMainMenu()
 	{
-		JumpToEditorWindow window = EditorWindow.GetWindow<JumpToEditorWindow>("Jump To");
+		JumpToEditorWindow window = GetOrCreateWindow();
 		window.Show();
 	}
 
 	[MenuItem("Assets/Create/Jump Link", true)]
 	public static bool JumpTo_AssetsCreateJumpLink_Validate()
 	{
+		JumpToEditorWindow[] windows = Resources.FindObjectsOfTypeAll<JumpToEditorWindow>();
+
 		Object[] selected = Selection.objects;
-		return JumpLinks.Instance != null && selected != null && selected.Length > 0;
+		return windows.Length > 0 && JumpLinks.Instance != null && selected != null && selected.Length > 0;
 	}
 
 	[MenuItem("Assets/Create/Jump Link", false)]
 	public static void JumpTo_AssetsCreateJumpLink()
 	{
 		Object[] selected = Selection.objects;
-		JumpToEditorWindow window = EditorWindow.GetWindow<JumpToEditorWindow>("Jump To");
+		JumpToEditorWindow window = GetOrCreateWindow();
 		window.CreateMultipleJumpLinks(selected);
 	}
 
 	[MenuItem("GameObject/Create Other/Jump Link", true)]
 	public static bool JumpTo_GameObjectCreateOtherJumpLink_Validate()
 	{
+		JumpToEditorWindow[] windows = Resources.FindObjectsOfTypeAll<JumpToEditorWindow>();
+
 		Object[] selected = Selection.objects;
-		return JumpLinks.Instance != null && selected != null && selected.Length > 0;
+		return windows.Length > 0 && JumpLinks.Instance != null && selected != null && selected.Length > 0;
 	}
 
 	[MenuItem("GameObject/Create Other/Jump Link", false)]
 	public static void JumpTo_GameObjectCreateOtherJumpLink()
 	{
 		Object[] selected = Selection.objects;
-		JumpToEditorWindow window = EditorWindow.GetWindow<JumpToEditorWindow>("Jump To");
+		JumpToEditorWindow window = GetOrCreateWindow();
 		window.CreateMultipleJumpLinks(selected);
 	}
 }

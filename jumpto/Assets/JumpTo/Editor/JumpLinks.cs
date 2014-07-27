@@ -79,7 +79,7 @@ namespace JumpTo
 	public abstract class JumpLinkContainer<T> : ScriptableObject where T : JumpLink
 	{
 		[SerializeField] protected List<T> m_Links = new List<T>();
-		[SerializeField] int m_ActiveSelection = -1;
+		[SerializeField] protected int m_ActiveSelection = -1;
 
 
 		public List<T> Links { get { return m_Links; } }
@@ -744,12 +744,12 @@ namespace JumpTo
 			}
 		}
 
-		public void CheckHierarchyLinks()
+		public void RefreshHierarchyLinks()
 		{
 			m_HierarchyLinkContainer.RefreshLinks();
 		}
 
-		public void CheckProjectLinks()
+		public void RefreshProjectLinks()
 		{
 			m_ProjectLinkContainer.RefreshLinks();
 		}
