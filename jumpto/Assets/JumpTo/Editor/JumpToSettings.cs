@@ -1,6 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 using System.Collections;
+using System.IO;
 
 
 namespace JumpTo
@@ -42,6 +43,31 @@ namespace JumpTo
 			instance.hideFlags = HideFlags.HideAndDontSave;
 
 			return instance;
+		}
+
+
+		public static void Save()
+		{
+			using (StreamWriter streamWriter = new StreamWriter(Application.dataPath + "\\..\\settings.jumpto"))
+			{
+				streamWriter.WriteLine(s_Instance.m_VisibleList);
+				streamWriter.WriteLine(s_Instance.m_ProjectFirst);
+				streamWriter.WriteLine(s_Instance.m_Vertical);
+			}
+		}
+
+		public static void Load()
+		{
+			string settingsFilePath = Application.dataPath + "\\..\\settings.jumpto";
+			if (!File.Exists(settingsFilePath))
+				return;
+
+			using (StreamReader streamReader = new StreamReader(settingsFilePath))
+			{
+				s_Instance.m_VisibleList = (VisibleList)System.Enum.Parse(typeof(VisibleList), streamReader.ReadLine());
+				s_Instance.m_ProjectFirst = bool.Parse(streamReader.ReadLine());
+				s_Instance.m_Vertical = bool.Parse(streamReader.ReadLine());
+			}
 		}
 	}
 }

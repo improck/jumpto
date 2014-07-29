@@ -1,6 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 using System.Collections.Generic;
+using System.IO;
 
 
 namespace JumpTo
@@ -17,7 +18,7 @@ namespace JumpTo
 		PrefabInstanceBroken = 3
 	}
 
-	[System.Serializable]
+	
 	public abstract class JumpLink : ScriptableObject
 	{
 		[SerializeField] protected UnityEngine.Object m_LinkReference;
@@ -37,45 +38,23 @@ namespace JumpTo
 		{
 			Area = new RectRef();
 		}
-
-		public abstract void OnSerialize();
-		public abstract void OnDeserialize();
 	}
 
 
-	[System.Serializable]
 	public class ProjectJumpLink : JumpLink
 	{
-		public override void OnSerialize()
-		{
-		}
-
-		public override void OnDeserialize()
-		{
-		}
 	}
 
 
-	[System.Serializable]
 	public class HierarchyJumpLink : JumpLink
 	{
 		[SerializeField] protected bool m_Active = true;
 
 
 		public bool Active { get { return m_Active; } set { m_Active = value; } }
-
-
-		public override void OnSerialize()
-		{
-		}
-
-		public override void OnDeserialize()
-		{
-		}
 	}
 
 
-	[System.Serializable]
 	public abstract class JumpLinkContainer<T> : ScriptableObject where T : JumpLink
 	{
 		[SerializeField] protected List<T> m_Links = new List<T>();
@@ -462,7 +441,6 @@ namespace JumpTo
 	}
 
 
-	[System.Serializable]
 	public class ProjectJumpLinkContainer : JumpLinkContainer<ProjectJumpLink>
 	{
 		public override void AddLink(UnityEngine.Object linkReference, PrefabType prefabType)
@@ -538,10 +516,77 @@ namespace JumpTo
 				}
 			}
 		}
+
+		public void Save()
+		{
+			if (m_Links.Count > 0)
+			{
+				using (StreamWriter streamWriter = new StreamWriter(Application.dataPath + "\\..\\projectlinks.jumpto"))
+				{
+					int instanceId;
+					string line;
+					for (int i = 0; i < m_Links.Count; i++)
+					{
+						instanceId = m_Links[i].LinkReference.GetInstanceID();
+						line = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(instanceId));
+						if (AssetDatabase.IsSubAsset(instanceId))
+							line += "|" + instanceId;
+
+						streamWriter.WriteLine(line);
+					}
+				}
+			}
+		}
+
+		public void Load()
+		{
+			string linksFilePath = Application.dataPath + "\\..\\projectlinks.jumpto";
+			if (!File.Exists(linksFilePath))
+				return;
+
+			using (StreamReader streamReader = new StreamReader(linksFilePath))
+			{
+				int instanceId;
+				string line;
+				string path;
+				while (!streamReader.EndOfStream)
+				{
+					JumpLinks jumpLinks = JumpLinks.Instance;
+
+					line = streamReader.ReadLine();
+					if (line.Length == 32)
+					{
+						path = AssetDatabase.GUIDToAssetPath(line);
+						if (!string.IsNullOrEmpty(path))
+						{
+							Object obj = AssetDatabase.LoadMainAssetAtPath(path);
+							if (obj != null)
+								jumpLinks.CreateOnlyProjectJumpLink(obj);
+						}
+					}
+					else if (line.Length > 33 && line[32] == '|')
+					{
+						instanceId = int.Parse(line.Substring(33));
+						path = AssetDatabase.GUIDToAssetPath(line.Substring(0, 32));
+						if (!string.IsNullOrEmpty(path))
+						{
+							Object[] objs = AssetDatabase.LoadAllAssetsAtPath(path);
+							if (objs != null)
+							{
+								for (int j = 0; j < objs.Length; j++)
+								{
+									if (objs[j].GetInstanceID() == instanceId)
+										jumpLinks.CreateOnlyProjectJumpLink(objs[j]);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 
-	[System.Serializable]
 	public class HierarchyJumpLinkContainer : JumpLinkContainer<HierarchyJumpLink>
 	{
 		public override void AddLink(UnityEngine.Object linkReference, PrefabType prefabType)
@@ -625,7 +670,6 @@ namespace JumpTo
 	}
 
 	
-	[System.Serializable]
 	public class JumpLinks : ScriptableObject
 	{
 		#region Pseudo-Singleton
@@ -653,6 +697,23 @@ namespace JumpTo
 
 		[SerializeField] private ProjectJumpLinkContainer m_ProjectLinkContainer;
 		[SerializeField] private HierarchyJumpLinkContainer m_HierarchyLinkContainer;
+
+
+		public static void Save()
+		{
+			s_Instance.m_ProjectLinkContainer.Save();
+
+			//TODO: save the hierarchy links for the loaded scene
+			//NOTE: what if the current scene isn't saved yet?
+		}
+
+		public static void Load()
+		{
+			s_Instance.m_ProjectLinkContainer.Load();
+
+			//TODO: load the hierarchy links for the loaded scene
+			//NOTE: what if the current scene isn't saved yet?
+		}
 
 
 		public JumpLinkContainer<T> GetJumpLinkContainer<T>() where T : JumpLink

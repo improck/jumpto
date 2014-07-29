@@ -53,6 +53,22 @@ namespace JumpTo
 				RefreshOrientationButton();
 			}
 
+			m_DrawRect.x += m_DrawRect.width;
+			if (GUI.Button(m_DrawRect, "Save", style))
+			{
+				JumpToSettings.Save();
+				JumpLinks.Save();
+			}
+
+			m_DrawRect.x += m_DrawRect.width;
+			if (GUI.Button(m_DrawRect, "Load", style))
+			{
+				JumpToSettings.Load();
+				m_SelectedView = (int)JumpToSettings.Instance.Visibility;
+
+				JumpLinks.Load();
+			}
+
 			//draw visibility popup
 			style = GraphicAssets.Instance.ToolbarPopupStyle;
 			m_DrawRect.width = 70.0f;

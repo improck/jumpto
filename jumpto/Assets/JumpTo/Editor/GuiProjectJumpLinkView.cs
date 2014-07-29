@@ -28,7 +28,7 @@ namespace JumpTo
 			//		to appear right-justified and all caps in a GenericMenu. the name is being
 			//		parsed for hotkeys, and " _" indicates 'no modifiers' in the hotkey string.
 			//		See: http://docs.unity3d.com/ScriptReference/MenuItem.html
-			m_MenuPingLink.text = ResLoad.Instance.GetText(ResId.MenuContextPingLink) + " \"" + m_LinkContainer.ActiveSelectedObject.LinkReference.name + "\"";
+			m_MenuPingLink.text = ResLoad.Instance.GetText(ResId.MenuContextPingLink) + " \"" + m_LinkContainer.ActiveSelectedObject.LinkLabelContent.text + "\"";
 
 			int selectionCount = m_LinkContainer.SelectionCount;
 			if (selectionCount == 0)
