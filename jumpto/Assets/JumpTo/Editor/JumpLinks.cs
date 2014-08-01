@@ -667,6 +667,80 @@ namespace JumpTo
 
 			return path;
 		}
+
+		public void Save()
+		{
+			if (m_Links.Count > 0)
+			{
+				using (StreamWriter streamWriter = new StreamWriter(Application.dataPath + "\\..\\hierarchylinks.jumpto"))
+				{
+					int instanceId;
+					string line;
+					for (int i = 0; i < m_Links.Count; i++)
+					{
+						instanceId = m_Links[i].LinkReference.GetInstanceID();
+						line = instanceId.ToString();
+
+						streamWriter.WriteLine(line);
+					}
+				}
+			}
+		}
+
+		public void Load()
+		{
+			//SEE:
+			//	EditorApplication.currentScene
+			//	EditorWindow.OnDidOpenScene()
+			
+			string linksFilePath = Application.dataPath + "\\..\\hierarchylinks.jumpto";
+			if (!File.Exists(linksFilePath))
+				return;
+
+			using (StreamReader streamReader = new StreamReader(linksFilePath))
+			{
+				string line;
+				while (!streamReader.EndOfStream)
+				{
+					JumpLinks jumpLinks = JumpLinks.Instance;
+
+					line = streamReader.ReadLine();
+					Object obj = EditorUtility.InstanceIDToObject(int.Parse(line));
+					if (obj != null && obj is GameObject)
+					{
+						jumpLinks.CreateOnlyHierarchyJumpLink(obj);
+					}
+
+					//if (line.Length == 32)
+					//{
+					//	path = AssetDatabase.GUIDToAssetPath(line);
+					//	if (!string.IsNullOrEmpty(path))
+					//	{
+					//		Object obj = AssetDatabase.LoadMainAssetAtPath(path);
+					//		if (obj != null)
+					//			jumpLinks.CreateOnlyHierarchyJumpLink(obj);
+					//	}
+					//}
+					//else if (line.Length > 33 && line[32] == '|')
+					//{
+					//	instanceId = int.Parse(line.Substring(33));
+					//	path = AssetDatabase.GUIDToAssetPath(line.Substring(0, 32));
+					//	if (!string.IsNullOrEmpty(path))
+					//	{
+					//		Object[] objs = AssetDatabase.LoadAllAssetsAtPath(path);
+					//		if (objs != null)
+					//		{
+					//			for (int j = 0; j < objs.Length; j++)
+					//			{
+					//				if (objs[j].GetInstanceID() == instanceId)
+					//					jumpLinks.CreateOnlyHierarchyJumpLink(objs[j]);
+					//			}
+					//		}
+					//	}
+					//}
+				}
+			}
+		}
 	}
 
 	
@@ -702,6 +776,7 @@ namespace JumpTo
 		public static void Save()
 		{
 			s_Instance.m_ProjectLinkContainer.Save();
+			s_Instance.m_HierarchyLinkContainer.Save();
 
 			//TODO: save the hierarchy links for the loaded scene
 			//NOTE: what if the current scene isn't saved yet?
@@ -710,6 +785,7 @@ namespace JumpTo
 		public static void Load()
 		{
 			s_Instance.m_ProjectLinkContainer.Load();
+			s_Instance.m_HierarchyLinkContainer.Load();
 
 			//TODO: load the hierarchy links for the loaded scene
 			//NOTE: what if the current scene isn't saved yet?

@@ -19,6 +19,7 @@ using JumpTo;
 //xTODO: update on scene change
 //xTODO: update on project change
 //xTODO: change the view control look-and-feel
+//TODO: detect a scene load
 //TODO: draw a grab bar as the divider, horizontal and vertical
 //TODO: left-click hamburger menu for list view control
 //TODO: serialize to a file
@@ -88,11 +89,17 @@ public class JumpToEditorWindow : EditorWindow
 
 		m_Toolbar.OnWindowEnable(this);
 		m_View.OnWindowEnable(this);
+
+		EditorApplication.projectWindowChanged += OnProjectWindowChange;
+		EditorApplication.hierarchyWindowChanged += OnHierarchyWindowChange;
 	}
 
 	void OnDisable()
 	{
 		m_View.OnWindowDisable(this);
+
+		EditorApplication.projectWindowChanged -= OnProjectWindowChange;
+		EditorApplication.hierarchyWindowChanged -= OnHierarchyWindowChange;
 	}
 
 	void OnDestroy()
@@ -100,6 +107,9 @@ public class JumpToEditorWindow : EditorWindow
 		m_View.OnWindowClose(this);
 
 		GraphicAssets.Instance.Cleanup();
+		GraphicAssets.DestroyInstance();
+
+		SerializationControl.DestroyInstance();
 	}
 
 	private void Init()
@@ -136,21 +146,38 @@ public class JumpToEditorWindow : EditorWindow
 		}
 	}
 
-	//***** Only called if focused *****
+	//***** Only called if visible *****
 	void OnHierarchyChange()
 	{
-		//Debug.Log("Hierarchy changed");
+		Debug.Log("Hierarchy changed");
 		m_JumpLinks.RefreshHierarchyLinks();
 		Repaint();
 	}
 
 	void OnProjectChange()
 	{
-		//Debug.Log("Project changed");
+		Debug.Log("Project changed");
 		m_JumpLinks.RefreshProjectLinks();
 		Repaint();
 	}
+
+	void OnDidOpenScene()
+	{
+		Debug.Log("OnDidOpenScene(): " + EditorApplication.currentScene);
+
+		//TODO: if EditorApplication.currentScene has a path, load the hierarchy links for that scene
+	}
 	//**********************************
+
+	void OnProjectWindowChange()
+	{
+		Debug.Log("Project Window Changed");
+	}
+
+	void OnHierarchyWindowChange()
+	{
+		Debug.Log("Hierarchy Window Changed");
+	}
 
 
 	private void CreateMultipleJumpLinks(UnityEngine.Object[] linkReferences)

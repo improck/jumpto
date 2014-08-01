@@ -12,6 +12,8 @@ namespace JumpTo
 
 		public static GraphicAssets Instance { get { if (s_Instance == null) { s_Instance = new GraphicAssets(); } return s_Instance; } }
 
+		public static void DestroyInstance() { s_Instance = null; }
+
 
 		private GraphicAssets()
 		{
