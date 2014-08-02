@@ -38,6 +38,7 @@ public class JumpToEditorWindow : EditorWindow
 	[SerializeField] private JumpToSettings m_Settings;
 	[SerializeField] private GuiToolbar m_Toolbar;
 	[SerializeField] private GuiJumpLinkListView m_View;
+	//[SerializeField] private string m_CurrentScene = string.Empty;
 
 	[System.NonSerialized] private RectRef m_Position = new RectRef();
 
@@ -83,6 +84,8 @@ public class JumpToEditorWindow : EditorWindow
 		{
 			this.minSize = new Vector2(120.0f, GuiJumpLinkListView.DividerMin);
 		}
+
+		SceneLoadDetector.EnsureExistence();
 
 		m_JumpLinks.RefreshHierarchyLinks();
 		m_JumpLinks.RefreshProjectLinks();
@@ -177,6 +180,19 @@ public class JumpToEditorWindow : EditorWindow
 	void OnHierarchyWindowChange()
 	{
 		Debug.Log("Hierarchy Window Changed");
+
+		////NOTE: this won't detect a scene reopen
+		////		this won't detect a new scene if already working in an unsaved scene
+		//if (m_CurrentScene != EditorApplication.currentScene)
+		//{
+		//	//TODO: signal a scene change
+		//	Debug.Log("Detected a scene change: "
+		//		+ (m_CurrentScene.Length > 0 ? m_CurrentScene : "(Unsaved)")
+		//		+ " to "
+		//		+ (EditorApplication.currentScene.Length > 0 ? EditorApplication.currentScene : "(Unsaved)"));
+
+		//	m_CurrentScene = EditorApplication.currentScene;
+		//}
 	}
 
 
