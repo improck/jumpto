@@ -87,6 +87,10 @@ public class JumpToEditorWindow : EditorWindow
 
 		SceneLoadDetector.EnsureExistence();
 
+		//HACK: do something with this...
+		SerializationControl serCon = SerializationControl.Instance;
+		serCon.ToString();
+
 		m_JumpLinks.RefreshHierarchyLinks();
 		m_JumpLinks.RefreshProjectLinks();
 

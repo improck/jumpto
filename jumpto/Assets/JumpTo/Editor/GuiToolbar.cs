@@ -56,7 +56,7 @@ namespace JumpTo
 			if (GUI.Button(m_DrawRect, "Save", style))
 			{
 				JumpToSettings.Save();
-				JumpLinks.Save();
+				//JumpLinks.Save();
 			}
 
 			m_DrawRect.x += m_DrawRect.width;
@@ -65,7 +65,7 @@ namespace JumpTo
 				JumpToSettings.Load();
 				m_SelectedView = (int)JumpToSettings.Instance.Visibility;
 
-				JumpLinks.Load();
+				//SerializationControl.Instance.LoadHierarchyLinks();
 			}
 
 			//draw visibility popup
