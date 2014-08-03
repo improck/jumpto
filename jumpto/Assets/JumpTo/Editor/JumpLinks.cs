@@ -671,20 +671,8 @@ namespace JumpTo
 				}
 
 				Transform linkTransform = (linkReference as GameObject).transform;
-				link.LinkLabelContent.tooltip = GetTransformPath(linkTransform);
+				link.LinkLabelContent.tooltip = linkTransform.GetTransformPath();
 			}
-		}
-
-		private string GetTransformPath(Transform transform)
-		{
-			string path = string.Empty;
-			while (transform != null)
-			{
-				path = "/" + transform.name + path;
-				transform = transform.parent;
-			}
-
-			return path;
 		}
 
 		//public void Save()
@@ -790,6 +778,10 @@ namespace JumpTo
 
 		[SerializeField] private ProjectJumpLinkContainer m_ProjectLinkContainer;
 		[SerializeField] private HierarchyJumpLinkContainer m_HierarchyLinkContainer;
+
+
+		public ProjectJumpLinkContainer ProjectLinks { get { return m_ProjectLinkContainer; } }
+		public HierarchyJumpLinkContainer HierarchyLinks { get { return m_HierarchyLinkContainer; } }
 
 
 		//public static void Save()

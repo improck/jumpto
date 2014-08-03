@@ -16,6 +16,7 @@ namespace JumpTo
 
 		public static void TemporarilyDestroyInstance()
 		{
+			//TODO: instance gets leaked on compile
 			DestroyImmediate(s_Instance);
 			s_Instance = null;
 		}

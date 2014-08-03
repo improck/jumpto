@@ -57,6 +57,8 @@ namespace JumpTo
 
 			LoadProjectLinks();
 			LoadHierarchyLinks();
+
+			//TODO: trigger a repaint
 		}
 
 		private void SaveProjectLinks()
@@ -91,18 +93,20 @@ namespace JumpTo
 			string currentScene = EditorApplication.currentScene;
 			string sceneGuid = AssetDatabase.AssetPathToGUID(currentScene);
 			string filePath = m_HierarchySaveDirectory + sceneGuid + SaveFileExtension;
-			Object[] linkReferences = JumpLinks.Instance.GetJumpLinkContainer<HierarchyJumpLink>().AllLinkReferences;
+			Object[] linkReferences = JumpLinks.Instance.HierarchyLinks.AllLinkReferences;
 			if (linkReferences != null)
 			{
 				using (StreamWriter streamWriter = new StreamWriter(filePath))
 				{
-					int instanceId;
+					//int instanceId;
 					string line;
 					for (int i = 0; i < linkReferences.Length; i++)
 					{
-						//TODO: can't use instanceId because they change each time the scene is loaded!
-						instanceId = linkReferences[i].GetInstanceID();
-						line = instanceId.ToString();
+						//NOTE: can't use instanceId because they change each time the scene is loaded!
+						//instanceId = linkReferences[i].GetInstanceID();
+						//line = instanceId.ToString();
+
+						line = (linkReferences[i] as GameObject).transform.GetTransformPath();
 
 						streamWriter.WriteLine(line);
 					}
@@ -168,7 +172,7 @@ namespace JumpTo
 		{
 			SetSaveDirectoryPaths();
 
-			JumpLinkContainer<HierarchyJumpLink> links = JumpLinks.Instance.GetJumpLinkContainer<HierarchyJumpLink>();
+			HierarchyJumpLinkContainer links = JumpLinks.Instance.HierarchyLinks;
 			links.RemoveAll();
 
 			string currentScene = EditorApplication.currentScene;
@@ -190,8 +194,14 @@ namespace JumpTo
 					JumpLinks jumpLinks = JumpLinks.Instance;
 
 					line = streamReader.ReadLine();
-					//TODO: can't use instanceId because they change each time the scene is loaded!
-					Object obj = EditorUtility.InstanceIDToObject(int.Parse(line));
+					//NOTE: can't use instanceId because they change each time the scene is loaded!
+					//Object obj = EditorUtility.InstanceIDToObject(int.Parse(line));
+					//if (obj != null && obj is GameObject)
+					//{
+					//	jumpLinks.CreateOnlyHierarchyJumpLink(obj);
+					//}
+
+					GameObject obj = GameObject.Find(line);
 					if (obj != null && obj is GameObject)
 					{
 						jumpLinks.CreateOnlyHierarchyJumpLink(obj);
