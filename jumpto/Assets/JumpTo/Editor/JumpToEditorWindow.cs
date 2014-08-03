@@ -19,10 +19,10 @@ using JumpTo;
 //xTODO: update on scene change
 //xTODO: update on project change
 //xTODO: change the view control look-and-feel
-//TODO: detect a scene load
+//xTODO: detect a scene load
+//xTODO: serialize to a file
 //TODO: draw a grab bar as the divider, horizontal and vertical
 //TODO: left-click hamburger menu for list view control
-//TODO: serialize to a file
 //TODO: move to a dll assembly
 //TODO: assembly resource text, multiple languages
 //TODO: load images from assembly resources
@@ -32,14 +32,12 @@ using JumpTo;
 
 public class JumpToEditorWindow : EditorWindow
 {
-	[System.NonSerialized] private bool m_Initialized = false;
-
 	[SerializeField] private JumpLinks m_JumpLinks;
 	[SerializeField] private JumpToSettings m_Settings;
 	[SerializeField] private GuiToolbar m_Toolbar;
 	[SerializeField] private GuiJumpLinkListView m_View;
-	//[SerializeField] private string m_CurrentScene = string.Empty;
 
+	[System.NonSerialized] private bool m_Initialized = false;
 	[System.NonSerialized] private RectRef m_Position = new RectRef();
 
 
@@ -103,6 +101,8 @@ public class JumpToEditorWindow : EditorWindow
 
 	void OnDisable()
 	{
+		SceneLoadDetector.TemporarilyDestroyInstance();
+
 		m_View.OnWindowDisable(this);
 
 		EditorApplication.projectWindowChanged -= OnProjectWindowChange;
@@ -171,8 +171,6 @@ public class JumpToEditorWindow : EditorWindow
 	void OnDidOpenScene()
 	{
 		Debug.Log("OnDidOpenScene(): " + EditorApplication.currentScene);
-
-		//TODO: if EditorApplication.currentScene has a path, load the hierarchy links for that scene
 	}
 	//**********************************
 
@@ -184,19 +182,6 @@ public class JumpToEditorWindow : EditorWindow
 	void OnHierarchyWindowChange()
 	{
 		Debug.Log("Hierarchy Window Changed");
-
-		////NOTE: this won't detect a scene reopen
-		////		this won't detect a new scene if already working in an unsaved scene
-		//if (m_CurrentScene != EditorApplication.currentScene)
-		//{
-		//	//TODO: signal a scene change
-		//	Debug.Log("Detected a scene change: "
-		//		+ (m_CurrentScene.Length > 0 ? m_CurrentScene : "(Unsaved)")
-		//		+ " to "
-		//		+ (EditorApplication.currentScene.Length > 0 ? EditorApplication.currentScene : "(Unsaved)"));
-
-		//	m_CurrentScene = EditorApplication.currentScene;
-		//}
 	}
 
 
@@ -246,7 +231,19 @@ public class JumpToEditorWindow : EditorWindow
 	public static JumpToEditorWindow GetOrCreateWindow()
 	{
 		return EditorWindow.GetWindow<JumpToEditorWindow>("Jump To");
-	}	
+	}
+
+	public static void RepaintOpenWindows()
+	{
+		JumpToEditorWindow[] windows = Resources.FindObjectsOfTypeAll<JumpToEditorWindow>();
+		if (windows != null && windows.Length > 0)
+		{
+			for (int i = 0; i < windows.Length; i++)
+			{
+				windows[i].Repaint();
+			}
+		}
+	}
 	
 	[MenuItem("Tools/Jump To")]
 	public static void JumpTo_InitMainMenu()

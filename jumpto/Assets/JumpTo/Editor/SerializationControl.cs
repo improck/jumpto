@@ -67,6 +67,7 @@ namespace JumpTo
 			Object[] linkReferences = JumpLinks.Instance.GetJumpLinkContainer<ProjectJumpLink>().AllLinkReferences;
 			if (linkReferences != null)
 			{
+				//TODO: error handling
 				using (StreamWriter streamWriter = new StreamWriter(filePath))
 				{
 					int instanceId;
@@ -96,6 +97,7 @@ namespace JumpTo
 			Object[] linkReferences = JumpLinks.Instance.HierarchyLinks.AllLinkReferences;
 			if (linkReferences != null)
 			{
+				//TODO: error handling
 				using (StreamWriter streamWriter = new StreamWriter(filePath))
 				{
 					//int instanceId;
@@ -127,6 +129,7 @@ namespace JumpTo
 			JumpLinkContainer<ProjectJumpLink> links = JumpLinks.Instance.GetJumpLinkContainer<ProjectJumpLink>();
 			links.RemoveAll();
 
+			//TODO: error handling
 			using (StreamReader streamReader = new StreamReader(filePath))
 			{
 				int instanceId;
@@ -186,6 +189,7 @@ namespace JumpTo
 			if (!File.Exists(filePath))
 				return;
 
+			//TODO: error handling
 			using (StreamReader streamReader = new StreamReader(filePath))
 			{
 				string line;
@@ -218,6 +222,8 @@ namespace JumpTo
 
 		private bool CreateSaveDirectories()
 		{
+			//TODO: pull logerror statements from the resource loader
+
 			bool created = true;
 
 			SetSaveDirectoryPaths();
@@ -283,6 +289,8 @@ namespace JumpTo
 
 		private bool DeleteSaveFile(string filePath)
 		{
+			//TODO: pull logerror statements from the resource loader
+
 			bool deleted = true;
 
 			if (File.Exists(filePath))

@@ -16,9 +16,13 @@ namespace JumpTo
 
 		public static void TemporarilyDestroyInstance()
 		{
-			//TODO: instance gets leaked on compile
-			DestroyImmediate(s_Instance);
-			s_Instance = null;
+			if (s_Instance != null)
+			{
+				//NOTE: as soon as OnDestroy() gets called, a new instance
+				//		is scheduled to be created in the next editor frame
+				DestroyImmediate(s_Instance);
+				s_Instance = null;
+			}
 		}
 
 		private static void WaitToCreate()
