@@ -1,6 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 using JumpTo;
+using SceneStateDetection;
 
 
 //xTODO: make items clickable
@@ -39,6 +40,12 @@ public class JumpToEditorWindow : EditorWindow
 
 	[System.NonSerialized] private bool m_Initialized = false;
 	[System.NonSerialized] private RectRef m_Position = new RectRef();
+	[System.NonSerialized] private double m_LastHierarchyRefreshTime = 0.0f;
+
+
+	public static event EditorApplication.CallbackFunction OnWillEnable;
+	public static event EditorApplication.CallbackFunction OnWillDisable;
+	public static event EditorApplication.CallbackFunction OnWillClose;
 
 
 	void OnEnable()
@@ -89,28 +96,40 @@ public class JumpToEditorWindow : EditorWindow
 		SerializationControl serCon = SerializationControl.Instance;
 		serCon.ToString();
 
-		m_JumpLinks.RefreshHierarchyLinks();
 		m_JumpLinks.RefreshProjectLinks();
+		m_JumpLinks.RefreshHierarchyLinks();
+		m_LastHierarchyRefreshTime = EditorApplication.timeSinceStartup;
 
 		m_Toolbar.OnWindowEnable(this);
 		m_View.OnWindowEnable(this);
 
 		EditorApplication.projectWindowChanged += OnProjectWindowChange;
 		EditorApplication.hierarchyWindowChanged += OnHierarchyWindowChange;
+		SceneSaveLoadControl.OnSceneLoaded += OnSceneLoaded;
+
+		if (OnWillEnable != null)
+			OnWillEnable();
 	}
 
 	void OnDisable()
 	{
+		if (OnWillDisable != null)
+			OnWillDisable();
+
 		SceneLoadDetector.TemporarilyDestroyInstance();
 
 		m_View.OnWindowDisable(this);
 
 		EditorApplication.projectWindowChanged -= OnProjectWindowChange;
 		EditorApplication.hierarchyWindowChanged -= OnHierarchyWindowChange;
+		SceneSaveLoadControl.OnSceneLoaded -= OnSceneLoaded;
 	}
 
 	void OnDestroy()
 	{
+		if (OnWillClose != null)
+			OnWillClose();
+
 		m_View.OnWindowClose(this);
 
 		GraphicAssets.Instance.Cleanup();
@@ -153,35 +172,52 @@ public class JumpToEditorWindow : EditorWindow
 		}
 	}
 
-	//***** Only called if visible *****
-	void OnHierarchyChange()
-	{
-		Debug.Log("Hierarchy changed");
-		m_JumpLinks.RefreshHierarchyLinks();
-		Repaint();
-	}
+	//***** Only called if window is visible *****
+	//void OnHierarchyChange()
+	//{
+	//	Debug.Log("Hierarchy changed");
+	//	m_JumpLinks.RefreshHierarchyLinks();
+	//	Repaint();
+	//}
 
-	void OnProjectChange()
+	//void OnProjectChange()
+	//{
+	//	Debug.Log("Project changed");
+	//	m_JumpLinks.RefreshProjectLinks();
+	//	Repaint();
+	//}
+
+	//void OnDidOpenScene()
+	//{
+	//	Debug.Log("OnDidOpenScene(): " + EditorApplication.currentScene);
+	//}
+	//********************************************
+
+	private void OnProjectWindowChange()
 	{
-		Debug.Log("Project changed");
+		Debug.Log("Project Window Changed");
 		m_JumpLinks.RefreshProjectLinks();
 		Repaint();
 	}
 
-	void OnDidOpenScene()
+	private void OnHierarchyWindowChange()
 	{
-		Debug.Log("OnDidOpenScene(): " + EditorApplication.currentScene);
-	}
-	//**********************************
+		if (EditorApplication.isPlaying)
+			return;
 
-	void OnProjectWindowChange()
-	{
-		Debug.Log("Project Window Changed");
+		if (EditorApplication.timeSinceStartup - m_LastHierarchyRefreshTime >= 0.2f)
+		{
+			m_LastHierarchyRefreshTime = EditorApplication.timeSinceStartup;
+
+			Debug.Log("Hierarchy Window Changed");
+			m_JumpLinks.RefreshHierarchyLinks();
+			Repaint();
+		}
 	}
 
-	void OnHierarchyWindowChange()
+	private void OnSceneLoaded()
 	{
-		Debug.Log("Hierarchy Window Changed");
+		Repaint();
 	}
 
 

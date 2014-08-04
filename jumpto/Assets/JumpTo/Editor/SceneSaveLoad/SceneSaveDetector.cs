@@ -1,14 +1,15 @@
 ﻿using UnityEditor;
 
 
-namespace JumpTo
+namespace SceneStateDetection
 {
+	/// <summary>
+	/// Attempts to detect when a scene is saved as an asset in the project.
+	/// </summary>
 	public class SceneSaveDetector : UnityEditor.AssetModificationProcessor
 	{
 		public static string[] OnWillSaveAssets(string[] assetPaths)
 		{
-			//Debug.Log("OnWillSaveAssets() " + assetPaths.Length);
-
 			//NOTE: OnWillSaveAssets() gets called on Save As, but assetPaths
 			//		is empty (0 length). A few posts on the Internet say that
 			//		this can happen under other circumstances as well. Treating
@@ -20,20 +21,20 @@ namespace JumpTo
 			//for a regular asset save
 			else
 			{
+				//linear search for a scene asset within the paths
 				for (int i = 0; i < assetPaths.Length; i++)
 				{
 					if (assetPaths[i].EndsWith(".unity"))
 					{
-						//Debug.Log("About to save " + assetPaths[i]);
-						
-						//SerializationControl.Instance.SceneAssetWillSave = true;
+						//signal that a scene is about to be saved, then
+						//	stop searching
 						SceneSaveLoadControl.WaitForSceneAssetSave();
-
 						break;
 					}
 				}
 			}
 
+			//return the asset paths without any modifications
 			return assetPaths;
 		}
 	}

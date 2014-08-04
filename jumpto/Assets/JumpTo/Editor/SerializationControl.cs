@@ -1,6 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 using System.IO;
+using SceneStateDetection;
 
 
 namespace JumpTo
@@ -27,6 +28,7 @@ namespace JumpTo
 
 
 		private const string ProjectLinksSaveFile = "projectlinks";
+		private const string SettingsSaveFile = "settings";
 		private const string SaveFileExtension = ".jumpto";
 
 
@@ -34,18 +36,25 @@ namespace JumpTo
 		{
 			SceneSaveLoadControl.OnSceneSaved += OnSceneSaved;
 			SceneSaveLoadControl.OnSceneLoaded += OnSceneLoaded;
+
+			JumpToEditorWindow.OnWillEnable += OnWindowEnable;
+			JumpToEditorWindow.OnWillClose += OnWindowClose;
 		}
 
 		private void CleanUp()
 		{
 			SceneSaveLoadControl.OnSceneSaved -= OnSceneSaved;
 			SceneSaveLoadControl.OnSceneLoaded -= OnSceneLoaded;
+
+			JumpToEditorWindow.OnWillEnable -= OnWindowEnable;
+			JumpToEditorWindow.OnWillClose -= OnWindowClose;
 		}
 
 		private void OnSceneSaved()
 		{
 			if (CreateSaveDirectories())
 			{
+				SaveSettings();
 				SaveProjectLinks();
 				SaveHierarchyLinks();
 			}
@@ -55,10 +64,29 @@ namespace JumpTo
 		{
 			SetSaveDirectoryPaths();
 
-			LoadProjectLinks();
 			LoadHierarchyLinks();
+		}
 
-			//TODO: trigger a repaint
+		private void OnWindowEnable()
+		{
+			SetSaveDirectoryPaths();
+
+			LoadSettings();
+			LoadProjectLinks();
+		}
+
+		private void OnWindowDisable()
+		{
+		}
+
+		private void OnWindowClose()
+		{
+			if (CreateSaveDirectories())
+			{
+				SaveSettings();
+				SaveProjectLinks();
+				SaveHierarchyLinks();
+			}
 		}
 
 		private void SaveProjectLinks()
@@ -120,6 +148,19 @@ namespace JumpTo
 			}
 		}
 
+		private void SaveSettings()
+		{
+			string filePath = m_SaveDirectory + SettingsSaveFile + SaveFileExtension;
+			using (StreamWriter streamWriter = new StreamWriter(filePath))
+			{
+				JumpToSettings settings = JumpToSettings.Instance;
+
+				streamWriter.WriteLine(settings.Visibility);
+				streamWriter.WriteLine(settings.ProjectFirst);
+				streamWriter.WriteLine(settings.Vertical);
+			}
+		}
+		
 		private void LoadProjectLinks()
 		{
 			string filePath = m_SaveDirectory + ProjectLinksSaveFile + SaveFileExtension;
@@ -211,6 +252,21 @@ namespace JumpTo
 						jumpLinks.CreateOnlyHierarchyJumpLink(obj);
 					}
 				}
+			}
+		}
+
+		private void LoadSettings()
+		{
+			string filePath = m_SaveDirectory + SettingsSaveFile + SaveFileExtension;
+			if (!File.Exists(filePath))
+				return;
+
+			using (StreamReader streamReader = new StreamReader(filePath))
+			{
+				JumpToSettings settings = JumpToSettings.Instance;
+				settings.Visibility= (JumpToSettings.VisibleList)System.Enum.Parse(typeof(JumpToSettings.VisibleList), streamReader.ReadLine());
+				settings.ProjectFirst = bool.Parse(streamReader.ReadLine());
+				settings.Vertical = bool.Parse(streamReader.ReadLine());
 			}
 		}
 
