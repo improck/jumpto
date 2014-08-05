@@ -60,8 +60,8 @@ namespace SceneStateDetection
 		}
 
 		/// <summary>
-		/// Call this to immediately destroy the instance of this object, but not
-		/// trigger a reinstantiation on the next Editor update.
+		/// Call this from your editor's OnDestroy(). Immediately destroys the instance
+		/// of this object, but doesn't cause a reinstantiation on the next Editor update.
 		/// </summary>
 		public static void PermanentlyDestroyInstance()
 		{
@@ -88,7 +88,7 @@ namespace SceneStateDetection
 				s_Instance = CreateInstance<SceneLoadDetector>();
 				s_Instance.hideFlags = HideFlags.HideInHierarchy;
 
-				SceneSaveLoadControl.WaitForSceneLoad();
+				SceneStateControl.SceneWillLoad();
 			}
 		}
 
@@ -100,7 +100,10 @@ namespace SceneStateDetection
 		void OnDestroy()
 		{
 			if (m_KeepAlive)
+			{
+				SceneStateControl.SceneIsUnloading();
 				EnsureExistence();
+			}
 		}
 	}
 }

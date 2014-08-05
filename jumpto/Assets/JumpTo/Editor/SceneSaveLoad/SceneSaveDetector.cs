@@ -16,7 +16,7 @@ namespace SceneStateDetection
 			//		it like a scene save anyway, just in case.
 			if (assetPaths == null || assetPaths.Length == 0)
 			{
-				SceneSaveLoadControl.WaitForSceneAssetSave();
+				SceneStateControl.SceneWillSave();
 			}
 			//for a regular asset save
 			else
@@ -28,7 +28,7 @@ namespace SceneStateDetection
 					{
 						//signal that a scene is about to be saved, then
 						//	stop searching
-						SceneSaveLoadControl.WaitForSceneAssetSave();
+						SceneStateControl.SceneWillSave();
 						break;
 					}
 				}

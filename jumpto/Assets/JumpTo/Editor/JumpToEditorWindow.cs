@@ -37,6 +37,7 @@ public class JumpToEditorWindow : EditorWindow
 	[SerializeField] private JumpToSettings m_Settings;
 	[SerializeField] private GuiToolbar m_Toolbar;
 	[SerializeField] private GuiJumpLinkListView m_View;
+	[SerializeField] private SceneStateControl m_SceneState;
 
 	[System.NonSerialized] private bool m_Initialized = false;
 	[System.NonSerialized] private RectRef m_Position = new RectRef();
@@ -90,6 +91,11 @@ public class JumpToEditorWindow : EditorWindow
 			this.minSize = new Vector2(120.0f, GuiJumpLinkListView.DividerMin);
 		}
 
+		if (m_SceneState == null)
+		{
+			m_SceneState = SceneStateControl.Create();
+		}
+
 		SceneLoadDetector.EnsureExistence();
 
 		//HACK: do something with this...
@@ -105,7 +111,7 @@ public class JumpToEditorWindow : EditorWindow
 
 		EditorApplication.projectWindowChanged += OnProjectWindowChange;
 		EditorApplication.hierarchyWindowChanged += OnHierarchyWindowChange;
-		SceneSaveLoadControl.OnSceneLoaded += OnSceneLoaded;
+		SceneStateControl.OnSceneLoaded += OnSceneLoaded;
 
 		if (OnWillEnable != null)
 			OnWillEnable();
@@ -122,7 +128,7 @@ public class JumpToEditorWindow : EditorWindow
 
 		EditorApplication.projectWindowChanged -= OnProjectWindowChange;
 		EditorApplication.hierarchyWindowChanged -= OnHierarchyWindowChange;
-		SceneSaveLoadControl.OnSceneLoaded -= OnSceneLoaded;
+		SceneStateControl.OnSceneLoaded -= OnSceneLoaded;
 	}
 
 	void OnDestroy()
@@ -134,6 +140,8 @@ public class JumpToEditorWindow : EditorWindow
 
 		GraphicAssets.Instance.Cleanup();
 		GraphicAssets.DestroyInstance();
+
+		SceneLoadDetector.PermanentlyDestroyInstance();
 
 		SerializationControl.DestroyInstance();
 	}

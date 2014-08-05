@@ -34,8 +34,8 @@ namespace JumpTo
 
 		public SerializationControl()
 		{
-			SceneSaveLoadControl.OnSceneSaved += OnSceneSaved;
-			SceneSaveLoadControl.OnSceneLoaded += OnSceneLoaded;
+			SceneStateControl.OnSceneSaved += OnSceneSaved;
+			SceneStateControl.OnSceneLoaded += OnSceneLoaded;
 
 			JumpToEditorWindow.OnWillEnable += OnWindowEnable;
 			JumpToEditorWindow.OnWillClose += OnWindowClose;
@@ -43,8 +43,8 @@ namespace JumpTo
 
 		private void CleanUp()
 		{
-			SceneSaveLoadControl.OnSceneSaved -= OnSceneSaved;
-			SceneSaveLoadControl.OnSceneLoaded -= OnSceneLoaded;
+			SceneStateControl.OnSceneSaved -= OnSceneSaved;
+			SceneStateControl.OnSceneLoaded -= OnSceneLoaded;
 
 			JumpToEditorWindow.OnWillEnable -= OnWindowEnable;
 			JumpToEditorWindow.OnWillClose -= OnWindowClose;
