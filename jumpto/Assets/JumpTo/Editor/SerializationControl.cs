@@ -25,6 +25,7 @@ namespace JumpTo
 
 		private string m_SaveDirectory = string.Empty;
 		private string m_HierarchySaveDirectory = string.Empty;
+		private string[] m_HierarchyLinkPaths = null;
 
 
 		private const string ProjectLinksSaveFile = "projectlinks";
@@ -34,45 +35,90 @@ namespace JumpTo
 
 		public SerializationControl()
 		{
+			SceneStateControl.OnSceneWillSave += OnSceneWillSave;
+			SceneStateControl.OnSceneWillLoad += OnSceneWillLoad;
 			SceneStateControl.OnSceneSaved += OnSceneSaved;
 			SceneStateControl.OnSceneLoaded += OnSceneLoaded;
 
+			JumpToEditorWindow.OnWindowOpen += OnWindowOpen;
 			JumpToEditorWindow.OnWillEnable += OnWindowEnable;
 			JumpToEditorWindow.OnWillClose += OnWindowClose;
 		}
 
 		private void CleanUp()
 		{
+			SceneStateControl.OnSceneWillSave -= OnSceneWillSave;
+			SceneStateControl.OnSceneWillLoad -= OnSceneWillLoad;
 			SceneStateControl.OnSceneSaved -= OnSceneSaved;
 			SceneStateControl.OnSceneLoaded -= OnSceneLoaded;
 
+			JumpToEditorWindow.OnWindowOpen -= OnWindowOpen;
 			JumpToEditorWindow.OnWillEnable -= OnWindowEnable;
 			JumpToEditorWindow.OnWillClose -= OnWindowClose;
 		}
 
-		private void OnSceneSaved()
+		private void OnSceneWillSave(string sceneAssetPath)
 		{
 			if (CreateSaveDirectories())
 			{
 				SaveSettings();
 				SaveProjectLinks();
-				SaveHierarchyLinks();
+
+				GetHierarchyLinkPaths();
 			}
 		}
 
-		private void OnSceneLoaded()
+		//TODO: wipes out an existing file or just saves nothing
+		//	this happens when the scene has changed, the user loads
+		//	a new scene and chooses save from the popup. this only
+		//	gets called after the delayCall, so the scene is already
+		//	unloaded.
+		//	can't just save hi links from OnSceneWillSave because
+		//	there may not yet be an asset file. need to temp store
+		//	the hi links data that will be saved in OnSceneWillSave
+		//	then actually write it in OnSceneSaved.
+		private void OnSceneSaved(string sceneAssetPath)
+		{
+			if (CreateSaveDirectories())
+			{
+				SaveHierarchyLinks(sceneAssetPath);
+			}
+		}
+
+		private void OnSceneWillLoad()
+		{
+			if (CreateSaveDirectories())
+			{
+				//TODO: this is the troublesome one. scene objects have already been destroyed by this point
+				//SaveHierarchyLinks();
+			}
+		}
+
+		private void OnSceneLoaded(string sceneAssetPath)
 		{
 			SetSaveDirectoryPaths();
 
-			LoadHierarchyLinks();
+			if (sceneAssetPath != string.Empty)
+				LoadHierarchyLinks();
 		}
 
-		private void OnWindowEnable()
+		private void OnWindowOpen()
+		{
+			Debug.Log("window open");
+			EditorApplication.delayCall += WaitForWindowOpenComplete;
+		}
+
+		private void WaitForWindowOpenComplete()
 		{
 			SetSaveDirectoryPaths();
 
 			LoadSettings();
 			LoadProjectLinks();
+			LoadHierarchyLinks();
+		}
+
+		private void OnWindowEnable()
+		{
 		}
 
 		private void OnWindowDisable()
@@ -85,7 +131,12 @@ namespace JumpTo
 			{
 				SaveSettings();
 				SaveProjectLinks();
-				SaveHierarchyLinks();
+
+				if (EditorApplication.currentScene != string.Empty)
+				{
+					GetHierarchyLinkPaths();
+					SaveHierarchyLinks(EditorApplication.currentScene);
+				}
 			}
 		}
 
@@ -117,28 +168,18 @@ namespace JumpTo
 			}
 		}
 
-		private void SaveHierarchyLinks()
+		private void SaveHierarchyLinks(string sceneAssetPath)
 		{
-			string currentScene = EditorApplication.currentScene;
-			string sceneGuid = AssetDatabase.AssetPathToGUID(currentScene);
+			string sceneGuid = AssetDatabase.AssetPathToGUID(sceneAssetPath);
 			string filePath = m_HierarchySaveDirectory + sceneGuid + SaveFileExtension;
-			Object[] linkReferences = JumpLinks.Instance.HierarchyLinks.AllLinkReferences;
-			if (linkReferences != null)
+			if (m_HierarchyLinkPaths != null)
 			{
 				//TODO: error handling
 				using (StreamWriter streamWriter = new StreamWriter(filePath))
 				{
-					//int instanceId;
-					string line;
-					for (int i = 0; i < linkReferences.Length; i++)
+					for (int i = 0; i < m_HierarchyLinkPaths.Length; i++)
 					{
-						//NOTE: can't use instanceId because they change each time the scene is loaded!
-						//instanceId = linkReferences[i].GetInstanceID();
-						//line = instanceId.ToString();
-
-						line = (linkReferences[i] as GameObject).transform.GetTransformPath();
-
-						streamWriter.WriteLine(line);
+						streamWriter.WriteLine(m_HierarchyLinkPaths[i]);
 					}
 				}
 			}
@@ -214,8 +255,6 @@ namespace JumpTo
 
 		private void LoadHierarchyLinks()
 		{
-			SetSaveDirectoryPaths();
-
 			HierarchyJumpLinkContainer links = JumpLinks.Instance.HierarchyLinks;
 			links.RemoveAll();
 
@@ -378,6 +417,27 @@ namespace JumpTo
 			}
 
 			return deleted;
+		}
+
+		private void GetHierarchyLinkPaths()
+		{
+			m_HierarchyLinkPaths = null;
+
+			Object[] linkReferences = JumpLinks.Instance.HierarchyLinks.AllLinkReferences;
+			if (linkReferences != null)
+			{
+				m_HierarchyLinkPaths = new string[linkReferences.Length];
+				for (int i = 0; i < linkReferences.Length; i++)
+				{
+					//NOTE: can't use instanceId because they change each time the scene is loaded!
+					//		instead we have to store the transform path. it's not very reliable,
+					//		though, so i hope this changes in the future.
+					//instanceId = linkReferences[i].GetInstanceID();
+
+					//NOTE: only saves unique transform paths
+					m_HierarchyLinkPaths[i] = (linkReferences[i] as GameObject).transform.GetTransformPath();
+				}
+			}
 		}
 	}
 }

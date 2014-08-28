@@ -92,6 +92,12 @@ namespace SceneStateDetection
 			}
 		}
 
+		void OnDisable()
+		{
+			if (m_KeepAlive)
+				SceneStateControl.SceneIsUnloading();
+		}
+
 		/// <summary>
 		/// Gets called just before the object is destroyed, which happens when a scene
 		/// is being unloaded. Causes a new instance to be created after the next scene
@@ -101,7 +107,6 @@ namespace SceneStateDetection
 		{
 			if (m_KeepAlive)
 			{
-				SceneStateControl.SceneIsUnloading();
 				EnsureExistence();
 			}
 		}

@@ -38,12 +38,14 @@ public class JumpToEditorWindow : EditorWindow
 	[SerializeField] private GuiToolbar m_Toolbar;
 	[SerializeField] private GuiJumpLinkListView m_View;
 	[SerializeField] private SceneStateControl m_SceneState;
+	[SerializeField] private bool m_FirstOpen = true;
 
 	[System.NonSerialized] private bool m_Initialized = false;
 	[System.NonSerialized] private RectRef m_Position = new RectRef();
 	[System.NonSerialized] private double m_LastHierarchyRefreshTime = 0.0f;
 
 
+	public static event EditorApplication.CallbackFunction OnWindowOpen;
 	public static event EditorApplication.CallbackFunction OnWillEnable;
 	public static event EditorApplication.CallbackFunction OnWillDisable;
 	public static event EditorApplication.CallbackFunction OnWillClose;
@@ -113,6 +115,19 @@ public class JumpToEditorWindow : EditorWindow
 		EditorApplication.hierarchyWindowChanged += OnHierarchyWindowChange;
 		SceneStateControl.OnSceneLoaded += OnSceneLoaded;
 
+		//NOTE: this DOES NOT WORK because closing unity will serialize the
+		//		jumpto window if it's open. that means that when unity is
+		//		restarted, the m_FirstOpen flag gets deserialized to equal
+		//		FALSE.
+		//Debug.Log("first open = " + m_FirstOpen);
+		//if (m_FirstOpen)
+		//{
+		//	m_FirstOpen = false;
+			
+		//	if (OnWindowOpen != null)
+		//		OnWindowOpen();
+		//}
+
 		if (OnWillEnable != null)
 			OnWillEnable();
 	}
@@ -137,6 +152,8 @@ public class JumpToEditorWindow : EditorWindow
 			OnWillClose();
 
 		m_View.OnWindowClose(this);
+
+		m_FirstOpen = true;
 
 		GraphicAssets.Instance.Cleanup();
 		GraphicAssets.DestroyInstance();
@@ -223,7 +240,7 @@ public class JumpToEditorWindow : EditorWindow
 		}
 	}
 
-	private void OnSceneLoaded()
+	private void OnSceneLoaded(string sceneAssetPath)
 	{
 		Repaint();
 	}
