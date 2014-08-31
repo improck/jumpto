@@ -48,7 +48,7 @@ namespace JumpTo
 			//SceneStateControl.OnSceneSaved += OnSceneSaved;
 			SceneStateControl.OnSceneLoaded += OnSceneLoaded;
 
-			JumpToEditorWindow.OnWindowOpen += OnWindowOpen;
+			//JumpToEditorWindow.OnWindowOpen += OnWindowOpen;
 			JumpToEditorWindow.OnWillEnable += OnWindowEnable;
 			JumpToEditorWindow.OnWillClose += OnWindowClose;
 		}
@@ -60,7 +60,7 @@ namespace JumpTo
 			//SceneStateControl.OnSceneSaved -= OnSceneSaved;
 			SceneStateControl.OnSceneLoaded -= OnSceneLoaded;
 
-			JumpToEditorWindow.OnWindowOpen -= OnWindowOpen;
+			//JumpToEditorWindow.OnWindowOpen -= OnWindowOpen;
 			JumpToEditorWindow.OnWillEnable -= OnWindowEnable;
 			JumpToEditorWindow.OnWillClose -= OnWindowClose;
 		}
@@ -113,20 +113,20 @@ namespace JumpTo
 				LoadHierarchyLinks();
 		}
 
-		private void OnWindowOpen()
-		{
-			Debug.Log("window open");
-			EditorApplication.delayCall += WaitForWindowOpenComplete;
-		}
+		//private void OnWindowOpen()
+		//{
+		//	//Debug.Log("window open");
+		//	EditorApplication.delayCall += WaitForWindowOpenComplete;
+		//}
 
-		private void WaitForWindowOpenComplete()
-		{
-			SetSaveDirectoryPaths();
+		//private void WaitForWindowOpenComplete()
+		//{
+		//	SetSaveDirectoryPaths();
 
-			LoadSettings();
-			LoadProjectLinks();
-			//LoadHierarchyLinks();
-		}
+		//	LoadSettings();
+		//	LoadProjectLinks();
+		//	//LoadHierarchyLinks();
+		//}
 
 		private void OnWindowEnable()
 		{
@@ -530,9 +530,21 @@ namespace JumpTo
 						continue;
 					
 					m_HierarchyLinkPaths[i] =
-						(linkReferences[i] as GameObject).transform.GetTransformPath() + "|" + serializedObject.GetLocalIdInFile().ToString();
+						GetTransformPath((linkReferences[i] as GameObject).transform) + "|" + serializedObject.GetLocalIdInFile().ToString();
 				}
 			}
+		}
+
+		public string GetTransformPath(Transform transform)
+		{
+			string path = string.Empty;
+			while (transform != null)
+			{
+				path = "/" + transform.name + path;
+				transform = transform.parent;
+			}
+
+			return path;
 		}
 	}
 }

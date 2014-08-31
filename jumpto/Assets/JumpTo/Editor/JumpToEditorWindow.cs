@@ -45,7 +45,7 @@ public class JumpToEditorWindow : EditorWindow
 	[System.NonSerialized] private double m_LastHierarchyRefreshTime = 0.0f;
 
 
-	public static event EditorApplication.CallbackFunction OnWindowOpen;
+	//public static event EditorApplication.CallbackFunction OnWindowOpen;
 	public static event EditorApplication.CallbackFunction OnWillEnable;
 	public static event EditorApplication.CallbackFunction OnWillDisable;
 	public static event EditorApplication.CallbackFunction OnWillClose;
@@ -217,17 +217,27 @@ public class JumpToEditorWindow : EditorWindow
 		m_View.Draw(m_Position);
 	}
 
-	void OnFocus()
-	{
-		Debug.Log("OnFocus()");
+	//apparently OnFocus() gets called before OnEnable()!
+	//void OnFocus()
+	//{
+	//	Debug.Log("OnFocus()");
+	//}
 
-		//apparently OnFocus() gets called before OnEnable()!
+	void OnBecameVisible()
+	{
+		//Debug.Log("OnBecameVisible()");
+
 		if (m_JumpLinks != null)
 		{
 			m_JumpLinks.RefreshHierarchyLinks();
 			m_JumpLinks.RefreshProjectLinks();
 		}
 	}
+
+	//void ModifierKeysChanged()
+	//{
+	//	Debug.Log("ModifierKeysChanged()");
+	//}
 
 	//***** Only called if window is visible *****
 	//void OnHierarchyChange()
