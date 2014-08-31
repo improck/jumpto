@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{1B5D1206-69FA-4B5F-87FE-5BACB208216D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>JumpTo</RootNamespace>
+    <AssemblyName>JumpTo</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEditor">
+      <HintPath>C:\Program Files (x86)\Unity45\Editor\Data\Managed\UnityEditor.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>C:\Program Files (x86)\Unity45\Editor\Data\Managed\UnityEngine.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="src\Gui\GraphicAssets.cs" />
+    <Compile Include="src\Gui\GuiBase.cs" />
+    <Compile Include="src\Gui\GuiHierarchyJumpLinkView.cs" />
+    <Compile Include="src\Gui\GuiJumpLinkListView.cs" />
+    <Compile Include="src\Gui\GuiJumpLinkViewBase.cs" />
+    <Compile Include="src\Gui\GuiProjectJumpLinkView.cs" />
+    <Compile Include="src\Gui\GuiToolbar.cs" />
+    <Compile Include="src\JumpLinks\HierarchyJumpLinkContainer.cs" />
+    <Compile Include="src\JumpLinks\JumpLinkContainer.cs" />
+    <Compile Include="src\JumpLinks\JumpLinks.cs" />
+    <Compile Include="src\Gui\JumpToEditorWindow.cs" />
+    <Compile Include="src\JumpToResources.cs" />
+    <Compile Include="src\JumpToSettings.cs" />
+    <Compile Include="src\JumpToUtility.cs" />
+    <Compile Include="src\JumpLinks\ProjectJumpLinkContainer.cs" />
+    <Compile Include="src\Gui\RectRef.cs" />
+    <Compile Include="src\SceneSaveLoad\SceneLoadDetector.cs" />
+    <Compile Include="src\SceneSaveLoad\SceneSaveDetector.cs" />
+    <Compile Include="src\SceneSaveLoad\SceneStateControl.cs" />
+    <Compile Include="src\SerializationControl.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy /y $(TargetPath) $(SolutionDir)Assets\JumpTo\Editor
+copy /y $(TargetDir)$(TargetName).pdb $(SolutionDir)Assets\JumpTo\Editor</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>del $(TargetPath) $(SolutionDir)Assets\JumpTo\Editor\$(TargetName).dll
+del $(TargetPath) $(SolutionDir)Assets\JumpTo\Editor\$(TargetName).pdb
+del $(TargetPath) $(SolutionDir)Assets\JumpTo\Editor\$(TargetName).dll.mdb</PreBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

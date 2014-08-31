@@ -22,9 +22,9 @@ using SceneStateDetection;
 //xTODO: change the view control look-and-feel
 //xTODO: detect a scene load
 //xTODO: serialize to a file
-//TODO: draw a grab bar as the divider, horizontal and vertical
+//xTODO: move to a dll assembly
+//TODO: draw a grab bar as the divider, horizontal AND vertical
 //TODO: left-click hamburger menu for list view control
-//TODO: move to a dll assembly
 //TODO: assembly resource text, multiple languages
 //TODO: load images from assembly resources
 //TODO: find the minimum editorwindow width
