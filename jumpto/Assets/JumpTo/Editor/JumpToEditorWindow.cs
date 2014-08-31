@@ -51,8 +51,21 @@ public class JumpToEditorWindow : EditorWindow
 	public static event EditorApplication.CallbackFunction OnWillClose;
 
 
+	//called when window is first open
+	//called before deserialization due to a compile
+	//public JumpToEditorWindow()
+	//{
+	//	SerializationControl.CreateInstance();
+
+	//	if (OnWindowOpen != null)
+	//		OnWindowOpen();
+	//}
+
+	//called when window is first open
+	//called after deserialization due to a compile
 	void OnEnable()
 	{
+		Debug.Log("OnEnable()");
 		m_JumpLinks = JumpLinks.Instance;
 
 		if (m_JumpLinks == null)
@@ -100,9 +113,7 @@ public class JumpToEditorWindow : EditorWindow
 
 		SceneLoadDetector.EnsureExistence();
 
-		//HACK: do something with this...
-		SerializationControl serCon = SerializationControl.Instance;
-		serCon.ToString();
+		SerializationControl.CreateInstance();
 
 		m_JumpLinks.RefreshProjectLinks();
 		m_JumpLinks.RefreshHierarchyLinks();
@@ -123,7 +134,7 @@ public class JumpToEditorWindow : EditorWindow
 		//if (m_FirstOpen)
 		//{
 		//	m_FirstOpen = false;
-			
+		//
 		//	if (OnWindowOpen != null)
 		//		OnWindowOpen();
 		//}
@@ -131,7 +142,9 @@ public class JumpToEditorWindow : EditorWindow
 		if (OnWillEnable != null)
 			OnWillEnable();
 	}
-
+	
+	//called before window closes
+	//called before serialization due to a compile
 	void OnDisable()
 	{
 		if (OnWillDisable != null)
@@ -144,16 +157,33 @@ public class JumpToEditorWindow : EditorWindow
 		EditorApplication.projectWindowChanged -= OnProjectWindowChange;
 		EditorApplication.hierarchyWindowChanged -= OnHierarchyWindowChange;
 		SceneStateControl.OnSceneLoaded -= OnSceneLoaded;
+
+		Debug.Log("OnDisable()");
 	}
 
+	void OnLostFocus()
+	{
+		Debug.Log("OnLostFocus()");
+	}
+
+	//NOT called when unity editor is closed
+	//called when window is closed
 	void OnDestroy()
 	{
+		Debug.Log("OnDestroy()");
+
 		if (OnWillClose != null)
 			OnWillClose();
 
+		//NOTE: this doesn't get called on editor close!
+		//using (System.IO.StreamWriter streamWriter = new System.IO.StreamWriter(@"r:\testfile.txt"))
+		//{
+		//	streamWriter.WriteLine("called from OnDestroy()");
+		//}
+
 		m_View.OnWindowClose(this);
 
-		m_FirstOpen = true;
+		//m_FirstOpen = true;
 
 		GraphicAssets.Instance.Cleanup();
 		GraphicAssets.DestroyInstance();
@@ -189,6 +219,8 @@ public class JumpToEditorWindow : EditorWindow
 
 	void OnFocus()
 	{
+		Debug.Log("OnFocus()");
+
 		//apparently OnFocus() gets called before OnEnable()!
 		if (m_JumpLinks != null)
 		{

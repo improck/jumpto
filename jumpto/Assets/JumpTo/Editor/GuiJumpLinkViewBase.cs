@@ -42,6 +42,7 @@ namespace JumpTo
 
 
 		protected abstract void ShowContextMenu();
+		protected abstract void ShowTitleContextMenu();
 		protected abstract void OnDoubleClick();
 
 
@@ -430,18 +431,6 @@ namespace JumpTo
 			if (m_DragInsert && m_InsertionIndex > -1)
 			{
 				graphicAssets.DragDropInsertionStyle.Draw(m_InsertionDrawRect, false, false, false, false);
-			}
-		}
-
-		protected void ShowTitleContextMenu()
-		{
-			if (m_LinkContainer.Links.Count > 0)
-			{
-				GenericMenu menu = new GenericMenu();
-
-				menu.AddItem(m_MenuRemoveAll, false, RemoveAll);
-
-				menu.ShowAsContext();
 			}
 		}
 

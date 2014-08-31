@@ -9,6 +9,7 @@ namespace JumpTo
 	{
 		private GUIContent m_MenuFrameLink;
 		private GUIContent m_MenuFrameLinkPlural;
+		private GUIContent m_MenuSaveLinks;
 		
 		
 		public override void OnWindowEnable(EditorWindow window)
@@ -18,6 +19,7 @@ namespace JumpTo
 			m_ControlTitle = new GUIContent(ResLoad.Instance.GetText(ResId.LabelHierarchyLinks));
 			m_MenuFrameLink = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextFrameLink));
 			m_MenuFrameLinkPlural = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextFrameLinkPlural));
+			m_MenuSaveLinks = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextSaveLinks));
 		}
 
 		protected override Color DetermineNormalTextColor(HierarchyJumpLink link)
@@ -84,6 +86,23 @@ namespace JumpTo
 			menu.ShowAsContext();
 		}
 
+		protected override void ShowTitleContextMenu()
+		{
+			if (m_LinkContainer.Links.Count > 0)
+			{
+				GenericMenu menu = new GenericMenu();
+
+				if (EditorApplication.currentScene != string.Empty)
+				{
+					menu.AddItem(m_MenuSaveLinks, false, SaveLinks);
+				}
+
+				menu.AddItem(m_MenuRemoveAll, false, RemoveAll);
+
+				menu.ShowAsContext();
+			}
+		}
+
 		protected override void OnDoubleClick()
 		{
 			FrameLink();
@@ -106,6 +125,12 @@ namespace JumpTo
 					Selection.objects = selection;
 				}
 			}
+		}
+
+		private void SaveLinks()
+		{
+			//TODO: detect links to objects not saved in the scene, warn the user
+			SerializationControl.Instance.SaveHierarchyLinks(EditorApplication.currentScene);
 		}
 
 		private bool ValidateSceneView()

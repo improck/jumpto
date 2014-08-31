@@ -1,17 +1,25 @@
 ﻿using UnityEditor;
 using UnityEngine;
 using System.IO;
+using System.Reflection;
 using SceneStateDetection;
 
 
 namespace JumpTo
 {
+	//TODO: all auto-saving of hierarchy links is disabled. not enough info from unity editor to make it work.
 	public class SerializationControl
 	{
 		#region Singleton
 		private static SerializationControl s_Instance = null;
 
-		public static SerializationControl Instance { get { if (s_Instance == null) { s_Instance = new SerializationControl(); } return s_Instance; } }
+		public static SerializationControl Instance { get { CreateInstance(); return s_Instance; } }
+
+		public static void CreateInstance()
+		{
+			if (s_Instance == null)
+				s_Instance = new SerializationControl();
+		}
 
 		public static void DestroyInstance()
 		{
@@ -36,8 +44,8 @@ namespace JumpTo
 		public SerializationControl()
 		{
 			SceneStateControl.OnSceneWillSave += OnSceneWillSave;
-			SceneStateControl.OnSceneWillLoad += OnSceneWillLoad;
-			SceneStateControl.OnSceneSaved += OnSceneSaved;
+			//SceneStateControl.OnSceneWillLoad += OnSceneWillLoad;
+			//SceneStateControl.OnSceneSaved += OnSceneSaved;
 			SceneStateControl.OnSceneLoaded += OnSceneLoaded;
 
 			JumpToEditorWindow.OnWindowOpen += OnWindowOpen;
@@ -48,8 +56,8 @@ namespace JumpTo
 		private void CleanUp()
 		{
 			SceneStateControl.OnSceneWillSave -= OnSceneWillSave;
-			SceneStateControl.OnSceneWillLoad -= OnSceneWillLoad;
-			SceneStateControl.OnSceneSaved -= OnSceneSaved;
+			//SceneStateControl.OnSceneWillLoad -= OnSceneWillLoad;
+			//SceneStateControl.OnSceneSaved -= OnSceneSaved;
 			SceneStateControl.OnSceneLoaded -= OnSceneLoaded;
 
 			JumpToEditorWindow.OnWindowOpen -= OnWindowOpen;
@@ -64,7 +72,10 @@ namespace JumpTo
 				SaveSettings();
 				SaveProjectLinks();
 
-				GetHierarchyLinkPaths();
+				//TODO: objects that are new in the scene have not been
+				//		assigned a localidinfile at this point, so they
+				//		will save as zero.
+				//GetHierarchyLinkPaths();
 			}
 		}
 
@@ -77,22 +88,22 @@ namespace JumpTo
 		//	there may not yet be an asset file. need to temp store
 		//	the hi links data that will be saved in OnSceneWillSave
 		//	then actually write it in OnSceneSaved.
-		private void OnSceneSaved(string sceneAssetPath)
-		{
-			if (CreateSaveDirectories())
-			{
-				SaveHierarchyLinks(sceneAssetPath);
-			}
-		}
+		//private void OnSceneSaved(string sceneAssetPath)
+		//{
+		//	if (CreateSaveDirectories())
+		//	{
+		//		SaveHierarchyLinks(sceneAssetPath);
+		//	}
+		//}
 
-		private void OnSceneWillLoad()
-		{
-			if (CreateSaveDirectories())
-			{
-				//TODO: this is the troublesome one. scene objects have already been destroyed by this point
-				//SaveHierarchyLinks();
-			}
-		}
+		//private void OnSceneWillLoad()
+		//{
+		//	if (CreateSaveDirectories())
+		//	{
+		//		//TODO: this is the troublesome one. scene objects have already been destroyed by this point
+		//		SaveHierarchyLinks(EditorApplication.currentScene);
+		//	}
+		//}
 
 		private void OnSceneLoaded(string sceneAssetPath)
 		{
@@ -114,15 +125,33 @@ namespace JumpTo
 
 			LoadSettings();
 			LoadProjectLinks();
-			LoadHierarchyLinks();
+			//LoadHierarchyLinks();
 		}
 
 		private void OnWindowEnable()
 		{
+			SetSaveDirectoryPaths();
+
+			LoadSettings();
+
+			if (JumpLinks.Instance.GetJumpLinkContainer<ProjectJumpLink>().Links.Count == 0)
+			{
+				LoadProjectLinks();
+			}
+
+			if (JumpLinks.Instance.GetJumpLinkContainer<HierarchyJumpLink>().Links.Count == 0)
+			{
+				EditorApplication.delayCall += LoadHierarchyLinks;
+			}
 		}
 
 		private void OnWindowDisable()
 		{
+			if (CreateSaveDirectories())
+			{
+				SaveSettings();
+				SaveProjectLinks();
+			}
 		}
 
 		private void OnWindowClose()
@@ -132,11 +161,11 @@ namespace JumpTo
 				SaveSettings();
 				SaveProjectLinks();
 
-				if (EditorApplication.currentScene != string.Empty)
-				{
-					GetHierarchyLinkPaths();
-					SaveHierarchyLinks(EditorApplication.currentScene);
-				}
+				//if (EditorApplication.currentScene != string.Empty)
+				//{
+				//	GetHierarchyLinkPaths();
+				//	SaveHierarchyLinks(EditorApplication.currentScene);
+				//}
 			}
 		}
 
@@ -168,8 +197,11 @@ namespace JumpTo
 			}
 		}
 
-		private void SaveHierarchyLinks(string sceneAssetPath)
+		public void SaveHierarchyLinks(string sceneAssetPath)
 		{
+			//TODO: move this when/if unity leaves hooks for scene save events
+			GetHierarchyLinkPaths();
+
 			string sceneGuid = AssetDatabase.AssetPathToGUID(sceneAssetPath);
 			string filePath = m_HierarchySaveDirectory + sceneGuid + SaveFileExtension;
 			if (m_HierarchyLinkPaths != null)
@@ -272,23 +304,75 @@ namespace JumpTo
 			//TODO: error handling
 			using (StreamReader streamReader = new StreamReader(filePath))
 			{
+				PropertyInfo inspectorModeProperty = typeof(SerializedObject).GetProperty("inspectorMode", BindingFlags.NonPublic | BindingFlags.Instance);
+
 				string line;
+				string transPath;
+				string objName;
+				int localId = 0;
+				int searchId = 0;
+				int pipeLoc = 0;
+				GameObject obj;
+				SerializedObject serializedObject;
 				while (!streamReader.EndOfStream)
 				{
 					JumpLinks jumpLinks = JumpLinks.Instance;
 
 					line = streamReader.ReadLine();
-					//NOTE: can't use instanceId because they change each time the scene is loaded!
-					//Object obj = EditorUtility.InstanceIDToObject(int.Parse(line));
-					//if (obj != null && obj is GameObject)
-					//{
-					//	jumpLinks.CreateOnlyHierarchyJumpLink(obj);
-					//}
-
-					GameObject obj = GameObject.Find(line);
-					if (obj != null && obj is GameObject)
+					pipeLoc = line.LastIndexOf('|');
+					transPath = line.Substring(0, pipeLoc);
+					localId = int.Parse(line.Substring(pipeLoc + 1));
+					
+					obj = GameObject.Find(transPath);
+					if (obj != null)
 					{
-						jumpLinks.CreateOnlyHierarchyJumpLink(obj);
+						serializedObject = new SerializedObject(obj);
+						serializedObject.SetInspectorMode(InspectorMode.Debug);
+						searchId = serializedObject.GetLocalIdInFile();
+
+						if (searchId == localId)
+						{
+							jumpLinks.CreateOnlyHierarchyJumpLink(obj);
+						}
+						else if (obj.transform.parent != null)
+						{
+							objName = obj.name;
+							foreach (Transform trans in obj.transform.parent)
+							{
+								if (trans.name == objName && trans.gameObject != obj)
+								{
+									serializedObject = new SerializedObject(trans.gameObject);
+									serializedObject.SetInspectorMode(InspectorMode.Debug);
+									searchId = serializedObject.GetLocalIdInFile();
+									if (searchId == localId)
+									{
+										jumpLinks.CreateOnlyHierarchyJumpLink(trans.gameObject);
+										break;
+									}
+								}
+							}
+						}
+						else
+						{
+							objName = obj.name;
+
+							HierarchyProperty hierarchyProperty = new HierarchyProperty(HierarchyType.GameObjects);
+							int[] expanded = new int[0];
+							while (hierarchyProperty.Next(expanded))
+							{
+								if (hierarchyProperty.name == objName && hierarchyProperty.pptrValue != obj)
+								{
+									serializedObject = new SerializedObject(hierarchyProperty.pptrValue);
+									serializedObject.SetInspectorMode(InspectorMode.Debug);
+									searchId = serializedObject.GetLocalIdInFile();
+									if (searchId == localId)
+									{
+										jumpLinks.CreateOnlyHierarchyJumpLink(hierarchyProperty.pptrValue);
+										break;
+									}
+								}
+							}
+						}
 					}
 				}
 			}
@@ -426,18 +510,66 @@ namespace JumpTo
 			Object[] linkReferences = JumpLinks.Instance.HierarchyLinks.AllLinkReferences;
 			if (linkReferences != null)
 			{
+				SerializedObject serializedObject;
+				int localId = 0;
 				m_HierarchyLinkPaths = new string[linkReferences.Length];
 				for (int i = 0; i < linkReferences.Length; i++)
 				{
 					//NOTE: can't use instanceId because they change each time the scene is loaded!
 					//		instead we have to store the transform path. it's not very reliable,
-					//		though, so i hope this changes in the future.
+					//		though, so we also get the "local id in file."
 					//instanceId = linkReferences[i].GetInstanceID();
 
-					//NOTE: only saves unique transform paths
-					m_HierarchyLinkPaths[i] = (linkReferences[i] as GameObject).transform.GetTransformPath();
+					serializedObject = new SerializedObject(linkReferences[i]);
+					serializedObject.SetInspectorMode(InspectorMode.Debug);
+
+					//skip objects that haven't been saved to the scene
+					//TODO: should this even be necessary in the future?
+					localId = serializedObject.GetLocalIdInFile();
+					if (localId == 0)
+						continue;
+					
+					m_HierarchyLinkPaths[i] =
+						(linkReferences[i] as GameObject).transform.GetTransformPath() + "|" + serializedObject.GetLocalIdInFile().ToString();
 				}
 			}
 		}
+	}
+}
+
+
+public static class SerializedObjectExtension
+{
+	private static PropertyInfo m_InspectorModeProperty = null;
+
+
+	public static InspectorMode GetInspectorMode(this SerializedObject serializedObject)
+	{
+		if (m_InspectorModeProperty == null)
+		{
+			m_InspectorModeProperty = typeof(SerializedObject).GetProperty("inspectorMode", BindingFlags.NonPublic | BindingFlags.Instance);
+		}
+
+		return (InspectorMode)m_InspectorModeProperty.GetValue(serializedObject, null);
+	}
+
+	public static void SetInspectorMode(this SerializedObject serializedObject, InspectorMode inspectorMode)
+	{
+		if (m_InspectorModeProperty == null)
+		{
+			m_InspectorModeProperty = typeof(SerializedObject).GetProperty("inspectorMode", BindingFlags.NonPublic | BindingFlags.Instance);
+		}
+
+		m_InspectorModeProperty.SetValue(serializedObject, inspectorMode, null);
+	}
+
+	public static int GetLocalIdInFile(this SerializedObject serializedObject)
+	{
+		//NOTE: the property name is actually misspelled in the object!
+		SerializedProperty localIdProp = serializedObject.FindProperty("m_LocalIdentfierInFile");
+		if (localIdProp != null)
+			return localIdProp.intValue;
+
+		return -1;
 	}
 }

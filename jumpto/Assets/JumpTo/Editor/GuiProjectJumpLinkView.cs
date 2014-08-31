@@ -59,6 +59,18 @@ namespace JumpTo
 			menu.ShowAsContext();
 		}
 
+		protected override void ShowTitleContextMenu()
+		{
+			if (m_LinkContainer.Links.Count > 0)
+			{
+				GenericMenu menu = new GenericMenu();
+
+				menu.AddItem(m_MenuRemoveAll, false, RemoveAll);
+
+				menu.ShowAsContext();
+			}
+		}
+
 		protected override void OnDoubleClick()
 		{
 			OpenAssets();

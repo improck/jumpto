@@ -35,6 +35,7 @@ namespace JumpTo
 		public static readonly int MenuContextFrameLinkPlural = "menu_contextFrameLinkPlural".GetHashCode();
 		public static readonly int MenuContextOpenLinkPlural = "menu_contextOpenLinkPlural".GetHashCode();
 		public static readonly int MenuContextRemoveLinkPlural = "menu_contextRemoveLinkPlural".GetHashCode();
+		public static readonly int MenuContextSaveLinks = "menu_contextSaveLinks".GetHashCode();
 
 		public static readonly int DialogRemoveAllTitle = "dialog_removeAllTitle".GetHashCode();
 		public static readonly int DialogRemoveAllMessage = "dialog_removeAllMessage".GetHashCode();
@@ -141,6 +142,7 @@ namespace JumpTo
 			m_TextResources.Add(ResId.MenuContextFrameLinkPlural, "Frame These in Scene");
 			m_TextResources.Add(ResId.MenuContextOpenLinkPlural, "Open These");
 			m_TextResources.Add(ResId.MenuContextRemoveLinkPlural, "Remove These");
+			m_TextResources.Add(ResId.MenuContextSaveLinks, "Save Links");
 
 			m_TextResources.Add(ResId.DialogRemoveAllTitle, "Confirm Remove All");
 			m_TextResources.Add(ResId.DialogRemoveAllMessage, "Are you sure you want to remove all links from the list?");
