@@ -23,11 +23,12 @@ using SceneStateDetection;
 //xTODO: detect a scene load
 //xTODO: serialize to a file
 //xTODO: move to a dll assembly
-//TODO: draw a grab bar as the divider, horizontal AND vertical
-//TODO: left-click hamburger menu for list view control
-//TODO: assembly resource text, multiple languages
-//TODO: load images from assembly resources
+//xTODO: draw a grab bar as the divider, horizontal AND vertical
+//xTODO: left-click hamburger menu for list view control
+//xTODO: assembly resource text, multiple languages
+//xTODO: load images from assembly resources
 //TODO: find the minimum editorwindow width
+//TODO: save the divider placement to settings
 //TODO: comment all of this code
 
 
@@ -185,12 +186,11 @@ public class JumpToEditorWindow : EditorWindow
 
 		//m_FirstOpen = true;
 
-		GraphicAssets.Instance.Cleanup();
-		GraphicAssets.DestroyInstance();
-
 		SceneLoadDetector.PermanentlyDestroyInstance();
 
 		SerializationControl.DestroyInstance();
+		GraphicAssets.DestroyInstance();
+		ResLoad.DestroyInstance();
 	}
 
 	private void Init()

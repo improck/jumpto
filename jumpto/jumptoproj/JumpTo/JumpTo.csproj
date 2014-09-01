@@ -66,7 +66,19 @@
     <Compile Include="src\SceneSaveLoad\SceneStateControl.cs" />
     <Compile Include="src\SerializationControl.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="res\lang\jumptolang_en.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="res\image\horizontal.png" />
+    <EmbeddedResource Include="res\image\vertical.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="res\image\divider_v.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="res\image\hamburger.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy /y $(TargetPath) $(SolutionDir)Assets\JumpTo\Editor

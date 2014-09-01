@@ -41,6 +41,11 @@ namespace JumpTo
 		public static readonly int DialogRemoveAllMessage = "dialog_removeAllMessage".GetHashCode();
 		public static readonly int DialogYes = "dialog_yes".GetHashCode();
 		public static readonly int DialogNo = "dialog_no".GetHashCode();
+
+		public static readonly int ImageDividerVertical = "divider_v.png".GetHashCode();
+		public static readonly int ImageHorizontalView = "horizontal.png".GetHashCode();
+		public static readonly int ImageVerticalView = "vertical.png".GetHashCode();
+		public static readonly int ImageHamburger = "hamburger.png".GetHashCode();
 	}
 
 	public class ResLoad
@@ -56,8 +61,13 @@ namespace JumpTo
 			LoadResources();
 		}
 
-		public void Cleanup()
+		public static void DestroyInstance()
 		{
+			if (s_Instance != null)
+			{
+				s_Instance.CleanUp();
+				s_Instance = null;
+			}
 		}
 		#endregion
 
@@ -80,6 +90,7 @@ namespace JumpTo
 		private void LoadResources()
 		{
 			//text resources
+			//LoadDefaultText();
 			switch (Application.systemLanguage)
 			{
 			case SystemLanguage.English:
@@ -87,32 +98,69 @@ namespace JumpTo
 				break;
 			}
 
-			//TODO: load images
+			//image resources
+			LoadImage("divider_v.png");
+			LoadImage("horizontal.png");
+			LoadImage("vertical.png");
+			LoadImage("hamburger.png");
 		}
 
 		private void LoadText(string fileName)
 		{
-			//ResourceManager rm = new ResourceManager(fileName, this.GetType().Assembly);
-
-			//ResourceReader res = new ResourceReader(this.GetType().Assembly.GetManifestResourceStream("JumpTo." + fileName));
-			//IDictionaryEnumerator textEntry = res.GetEnumerator();
-
-			//m_TextResources.Clear();
-			//while (textEntry.MoveNext())
-			//{
-			//	m_TextResources.Add(textEntry.Key.GetHashCode(), (string)textEntry.Value);
-			//}
-
-			string[] resNames = this.GetType().Assembly.GetManifestResourceNames();
-			if (resNames == null || resNames.Length == 0)
+			using (Stream resStream = this.GetType().Assembly.GetManifestResourceStream("JumpTo.res.lang." + fileName))
 			{
-				LoadDefaultText();
-			}
-			else
-			{
-				for (int i = 0; i < resNames.Length; i++)
+				using (StreamReader reader = new StreamReader(resStream))
 				{
-					Debug.Log(resNames[i]);
+					int idHash = 0;
+					int equalsPos = 0;
+					const string equals = " = ";
+					string line = string.Empty;
+					string id = string.Empty;
+					string text = string.Empty;
+
+					while (!reader.EndOfStream)
+					{
+						line = reader.ReadLine();
+						if (line == null || line.Length == 0 || line[0] == ';')
+							continue;
+
+						equalsPos = line.IndexOf(equals);
+						id = line.Substring(0, equalsPos);
+						text = line.Substring(equalsPos + 3);
+
+						idHash = id.GetHashCode();
+						
+						if (m_TextResources.ContainsKey(idHash))
+						{
+							m_TextResources[idHash] = text;
+						}
+						else
+						{
+							m_TextResources.Add(idHash, text);
+						}
+					}
+				}
+			}
+		}
+
+		private void LoadImage(string fileName)
+		{
+			using (Stream resStream = this.GetType().Assembly.GetManifestResourceStream("JumpTo.res.image." + fileName))
+			{
+				byte[] fileBytes = new byte[resStream.Length];
+				resStream.Read(fileBytes, 0, fileBytes.Length);
+
+				Texture2D texture = new Texture2D(4, 4);
+				texture.LoadImage(fileBytes);
+
+				int fileNameHash = fileName.GetHashCode();
+				if (m_ImageResources.ContainsKey(fileNameHash))
+				{
+					m_ImageResources[fileNameHash] = texture;
+				}
+				else
+				{
+					m_ImageResources.Add(fileNameHash, texture);
 				}
 			}
 		}
@@ -148,6 +196,15 @@ namespace JumpTo
 			m_TextResources.Add(ResId.DialogRemoveAllMessage, "Are you sure you want to remove all links from the list?");
 			m_TextResources.Add(ResId.DialogYes, "Yes");
 			m_TextResources.Add(ResId.DialogNo, "No");
+		}
+
+		private void CleanUp()
+		{
+			//unload images
+			foreach (KeyValuePair<int, Texture2D> image in m_ImageResources)
+			{
+				Object.DestroyImmediate(image.Value);
+			}
 		}
 	}
 }

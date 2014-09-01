@@ -189,8 +189,14 @@ namespace JumpTo
 				break;
 			case EventType.Repaint:
 				{
-					//TODO: draw a divider icon
-					GraphicAssets.Instance.DividerStyle.Draw(m_DividerRect, false, false, false, false);
+					if (JumpToSettings.Instance.Vertical)
+					{
+						GraphicAssets.Instance.DividerHorizontalStyle.Draw(m_DividerRect, false, false, false, false);
+					}
+					else
+					{
+						GraphicAssets.Instance.DividerVerticalStyle.Draw(m_DividerRect, false, false, false, false);
+					}
 				}
 				break;
 			}

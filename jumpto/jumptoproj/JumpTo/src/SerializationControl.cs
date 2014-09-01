@@ -50,6 +50,7 @@ namespace JumpTo
 
 			//JumpToEditorWindow.OnWindowOpen += OnWindowOpen;
 			JumpToEditorWindow.OnWillEnable += OnWindowEnable;
+			JumpToEditorWindow.OnWillDisable += OnWindowDisable;
 			JumpToEditorWindow.OnWillClose += OnWindowClose;
 		}
 
@@ -62,6 +63,7 @@ namespace JumpTo
 
 			//JumpToEditorWindow.OnWindowOpen -= OnWindowOpen;
 			JumpToEditorWindow.OnWillEnable -= OnWindowEnable;
+			JumpToEditorWindow.OnWillDisable -= OnWindowDisable;
 			JumpToEditorWindow.OnWillClose -= OnWindowClose;
 		}
 

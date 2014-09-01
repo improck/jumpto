@@ -36,7 +36,7 @@ namespace JumpTo
 
 			//draw first state button
 			m_DrawRect.x = 6.0f;
-			m_DrawRect.width = 40.0f;
+			m_DrawRect.width = 26.0f;
 			style = GraphicAssets.Instance.ToolbarButtonStyle;
 			if (GUI.Button(m_DrawRect, m_FirstStateContent, style))
 			{
@@ -46,6 +46,7 @@ namespace JumpTo
 
 			//draw orientation button
 			m_DrawRect.x += m_DrawRect.width;
+			m_DrawRect.width = 24.0f;
 			if (GUI.Button(m_DrawRect, m_OrientationContent, style))
 			{
 				JumpToSettings.Instance.Vertical = !JumpToSettings.Instance.Vertical;
@@ -79,10 +80,12 @@ namespace JumpTo
 			if (JumpToSettings.Instance.ProjectFirst)
 			{
 				m_FirstStateContent.tooltip = ResLoad.Instance.GetText(ResId.TooltipProjectFirst);
+				m_FirstStateContent.image = GraphicAssets.Instance.IconProjectView;
 			}
 			else
 			{
 				m_FirstStateContent.tooltip = ResLoad.Instance.GetText(ResId.TooltipHierarchyFirst);
+				m_FirstStateContent.image = GraphicAssets.Instance.IconHierarchyView;
 			}
 		}
 
@@ -91,10 +94,12 @@ namespace JumpTo
 			if (JumpToSettings.Instance.Vertical)
 			{
 				m_OrientationContent.tooltip = ResLoad.Instance.GetText(ResId.TooltipVertical);
+				m_OrientationContent.image = ResLoad.Instance.GetImage(ResId.ImageVerticalView);
 			}
 			else
 			{
 				m_OrientationContent.tooltip = ResLoad.Instance.GetText(ResId.TooltipHorizontal);
+				m_OrientationContent.image = ResLoad.Instance.GetImage(ResId.ImageHorizontalView);
 			}
 		}
 

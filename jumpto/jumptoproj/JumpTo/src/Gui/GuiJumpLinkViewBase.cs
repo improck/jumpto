@@ -31,6 +31,8 @@ namespace JumpTo
 		protected GUIContent m_MenuAddToSelectionPlural;
 		protected GUIContent m_MenuRemoveLinkPlural;
 
+		protected Texture2D m_IconHamburger;
+
 		protected JumpToEditorWindow m_Window;
 
 		protected JumpLinkContainer<T> m_LinkContainer = null;
@@ -57,13 +59,15 @@ namespace JumpTo
 			m_MenuAddToSelectionPlural = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextAddToSelectionPlural));
 			m_MenuRemoveLinkPlural = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextRemoveLinkPlural));
 
+			m_IconHamburger = ResLoad.Instance.GetImage(ResId.ImageHamburger);
+
 			m_Window = window as JumpToEditorWindow;
 
 			m_LinkContainer = JumpLinks.Instance.GetJumpLinkContainer<T>();
 
-			m_ControlRect.y = 2.0f;
-			m_ControlRect.width = 16.0f;
-			m_ControlRect.height = 16.0f;
+			m_ControlRect.y = 7.0f;
+			m_ControlRect.width = 10.0f;
+			m_ControlRect.height = 8.0f;
 		}
 
 		protected override void OnGui()
@@ -76,13 +80,13 @@ namespace JumpTo
 		{
 			m_DrawRect.Set(0.0f, 0.0f, m_Size.x, 22.0f);
 
+			m_ControlRect.x = m_Size.x - (m_ControlRect.width + 6.0f);
+
 			Event currentEvent = Event.current;
 			switch (currentEvent.type)
 			{
 			case EventType.MouseDown:
 				{
-					m_ControlRect.x = m_Size.x - (m_ControlRect.width + 6.0f);
-
 					if (currentEvent.button == 0)
 					{
 						if (m_ControlRect.Contains(currentEvent.mousePosition))
@@ -101,6 +105,7 @@ namespace JumpTo
 			case EventType.Repaint:
 				{
 					GraphicAssets.Instance.LinkViewTitleStyle.Draw(m_DrawRect, m_ControlTitle, false, false, false, false);
+					GUI.DrawTexture(m_ControlRect, m_IconHamburger);
 				}
 				break;
 			};
