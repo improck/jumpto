@@ -36,6 +36,9 @@ namespace JumpTo
 
 			m_ProjectView.OnWindowEnable(window);
 			m_HierarchyView.OnWindowEnable(window);
+
+			if (JumpToSettings.Instance.DividerPosition >= 0.0f)
+				m_Divider = JumpToSettings.Instance.DividerPosition;
 		}
 
 		protected override void OnGui()
@@ -167,6 +170,8 @@ namespace JumpTo
 					{
 						GUIUtility.hotControl = 0;
 						current.Use();
+
+						JumpToSettings.Instance.DividerPosition = m_Divider;
 					}
 				}
 				break;

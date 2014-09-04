@@ -27,8 +27,10 @@ using SceneStateDetection;
 //xTODO: left-click hamburger menu for list view control
 //xTODO: assembly resource text, multiple languages
 //xTODO: load images from assembly resources
+//xTODO: save the divider placement to settings
+//xTODO: make some indicator of hierarchy links save state
+//TODO: bug! hamburger icon is null when window is open on startup
 //TODO: find the minimum editorwindow width
-//TODO: save the divider placement to settings
 //TODO: comment all of this code
 
 
@@ -39,7 +41,7 @@ public class JumpToEditorWindow : EditorWindow
 	[SerializeField] private GuiToolbar m_Toolbar;
 	[SerializeField] private GuiJumpLinkListView m_View;
 	[SerializeField] private SceneStateControl m_SceneState;
-	[SerializeField] private bool m_FirstOpen = true;
+	//[SerializeField] private bool m_FirstOpen = true;
 
 	[System.NonSerialized] private bool m_Initialized = false;
 	[System.NonSerialized] private RectRef m_Position = new RectRef();
@@ -116,13 +118,6 @@ public class JumpToEditorWindow : EditorWindow
 
 		SerializationControl.CreateInstance();
 
-		m_JumpLinks.RefreshProjectLinks();
-		m_JumpLinks.RefreshHierarchyLinks();
-		m_LastHierarchyRefreshTime = EditorApplication.timeSinceStartup;
-
-		m_Toolbar.OnWindowEnable(this);
-		m_View.OnWindowEnable(this);
-
 		EditorApplication.projectWindowChanged += OnProjectWindowChange;
 		EditorApplication.hierarchyWindowChanged += OnHierarchyWindowChange;
 		SceneStateControl.OnSceneLoaded += OnSceneLoaded;
@@ -142,6 +137,13 @@ public class JumpToEditorWindow : EditorWindow
 
 		if (OnWillEnable != null)
 			OnWillEnable();
+
+		m_JumpLinks.RefreshProjectLinks();
+		m_JumpLinks.RefreshHierarchyLinks();
+		m_LastHierarchyRefreshTime = EditorApplication.timeSinceStartup;
+
+		m_Toolbar.OnWindowEnable(this);
+		m_View.OnWindowEnable(this);
 	}
 	
 	//called before window closes

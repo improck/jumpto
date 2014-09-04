@@ -10,6 +10,7 @@ namespace JumpTo
 		private GUIContent m_MenuFrameLink;
 		private GUIContent m_MenuFrameLinkPlural;
 		private GUIContent m_MenuSaveLinks;
+		private string m_TitleText;	//TEMP
 		
 		
 		public override void OnWindowEnable(EditorWindow window)
@@ -20,6 +21,9 @@ namespace JumpTo
 			m_MenuFrameLink = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextFrameLink));
 			m_MenuFrameLinkPlural = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextFrameLinkPlural));
 			m_MenuSaveLinks = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextSaveLinks));
+
+			//TEMP
+			m_TitleText = m_ControlTitle.text;
 		}
 
 		protected override Color DetermineNormalTextColor(HierarchyJumpLink link)
@@ -65,7 +69,7 @@ namespace JumpTo
 
 				menu.AddSeparator(string.Empty);
 
-				menu.AddItem(m_MenuRemoveLink, false, RemoveSelected);
+				menu.AddItem(m_MenuRemoveLink, false, RemoveSelectedAndFlag);
 			}
 			else if (selectionCount > 1)
 			{
@@ -80,7 +84,7 @@ namespace JumpTo
 
 				menu.AddSeparator(string.Empty);
 
-				menu.AddItem(m_MenuRemoveLinkPlural, false, RemoveSelected);
+				menu.AddItem(m_MenuRemoveLinkPlural, false, RemoveSelectedAndFlag);
 			}
 
 			menu.ShowAsContext();
@@ -88,19 +92,25 @@ namespace JumpTo
 
 		protected override void ShowTitleContextMenu()
 		{
+			GenericMenu menu = null;
+
+			if (EditorApplication.currentScene != string.Empty &&
+				JumpLinks.Instance.HierarchyLinksChanged)
+			{
+				menu = new GenericMenu();
+				menu.AddItem(m_MenuSaveLinks, false, SaveLinks);
+			}
+
 			if (m_LinkContainer.Links.Count > 0)
 			{
-				GenericMenu menu = new GenericMenu();
+				if (menu == null)
+					menu = new GenericMenu();
 
-				if (EditorApplication.currentScene != string.Empty)
-				{
-					menu.AddItem(m_MenuSaveLinks, false, SaveLinks);
-				}
-
-				menu.AddItem(m_MenuRemoveAll, false, RemoveAll);
-
-				menu.ShowAsContext();
+				menu.AddItem(m_MenuRemoveAll, false, RemoveAllAndFlag);
 			}
+
+			if (menu != null)
+				menu.ShowAsContext();
 		}
 
 		protected override void OnDoubleClick()
@@ -131,11 +141,38 @@ namespace JumpTo
 		{
 			//TODO: detect links to objects not saved in the scene, warn the user
 			SerializationControl.Instance.SaveHierarchyLinks(EditorApplication.currentScene);
+
+			JumpLinks.Instance.HierarchyLinksChanged = false;
 		}
 
 		private bool ValidateSceneView()
 		{
 			return SceneView.lastActiveSceneView != null || SceneView.currentDrawingSceneView != null;
+		}
+
+		//TEMP
+		private void RemoveSelectedAndFlag()
+		{
+			JumpLinks.Instance.HierarchyLinksChanged = true;
+			RemoveSelected();
+		}
+
+		//TEMP
+		private void RemoveAllAndFlag()
+		{
+			JumpLinks.Instance.HierarchyLinksChanged = true;
+			RemoveAll();
+		}
+
+		//TEMP
+		protected override void OnGui()
+		{
+			if (JumpLinks.Instance.HierarchyLinksChanged)
+				m_ControlTitle.text = m_TitleText + '*';
+			else
+				m_ControlTitle.text = m_TitleText;
+
+			base.OnGui();
 		}
 	}
 }

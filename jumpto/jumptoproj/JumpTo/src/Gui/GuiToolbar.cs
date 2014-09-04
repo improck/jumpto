@@ -28,6 +28,8 @@ namespace JumpTo
 
 		protected override void OnGui()
 		{
+			//TODO: dock the window, maximize it, then restore it, null ref exc
+
 			//NOTE: the toolbar style has, by default, a fixed height of 18.
 			//		this must be taken into account when drawing a toolbar
 			GUIStyle style = GraphicAssets.Instance.ToolbarStyle;

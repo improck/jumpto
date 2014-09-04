@@ -233,6 +233,7 @@ namespace JumpTo
 				streamWriter.WriteLine(settings.Visibility);
 				streamWriter.WriteLine(settings.ProjectFirst);
 				streamWriter.WriteLine(settings.Vertical);
+				streamWriter.WriteLine(settings.DividerPosition);
 			}
 		}
 		
@@ -392,6 +393,7 @@ namespace JumpTo
 				settings.Visibility= (JumpToSettings.VisibleList)System.Enum.Parse(typeof(JumpToSettings.VisibleList), streamReader.ReadLine());
 				settings.ProjectFirst = bool.Parse(streamReader.ReadLine());
 				settings.Vertical = bool.Parse(streamReader.ReadLine());
+				settings.DividerPosition = float.Parse(streamReader.ReadLine());
 			}
 		}
 

@@ -82,10 +82,12 @@ namespace JumpTo
 
 		[SerializeField] private ProjectJumpLinkContainer m_ProjectLinkContainer;
 		[SerializeField] private HierarchyJumpLinkContainer m_HierarchyLinkContainer;
+		[SerializeField] private bool m_HierarchyLinksChanged = false;	//TEMP
 
 
 		public ProjectJumpLinkContainer ProjectLinks { get { return m_ProjectLinkContainer; } }
 		public HierarchyJumpLinkContainer HierarchyLinks { get { return m_HierarchyLinkContainer; } }
+		public bool HierarchyLinksChanged { get { return m_HierarchyLinksChanged; } set { m_HierarchyLinksChanged = value; } }	//TEMP
 
 
 		public JumpLinkContainer<T> GetJumpLinkContainer<T>() where T : JumpLink
