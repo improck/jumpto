@@ -57,8 +57,7 @@ namespace JumpTo
 
 
 		private ResLoad()
-		{
-			LoadResources();
+		{	
 		}
 
 		public static void DestroyInstance()
@@ -72,6 +71,10 @@ namespace JumpTo
 		#endregion
 
 
+		private Dictionary<int, string> m_TextResources = new Dictionary<int, string>();
+		private Dictionary<int, Texture2D> m_ImageResources = new Dictionary<int, Texture2D>();
+
+
 		public string GetText(int textId)
 		{
 			return m_TextResources[textId];
@@ -82,12 +85,7 @@ namespace JumpTo
 			return m_ImageResources[imageId];
 		}
 
-
-		private Dictionary<int, string> m_TextResources = new Dictionary<int, string>();
-		private Dictionary<int, Texture2D> m_ImageResources = new Dictionary<int, Texture2D>();
-
-
-		private void LoadResources()
+		public void LoadResources()
 		{
 			//text resources
 			//LoadDefaultText();
@@ -152,6 +150,7 @@ namespace JumpTo
 
 				Texture2D texture = new Texture2D(4, 4);
 				texture.LoadImage(fileBytes);
+				texture.hideFlags = HideFlags.HideAndDontSave;
 
 				int fileNameHash = fileName.GetHashCode();
 				if (m_ImageResources.ContainsKey(fileNameHash))

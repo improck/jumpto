@@ -10,28 +10,18 @@ namespace SceneStateDetection
 	{
 		public static string[] OnWillSaveAssets(string[] assetPaths)
 		{
-			UnityEngine.Debug.Log("OnWillSaveAssets(): " + assetPaths.Length);
-			//NOTE: OnWillSaveAssets() gets called on Save As, but assetPaths
-			//		is empty (0 length). A few posts on the Internet say that
-			//		this can happen under other circumstances as well. Treating
-			//		it like a scene save anyway, just in case.
-			//if (assetPaths == null || assetPaths.Length == 0)
-			//{
-			//	SceneStateControl.SceneWillSave();
-			//}
-			////for a regular asset save
-			//else
+			//UnityEngine.Debug.Log("OnWillSaveAssets(): " + assetPaths.Length);
+			
+			//linear search for a scene asset within the paths
+			for (int i = 0; i < assetPaths.Length; i++)
 			{
-				//linear search for a scene asset within the paths
-				for (int i = 0; i < assetPaths.Length; i++)
+				if (assetPaths[i].EndsWith(".unity"))
 				{
-					if (assetPaths[i].EndsWith(".unity"))
-					{
-						//signal that a scene is about to be saved, then
-						//	stop searching
-						SceneStateControl.SceneWillSave(assetPaths[i]);
-						break;
-					}
+					//signal that a scene is about to be saved, then
+					//	stop searching since you can only have one
+					//	scene open at a time (for now)
+					SceneStateControl.SceneWillSave(assetPaths[i]);
+					break;
 				}
 			}
 

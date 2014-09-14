@@ -29,7 +29,7 @@ using SceneStateDetection;
 //xTODO: load images from assembly resources
 //xTODO: save the divider placement to settings
 //xTODO: make some indicator of hierarchy links save state
-//TODO: bug! hamburger icon is null when window is open on startup
+//xTODO: bug! hamburger icon is null when window is open on startup
 //TODO: find the minimum editorwindow width
 //TODO: comment all of this code
 
@@ -118,6 +118,8 @@ public class JumpToEditorWindow : EditorWindow
 
 		SerializationControl.CreateInstance();
 
+		ResLoad.Instance.LoadResources();
+
 		EditorApplication.projectWindowChanged += OnProjectWindowChange;
 		EditorApplication.hierarchyWindowChanged += OnHierarchyWindowChange;
 		SceneStateControl.OnSceneLoaded += OnSceneLoaded;
@@ -161,13 +163,15 @@ public class JumpToEditorWindow : EditorWindow
 		EditorApplication.hierarchyWindowChanged -= OnHierarchyWindowChange;
 		SceneStateControl.OnSceneLoaded -= OnSceneLoaded;
 
+		m_Initialized = false;
+
 		Debug.Log("OnDisable()");
 	}
 
-	void OnLostFocus()
-	{
-		Debug.Log("OnLostFocus()");
-	}
+	//void OnLostFocus()
+	//{
+	//	Debug.Log("OnLostFocus()");
+	//}
 
 	//NOT called when unity editor is closed
 	//called when window is closed
@@ -264,7 +268,7 @@ public class JumpToEditorWindow : EditorWindow
 
 	private void OnProjectWindowChange()
 	{
-		Debug.Log("Project Window Changed");
+		//Debug.Log("Project Window Changed");
 		m_JumpLinks.RefreshProjectLinks();
 		Repaint();
 	}
@@ -278,7 +282,7 @@ public class JumpToEditorWindow : EditorWindow
 		{
 			m_LastHierarchyRefreshTime = EditorApplication.timeSinceStartup;
 
-			Debug.Log("Hierarchy Window Changed");
+			//Debug.Log("Hierarchy Window Changed");
 			m_JumpLinks.RefreshHierarchyLinks();
 			Repaint();
 		}

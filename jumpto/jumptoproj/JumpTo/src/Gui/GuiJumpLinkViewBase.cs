@@ -105,6 +105,7 @@ namespace JumpTo
 			case EventType.Repaint:
 				{
 					GraphicAssets.Instance.LinkViewTitleStyle.Draw(m_DrawRect, m_ControlTitle, false, false, false, false);
+
 					GUI.DrawTexture(m_ControlRect, m_IconHamburger);
 				}
 				break;
@@ -317,6 +318,7 @@ namespace JumpTo
 					m_DragOwner = true;
 
 					//Debug.Log("Start Drag");
+					DragAndDrop.PrepareStartDrag();
 					DragAndDrop.objectReferences = m_LinkContainer.SelectedLinkReferences;
 					DragAndDrop.StartDrag("Project Reference(s)");
 					//NOTE: tried to set the visual mode here. always got reset to none.
@@ -386,6 +388,9 @@ namespace JumpTo
 				currentEvent.Use();
 
 				m_Window.Repaint();
+
+				//reset the drag and drop data
+				DragAndDrop.PrepareStartDrag();
 			}
 		}
 

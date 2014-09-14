@@ -41,7 +41,7 @@ namespace SceneStateDetection
 			//NOTE: for Save As, the currentScene has not been updated at
 			//		this point.
 			//string currentScene = EditorApplication.currentScene;
-			Debug.Log("Scene Will Save: " + s_SceneAssetSavePath + "\n" + AssetDatabase.AssetPathToGUID(s_SceneAssetSavePath));
+			//Debug.Log("Scene Will Save: " + s_SceneAssetSavePath + "\n" + AssetDatabase.AssetPathToGUID(s_SceneAssetSavePath));
 
 			if (OnSceneWillSave != null)
 				OnSceneWillSave(s_SceneAssetSavePath);
@@ -65,8 +65,8 @@ namespace SceneStateDetection
 
 		private static void DelayedSceneSave()
 		{
-			string currentScene = EditorApplication.currentScene;
-			Debug.Log("Delayed Scene Save: " + currentScene + "\n" + AssetDatabase.AssetPathToGUID(currentScene));
+			//string currentScene = EditorApplication.currentScene;
+			//Debug.Log("Delayed Scene Save: " + currentScene + "\n" + AssetDatabase.AssetPathToGUID(currentScene));
 
 			if (OnSceneSaved != null)
 				OnSceneSaved(s_SceneAssetSavePath);
@@ -82,15 +82,15 @@ namespace SceneStateDetection
 
 		private static void DelayedSceneLoad()
 		{
-			string currentScene = EditorApplication.currentScene;
-			if (!string.IsNullOrEmpty(currentScene))
-			{
-				Debug.Log("Delayed Scene Load: " + currentScene + "\n" + AssetDatabase.AssetPathToGUID(currentScene));
-			}
-			else
-			{
-				Debug.Log("Delayed Scene Load: (Unsaved)");
-			}
+			//string currentScene = EditorApplication.currentScene;
+			//if (!string.IsNullOrEmpty(currentScene))
+			//{
+			//	Debug.Log("Delayed Scene Load: " + currentScene + "\n" + AssetDatabase.AssetPathToGUID(currentScene));
+			//}
+			//else
+			//{
+			//	Debug.Log("Delayed Scene Load: (Unsaved)");
+			//}
 
 			//if the hierarchy changed prior to the delayed scene load
 			//	then the scene load was the result of a scene asset being
@@ -99,15 +99,15 @@ namespace SceneStateDetection
 			//	NOT call the hierarchyWindowChanged event
 			if (s_Instance.m_HierarchyChanged)
 			{
-				Debug.Log("Hierarchy has changed");
+				//Debug.Log("Hierarchy has changed");
 
 				s_Instance.m_HierarchyChanged = false;
 
 				if (OnSceneLoaded != null)
 					OnSceneLoaded(EditorApplication.currentScene);
 			}
-			else
-				Debug.Log("Hierarchy has NOT changed");
+			//else
+			//	Debug.Log("Hierarchy has NOT changed");
 
 			EditorApplication.hierarchyWindowChanged -= OnHierarchyWindowChanged;
 		}

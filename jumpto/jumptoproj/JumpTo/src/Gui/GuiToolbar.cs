@@ -6,7 +6,7 @@ namespace JumpTo
 {
 	public class GuiToolbar : GuiBase
 	{
-		private RectRef m_DrawRect = new RectRef();
+		private Rect m_DrawRect;
 
 		private GUIContent m_FirstStateContent = new GUIContent();
 		private GUIContent m_OrientationContent = new GUIContent();
@@ -33,6 +33,8 @@ namespace JumpTo
 			//NOTE: the toolbar style has, by default, a fixed height of 18.
 			//		this must be taken into account when drawing a toolbar
 			GUIStyle style = GraphicAssets.Instance.ToolbarStyle;
+			if (style == null)
+				Debug.Log("style is null");
 			m_DrawRect.Set(0.0f, style.contentOffset.y, m_Size.x, style.fixedHeight);
 			GUI.Box(m_DrawRect, GUIContent.none, style);
 

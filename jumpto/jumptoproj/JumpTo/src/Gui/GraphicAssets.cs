@@ -113,20 +113,6 @@ namespace JumpTo
 			IconProjectView = EditorGUIUtility.FindTexture("Project");
 			IconHierarchyView = EditorGUIUtility.FindTexture("UnityEditor.HierarchyWindow");
 			
-			//TODO: load this from an embedded image
-			//m_Outline = new Texture2D(32, 32, TextureFormat.RGBA32, false);
-			//Color[] outline = new Color[32 * 32];
-			//for (int i = 0; i < 32; i++)
-			//{
-			//	outline[i] = Color.black;
-			//	outline[i * 32] = Color.black;
-			//	outline[i * 32 + 31] = Color.black;
-			//	outline[32 * 31 + i] = Color.black;
-			//}
-			//m_Outline.SetPixels(outline);
-			//m_Outline.Apply();
-			//m_Outline.hideFlags = HideFlags.HideAndDontSave;
-
 			if (EditorGUIUtility.isProSkin)
 			{
 				LinkTextColors = new Color[]
