@@ -10,30 +10,10 @@ namespace JumpTo
 	//TODO: all auto-saving of hierarchy links is disabled. not enough info from unity editor to make it work.
 	public class SerializationControl
 	{
-		#region Singleton
-		private static SerializationControl s_Instance = null;
-
-		public static SerializationControl Instance { get { CreateInstance(); return s_Instance; } }
-
-		public static void CreateInstance()
-		{
-			if (s_Instance == null)
-				s_Instance = new SerializationControl();
-		}
-
-		public static void DestroyInstance()
-		{
-			if (s_Instance != null)
-			{
-				s_Instance.CleanUp();
-				s_Instance = null;
-			}
-		}
-		#endregion
-
 		private string m_SaveDirectory = string.Empty;
 		private string m_HierarchySaveDirectory = string.Empty;
 		private string[] m_HierarchyLinkPaths = null;
+		private JumpToEditorWindow m_Window = null;
 
 
 		private const string ProjectLinksSaveFile = "projectlinks";
@@ -41,30 +21,22 @@ namespace JumpTo
 		private const string SaveFileExtension = ".jumpto";
 
 
-		public SerializationControl()
+		public void Initialize(JumpToEditorWindow window)
 		{
+			m_Window = window;
+
 			SceneStateControl.OnSceneWillSave += OnSceneWillSave;
 			//SceneStateControl.OnSceneWillLoad += OnSceneWillLoad;
 			//SceneStateControl.OnSceneSaved += OnSceneSaved;
 			SceneStateControl.OnSceneLoaded += OnSceneLoaded;
-
-			//JumpToEditorWindow.OnWindowOpen += OnWindowOpen;
-			JumpToEditorWindow.OnWillEnable += OnWindowEnable;
-			JumpToEditorWindow.OnWillDisable += OnWindowDisable;
-			JumpToEditorWindow.OnWillClose += OnWindowClose;
 		}
 
-		private void CleanUp()
+		public void Uninitialize()
 		{
 			SceneStateControl.OnSceneWillSave -= OnSceneWillSave;
 			//SceneStateControl.OnSceneWillLoad -= OnSceneWillLoad;
 			//SceneStateControl.OnSceneSaved -= OnSceneSaved;
 			SceneStateControl.OnSceneLoaded -= OnSceneLoaded;
-
-			//JumpToEditorWindow.OnWindowOpen -= OnWindowOpen;
-			JumpToEditorWindow.OnWillEnable -= OnWindowEnable;
-			JumpToEditorWindow.OnWillDisable -= OnWindowDisable;
-			JumpToEditorWindow.OnWillClose -= OnWindowClose;
 		}
 
 		private void OnSceneWillSave(string sceneAssetPath)
@@ -76,7 +48,7 @@ namespace JumpTo
 
 				//TODO: objects that are new in the scene have not been
 				//		assigned a localidinfile at this point, so they
-				//		will save as zero.
+				//		will not save.
 				//GetHierarchyLinkPaths();
 			}
 		}
@@ -130,24 +102,29 @@ namespace JumpTo
 		//	//LoadHierarchyLinks();
 		//}
 
-		private void OnWindowEnable()
+		public void OnWindowEnable()
 		{
 			SetSaveDirectoryPaths();
 
 			LoadSettings();
 
-			if (JumpLinks.Instance.GetJumpLinkContainer<ProjectJumpLink>().Links.Count == 0)
+			if (m_Window.JumpLinksInstance.GetJumpLinkContainer<ProjectJumpLink>().Links.Count == 0)
 			{
 				LoadProjectLinks();
 			}
 
-			if (JumpLinks.Instance.GetJumpLinkContainer<HierarchyJumpLink>().Links.Count == 0)
+			if (m_Window.JumpLinksInstance.GetJumpLinkContainer<HierarchyJumpLink>().Links.Count == 0)
 			{
-				EditorApplication.delayCall += LoadHierarchyLinks;
+				EditorApplication.delayCall += 
+					delegate()
+					{
+						LoadHierarchyLinks();
+						m_Window.Repaint();
+					};
 			}
 		}
 
-		private void OnWindowDisable()
+		public void OnWindowDisable()
 		{
 			if (CreateSaveDirectories())
 			{
@@ -156,7 +133,7 @@ namespace JumpTo
 			}
 		}
 
-		private void OnWindowClose()
+		public void OnWindowClose()
 		{
 			if (CreateSaveDirectories())
 			{
@@ -174,7 +151,7 @@ namespace JumpTo
 		private void SaveProjectLinks()
 		{
 			string filePath = m_SaveDirectory + ProjectLinksSaveFile + SaveFileExtension;
-			Object[] linkReferences = JumpLinks.Instance.GetJumpLinkContainer<ProjectJumpLink>().AllLinkReferences;
+			Object[] linkReferences = m_Window.JumpLinksInstance.GetJumpLinkContainer<ProjectJumpLink>().AllLinkReferences;
 			if (linkReferences != null)
 			{
 				//TODO: error handling
@@ -213,7 +190,9 @@ namespace JumpTo
 				{
 					for (int i = 0; i < m_HierarchyLinkPaths.Length; i++)
 					{
-						streamWriter.WriteLine(m_HierarchyLinkPaths[i]);
+						if (m_HierarchyLinkPaths[i] != null &&
+							m_HierarchyLinkPaths[i].Length > 0)
+							streamWriter.WriteLine(m_HierarchyLinkPaths[i]);
 					}
 				}
 			}
@@ -228,7 +207,7 @@ namespace JumpTo
 			string filePath = m_SaveDirectory + SettingsSaveFile + SaveFileExtension;
 			using (StreamWriter streamWriter = new StreamWriter(filePath))
 			{
-				JumpToSettings settings = JumpToSettings.Instance;
+				JumpToSettings settings = m_Window.JumpToSettingsInstance;
 
 				streamWriter.WriteLine(settings.Visibility);
 				streamWriter.WriteLine(settings.ProjectFirst);
@@ -243,7 +222,7 @@ namespace JumpTo
 			if (!File.Exists(filePath))
 				return;
 
-			JumpLinkContainer<ProjectJumpLink> links = JumpLinks.Instance.GetJumpLinkContainer<ProjectJumpLink>();
+			JumpLinkContainer<ProjectJumpLink> links = m_Window.JumpLinksInstance.GetJumpLinkContainer<ProjectJumpLink>();
 			links.RemoveAll();
 
 			//TODO: error handling
@@ -254,7 +233,7 @@ namespace JumpTo
 				string path;
 				while (!streamReader.EndOfStream)
 				{
-					JumpLinks jumpLinks = JumpLinks.Instance;
+					JumpLinks jumpLinks = m_Window.JumpLinksInstance;
 
 					line = streamReader.ReadLine();
 					if (line.Length == 32)
@@ -290,7 +269,7 @@ namespace JumpTo
 
 		private void LoadHierarchyLinks()
 		{
-			HierarchyJumpLinkContainer links = JumpLinks.Instance.HierarchyLinks;
+			HierarchyJumpLinkContainer links = m_Window.JumpLinksInstance.HierarchyLinks;
 			links.RemoveAll();
 
 			string currentScene = EditorApplication.currentScene;
@@ -319,9 +298,12 @@ namespace JumpTo
 				SerializedObject serializedObject;
 				while (!streamReader.EndOfStream)
 				{
-					JumpLinks jumpLinks = JumpLinks.Instance;
+					JumpLinks jumpLinks = m_Window.JumpLinksInstance;
 
 					line = streamReader.ReadLine();
+					if (line == null || line.Length == 0)
+						continue;
+
 					pipeLoc = line.LastIndexOf('|');
 					transPath = line.Substring(0, pipeLoc);
 					localId = int.Parse(line.Substring(pipeLoc + 1));
@@ -389,7 +371,7 @@ namespace JumpTo
 
 			using (StreamReader streamReader = new StreamReader(filePath))
 			{
-				JumpToSettings settings = JumpToSettings.Instance;
+				JumpToSettings settings = m_Window.JumpToSettingsInstance;
 				settings.Visibility= (JumpToSettings.VisibleList)System.Enum.Parse(typeof(JumpToSettings.VisibleList), streamReader.ReadLine());
 				settings.ProjectFirst = bool.Parse(streamReader.ReadLine());
 				settings.Vertical = bool.Parse(streamReader.ReadLine());
@@ -511,7 +493,7 @@ namespace JumpTo
 		{
 			m_HierarchyLinkPaths = null;
 
-			Object[] linkReferences = JumpLinks.Instance.HierarchyLinks.AllLinkReferences;
+			Object[] linkReferences = m_Window.JumpLinksInstance.HierarchyLinks.AllLinkReferences;
 			if (linkReferences != null)
 			{
 				SerializedObject serializedObject;

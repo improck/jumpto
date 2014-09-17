@@ -5,18 +5,8 @@ using System.IO;
 
 namespace JumpTo
 {
-	public class JumpToSettings : ScriptableObject
+	public class JumpToSettings : EditorScriptableObject<JumpToSettings>
 	{
-		#region Pseudo-Singleton
-		private static JumpToSettings s_Instance = null;
-
-		public static JumpToSettings Instance { get { return s_Instance; } /*set { s_Instance = value; }*/ }
-
-
-		protected JumpToSettings() { s_Instance = this; }
-		#endregion
-
-
 		[System.Serializable]
 		public enum VisibleList
 		{
@@ -36,14 +26,5 @@ namespace JumpTo
 		public bool ProjectFirst { get { return m_ProjectFirst; } set { m_ProjectFirst = value; } }
 		public bool Vertical { get { return m_Vertical; } set { m_Vertical = value; } }
 		public float DividerPosition { get { return m_DividerPosition; } set { m_DividerPosition = value; } }
-
-
-		public static JumpToSettings Create()
-		{
-			JumpToSettings instance = ScriptableObject.CreateInstance<JumpToSettings>();
-			instance.hideFlags = HideFlags.HideAndDontSave;
-
-			return instance;
-		}
 	}
 }

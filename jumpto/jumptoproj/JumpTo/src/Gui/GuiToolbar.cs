@@ -14,12 +14,16 @@ namespace JumpTo
 		private int m_SelectedView = 0;
 		private GUIContent[] m_ViewContent = new GUIContent[3];
 
+		private JumpToEditorWindow m_Window;
+
 
 		public override void OnWindowEnable(EditorWindow window)
 		{
-			m_ViewContent[0] = new GUIContent(ResLoad.Instance.GetText(ResId.MenuProjectView));
-			m_ViewContent[1] = new GUIContent(ResLoad.Instance.GetText(ResId.MenuHierarchyView));
-			m_ViewContent[2] = new GUIContent(ResLoad.Instance.GetText(ResId.MenuBothView));
+			m_Window = window as JumpToEditorWindow;
+
+			m_ViewContent[0] = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuProjectView));
+			m_ViewContent[1] = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuHierarchyView));
+			m_ViewContent[2] = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuBothView));
 
 			RefreshFirstStateButton();
 			RefreshOrientationButton();
@@ -28,8 +32,6 @@ namespace JumpTo
 
 		protected override void OnGui()
 		{
-			//TODO: dock the window, maximize it, then restore it, null ref exc
-
 			//NOTE: the toolbar style has, by default, a fixed height of 18.
 			//		this must be taken into account when drawing a toolbar
 			GUIStyle style = GraphicAssets.Instance.ToolbarStyle;
@@ -44,7 +46,7 @@ namespace JumpTo
 			style = GraphicAssets.Instance.ToolbarButtonStyle;
 			if (GUI.Button(m_DrawRect, m_FirstStateContent, style))
 			{
-				JumpToSettings.Instance.ProjectFirst = !JumpToSettings.Instance.ProjectFirst;
+				m_Window.JumpToSettingsInstance.ProjectFirst = !m_Window.JumpToSettingsInstance.ProjectFirst;
 				RefreshFirstStateButton();
 			}
 
@@ -53,7 +55,7 @@ namespace JumpTo
 			m_DrawRect.width = 24.0f;
 			if (GUI.Button(m_DrawRect, m_OrientationContent, style))
 			{
-				JumpToSettings.Instance.Vertical = !JumpToSettings.Instance.Vertical;
+				m_Window.JumpToSettingsInstance.Vertical = !m_Window.JumpToSettingsInstance.Vertical;
 				RefreshOrientationButton();
 			}
 
@@ -65,7 +67,7 @@ namespace JumpTo
 			//m_DrawRect.x += m_DrawRect.width;
 			//if (GUI.Button(m_DrawRect, "Load", style))
 			//{
-			//	m_SelectedView = (int)JumpToSettings.Instance.Visibility;
+			//	m_SelectedView = (int)m_Window.JumpToSettingsInstance.Visibility;
 			//}
 
 			//draw visibility popup
@@ -75,41 +77,41 @@ namespace JumpTo
 			m_SelectedView = EditorGUI.Popup(m_DrawRect, m_SelectedView, m_ViewContent, style);
 			if (GUI.changed)
 			{
-				JumpToSettings.Instance.Visibility = (JumpToSettings.VisibleList)m_SelectedView;
+				m_Window.JumpToSettingsInstance.Visibility = (JumpToSettings.VisibleList)m_SelectedView;
 			}
 		}
 
 		private void RefreshFirstStateButton()
 		{
-			if (JumpToSettings.Instance.ProjectFirst)
+			if (m_Window.JumpToSettingsInstance.ProjectFirst)
 			{
-				m_FirstStateContent.tooltip = ResLoad.Instance.GetText(ResId.TooltipProjectFirst);
+				m_FirstStateContent.tooltip = JumpToResources.Instance.GetText(ResId.TooltipProjectFirst);
 				m_FirstStateContent.image = GraphicAssets.Instance.IconProjectView;
 			}
 			else
 			{
-				m_FirstStateContent.tooltip = ResLoad.Instance.GetText(ResId.TooltipHierarchyFirst);
+				m_FirstStateContent.tooltip = JumpToResources.Instance.GetText(ResId.TooltipHierarchyFirst);
 				m_FirstStateContent.image = GraphicAssets.Instance.IconHierarchyView;
 			}
 		}
 
 		private void RefreshOrientationButton()
 		{
-			if (JumpToSettings.Instance.Vertical)
+			if (m_Window.JumpToSettingsInstance.Vertical)
 			{
-				m_OrientationContent.tooltip = ResLoad.Instance.GetText(ResId.TooltipVertical);
-				m_OrientationContent.image = ResLoad.Instance.GetImage(ResId.ImageVerticalView);
+				m_OrientationContent.tooltip = JumpToResources.Instance.GetText(ResId.TooltipVertical);
+				m_OrientationContent.image = JumpToResources.Instance.GetImage(ResId.ImageVerticalView);
 			}
 			else
 			{
-				m_OrientationContent.tooltip = ResLoad.Instance.GetText(ResId.TooltipHorizontal);
-				m_OrientationContent.image = ResLoad.Instance.GetImage(ResId.ImageHorizontalView);
+				m_OrientationContent.tooltip = JumpToResources.Instance.GetText(ResId.TooltipHorizontal);
+				m_OrientationContent.image = JumpToResources.Instance.GetImage(ResId.ImageHorizontalView);
 			}
 		}
 
 		private void RefreshVisibilityPopup()
 		{
-			m_SelectedView = (int)JumpToSettings.Instance.Visibility;
+			m_SelectedView = (int)m_Window.JumpToSettingsInstance.Visibility;
 		}
 	}
 }

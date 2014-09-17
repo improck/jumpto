@@ -14,7 +14,10 @@ namespace SceneStateDetection
 
 		public static SceneStateControl Create()
 		{
-			return new SceneStateControl();
+			if (s_Instance == null)
+				s_Instance = new SceneStateControl();
+
+			return s_Instance;
 		}
 
 
@@ -27,14 +30,14 @@ namespace SceneStateDetection
 		public static event System.Action			OnSceneWillLoad;
 		public static event System.Action<string>	OnSceneLoaded;
 
-		private static string s_SceneAssetSavePath = string.Empty;
+		//private static string s_SceneAssetSavePath = string.Empty;
 
 		[SerializeField] private bool m_HierarchyChanged = false;
 		
 		
 		public static void SceneWillSave(string sceneAssetPath)
 		{
-			s_SceneAssetSavePath = sceneAssetPath;
+			//s_SceneAssetSavePath = sceneAssetPath;
 
 			SceneLoadDetector.TemporarilyDestroyInstance();
 
@@ -44,9 +47,18 @@ namespace SceneStateDetection
 			//Debug.Log("Scene Will Save: " + s_SceneAssetSavePath + "\n" + AssetDatabase.AssetPathToGUID(s_SceneAssetSavePath));
 
 			if (OnSceneWillSave != null)
-				OnSceneWillSave(s_SceneAssetSavePath);
+				OnSceneWillSave(sceneAssetPath);
 
-			EditorApplication.delayCall += DelayedSceneSave;
+			EditorApplication.delayCall += 
+				delegate()
+				{
+					//string currentScene = EditorApplication.currentScene;
+					//Debug.Log("Delayed Scene Save: " + currentScene + "\n" + AssetDatabase.AssetPathToGUID(currentScene));
+
+					if (OnSceneSaved != null)
+						OnSceneSaved(sceneAssetPath);
+				};
+			//DelayedSceneSave;
 		}
 
 		public static void SceneIsUnloading()
@@ -60,18 +72,39 @@ namespace SceneStateDetection
 
 		public static void SceneWillLoad()
 		{	
-			EditorApplication.delayCall += DelayedSceneLoad;
-		}
+			EditorApplication.delayCall +=
+				delegate()
+				{
+					//string currentScene = EditorApplication.currentScene;
+					//if (!string.IsNullOrEmpty(currentScene))
+					//{
+					//	Debug.Log("Delayed Scene Load: " + currentScene + "\n" + AssetDatabase.AssetPathToGUID(currentScene));
+					//}
+					//else
+					//{
+					//	Debug.Log("Delayed Scene Load: (Unsaved)");
+					//}
 
-		private static void DelayedSceneSave()
-		{
-			//string currentScene = EditorApplication.currentScene;
-			//Debug.Log("Delayed Scene Save: " + currentScene + "\n" + AssetDatabase.AssetPathToGUID(currentScene));
+					//if the hierarchy changed prior to the delayed scene load
+					//	then the scene load was the result of a scene asset being
+					//	opened or a new scene being created. else, it was triggered
+					//	by an assembly reload which deserializes the scene but does
+					//	NOT call the hierarchyWindowChanged event
+					if (s_Instance.m_HierarchyChanged)
+					{
+						//Debug.Log("Hierarchy has changed");
 
-			if (OnSceneSaved != null)
-				OnSceneSaved(s_SceneAssetSavePath);
+						s_Instance.m_HierarchyChanged = false;
 
-			s_SceneAssetSavePath = string.Empty;
+						if (OnSceneLoaded != null)
+							OnSceneLoaded(EditorApplication.currentScene);
+					}
+					//else
+					//	Debug.Log("Hierarchy has NOT changed");
+
+					EditorApplication.hierarchyWindowChanged -= OnHierarchyWindowChanged;
+				};
+			//DelayedSceneLoad;
 		}
 
 		private static void OnHierarchyWindowChanged()
@@ -80,36 +113,47 @@ namespace SceneStateDetection
 			EditorApplication.hierarchyWindowChanged -= OnHierarchyWindowChanged;
 		}
 
-		private static void DelayedSceneLoad()
-		{
-			//string currentScene = EditorApplication.currentScene;
-			//if (!string.IsNullOrEmpty(currentScene))
-			//{
-			//	Debug.Log("Delayed Scene Load: " + currentScene + "\n" + AssetDatabase.AssetPathToGUID(currentScene));
-			//}
-			//else
-			//{
-			//	Debug.Log("Delayed Scene Load: (Unsaved)");
-			//}
+		//private static void DelayedSceneSave()
+		//{
+		//	//string currentScene = EditorApplication.currentScene;
+		//	//Debug.Log("Delayed Scene Save: " + currentScene + "\n" + AssetDatabase.AssetPathToGUID(currentScene));
 
-			//if the hierarchy changed prior to the delayed scene load
-			//	then the scene load was the result of a scene asset being
-			//	opened or a new scene being created. else, it was triggered
-			//	by an assembly reload which deserializes the scene but does
-			//	NOT call the hierarchyWindowChanged event
-			if (s_Instance.m_HierarchyChanged)
-			{
-				//Debug.Log("Hierarchy has changed");
+		//	if (OnSceneSaved != null)
+		//		OnSceneSaved(s_SceneAssetSavePath);
 
-				s_Instance.m_HierarchyChanged = false;
+		//	s_SceneAssetSavePath = string.Empty;
+		//}
 
-				if (OnSceneLoaded != null)
-					OnSceneLoaded(EditorApplication.currentScene);
-			}
-			//else
-			//	Debug.Log("Hierarchy has NOT changed");
+		//private static void DelayedSceneLoad()
+		//{
+		//	//string currentScene = EditorApplication.currentScene;
+		//	//if (!string.IsNullOrEmpty(currentScene))
+		//	//{
+		//	//	Debug.Log("Delayed Scene Load: " + currentScene + "\n" + AssetDatabase.AssetPathToGUID(currentScene));
+		//	//}
+		//	//else
+		//	//{
+		//	//	Debug.Log("Delayed Scene Load: (Unsaved)");
+		//	//}
 
-			EditorApplication.hierarchyWindowChanged -= OnHierarchyWindowChanged;
-		}
+		//	//if the hierarchy changed prior to the delayed scene load
+		//	//	then the scene load was the result of a scene asset being
+		//	//	opened or a new scene being created. else, it was triggered
+		//	//	by an assembly reload which deserializes the scene but does
+		//	//	NOT call the hierarchyWindowChanged event
+		//	if (s_Instance.m_HierarchyChanged)
+		//	{
+		//		//Debug.Log("Hierarchy has changed");
+
+		//		s_Instance.m_HierarchyChanged = false;
+
+		//		if (OnSceneLoaded != null)
+		//			OnSceneLoaded(EditorApplication.currentScene);
+		//	}
+		//	//else
+		//	//	Debug.Log("Hierarchy has NOT changed");
+
+		//	EditorApplication.hierarchyWindowChanged -= OnHierarchyWindowChanged;
+		//}
 	}
 }

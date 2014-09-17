@@ -7,10 +7,8 @@ namespace JumpTo
 {
 	public abstract class JumpLinkContainer<T> : ScriptableObject where T : JumpLink
 	{
-		[SerializeField]
-		protected List<T> m_Links = new List<T>();
-		[SerializeField]
-		protected int m_ActiveSelection = -1;
+		[SerializeField] protected List<T> m_Links = new List<T>();
+		[SerializeField] protected int m_ActiveSelection = -1;
 
 
 		public List<T> Links { get { return m_Links; } }
@@ -117,6 +115,9 @@ namespace JumpTo
 		}
 
 
+		public event System.Action OnLinksChanged;
+
+
 		public abstract void AddLink(UnityEngine.Object linkReference, PrefabType prefabType);
 		protected abstract void UpdateLinkInfo(T link, PrefabType prefabType);
 
@@ -133,6 +134,9 @@ namespace JumpTo
 			{
 				m_Links[i].Area.y = i * GraphicAssets.LinkHeight;
 			}
+
+			if (OnLinksChanged != null)
+				OnLinksChanged();
 		}
 
 		public void RemoveSelected()
@@ -149,6 +153,9 @@ namespace JumpTo
 			m_ActiveSelection = -1;
 
 			RefreshLinksY();
+
+			if (OnLinksChanged != null)
+				OnLinksChanged();
 		}
 
 		public void RemoveNonSelected()
@@ -167,12 +174,18 @@ namespace JumpTo
 			m_ActiveSelection = m_Links.IndexOf(active);
 
 			RefreshLinksY();
+
+			if (OnLinksChanged != null)
+				OnLinksChanged();
 		}
 
 		public void RemoveAll()
 		{
 			m_Links.Clear();
 			m_ActiveSelection = -1;
+
+			if (OnLinksChanged != null)
+				OnLinksChanged();
 		}
 
 		public void MoveLink(int from, int to)
@@ -211,6 +224,9 @@ namespace JumpTo
 			{
 				m_Links[min].Area.y = min * GraphicAssets.LinkHeight;
 			}
+
+			if (OnLinksChanged != null)
+				OnLinksChanged();
 		}
 
 		public void MoveSelected(int to)
@@ -250,6 +266,9 @@ namespace JumpTo
 
 			//fix all of the y-positions
 			RefreshLinksY();
+
+			if (OnLinksChanged != null)
+				OnLinksChanged();
 		}
 
 		public void LinkSelectionSet(int index)
@@ -408,6 +427,12 @@ namespace JumpTo
 			}
 
 			return false;
+		}
+
+		protected void RaiseOnLinksChanged()
+		{
+			if (OnLinksChanged != null)
+				OnLinksChanged();
 		}
 	}
 }

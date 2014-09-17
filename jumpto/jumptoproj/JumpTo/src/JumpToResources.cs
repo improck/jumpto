@@ -48,17 +48,15 @@ namespace JumpTo
 		public static readonly int ImageHamburger = "hamburger.png".GetHashCode();
 	}
 
-	public class ResLoad
+	public class JumpToResources
 	{
 		#region Singleton
-		private static ResLoad s_Instance = null;
+		private static JumpToResources s_Instance = null;
 
-		public static ResLoad Instance { get { if (s_Instance == null) { s_Instance = new ResLoad(); } return s_Instance; } }
+		public static JumpToResources Instance { get { if (s_Instance == null) { s_Instance = new JumpToResources(); } return s_Instance; } }
 
 
-		private ResLoad()
-		{	
-		}
+		private JumpToResources() { }
 
 		public static void DestroyInstance()
 		{
@@ -92,6 +90,9 @@ namespace JumpTo
 			switch (Application.systemLanguage)
 			{
 			case SystemLanguage.English:
+				LoadText("jumptolang_en.txt");
+				break;
+			default:
 				LoadText("jumptolang_en.txt");
 				break;
 			}
@@ -143,59 +144,55 @@ namespace JumpTo
 
 		private void LoadImage(string fileName)
 		{
-			using (Stream resStream = this.GetType().Assembly.GetManifestResourceStream("JumpTo.res.image." + fileName))
+			int fileNameHash = fileName.GetHashCode();
+			if (!m_ImageResources.ContainsKey(fileNameHash))
 			{
-				byte[] fileBytes = new byte[resStream.Length];
-				resStream.Read(fileBytes, 0, fileBytes.Length);
-
-				Texture2D texture = new Texture2D(4, 4);
-				texture.LoadImage(fileBytes);
-				texture.hideFlags = HideFlags.HideAndDontSave;
-
-				int fileNameHash = fileName.GetHashCode();
-				if (m_ImageResources.ContainsKey(fileNameHash))
+				using (Stream resStream = this.GetType().Assembly.GetManifestResourceStream("JumpTo.res.image." + fileName))
 				{
-					m_ImageResources[fileNameHash] = texture;
-				}
-				else
-				{
+					byte[] fileBytes = new byte[resStream.Length];
+					resStream.Read(fileBytes, 0, fileBytes.Length);
+
+					Texture2D texture = new Texture2D(4, 4);
+					texture.LoadImage(fileBytes);
+					texture.hideFlags = HideFlags.HideAndDontSave;
+
 					m_ImageResources.Add(fileNameHash, texture);
 				}
 			}
 		}
 
-		private void LoadDefaultText()
-		{
-			m_TextResources.Add(ResId.LabelProjectLinks, "Project Links");
-			m_TextResources.Add(ResId.LabelHierarchyLinks, "Hierarchy Links");
+		//private void LoadDefaultText()
+		//{
+		//	m_TextResources.Add(ResId.LabelProjectLinks, "Project Links");
+		//	m_TextResources.Add(ResId.LabelHierarchyLinks, "Hierarchy Links");
 
-			m_TextResources.Add(ResId.TooltipProjectFirst, "Project First");
-			m_TextResources.Add(ResId.TooltipHierarchyFirst, "Hierarchy First");
-			m_TextResources.Add(ResId.TooltipVertical, "Vertical Orientation");
-			m_TextResources.Add(ResId.TooltipHorizontal, "Horizontal Orientation");
+		//	m_TextResources.Add(ResId.TooltipProjectFirst, "Project First");
+		//	m_TextResources.Add(ResId.TooltipHierarchyFirst, "Hierarchy First");
+		//	m_TextResources.Add(ResId.TooltipVertical, "Vertical Orientation");
+		//	m_TextResources.Add(ResId.TooltipHorizontal, "Horizontal Orientation");
 
-			m_TextResources.Add(ResId.MenuProjectView, "Project");
-			m_TextResources.Add(ResId.MenuHierarchyView, "Hierarchy");
-			m_TextResources.Add(ResId.MenuBothView, "Both");
-			m_TextResources.Add(ResId.MenuContextPingLink, "Ping");
-			m_TextResources.Add(ResId.MenuContextSetAsSelection, "Set This as Selection");
-			m_TextResources.Add(ResId.MenuContextAddToSelection, "Add This to Selection");
-			m_TextResources.Add(ResId.MenuContextFrameLink, "Frame This in Scene");
-			m_TextResources.Add(ResId.MenuContextOpenLink, "Open This");
-			m_TextResources.Add(ResId.MenuContextRemoveLink, "Remove This");
-			m_TextResources.Add(ResId.MenuContextRemoveAll, "Remove All");
-			m_TextResources.Add(ResId.MenuContextSetAsSelectionPlural, "Set These as Selection");
-			m_TextResources.Add(ResId.MenuContextAddToSelectionPlural, "Add These to Selection");
-			m_TextResources.Add(ResId.MenuContextFrameLinkPlural, "Frame These in Scene");
-			m_TextResources.Add(ResId.MenuContextOpenLinkPlural, "Open These");
-			m_TextResources.Add(ResId.MenuContextRemoveLinkPlural, "Remove These");
-			m_TextResources.Add(ResId.MenuContextSaveLinks, "Save Links");
+		//	m_TextResources.Add(ResId.MenuProjectView, "Project");
+		//	m_TextResources.Add(ResId.MenuHierarchyView, "Hierarchy");
+		//	m_TextResources.Add(ResId.MenuBothView, "Both");
+		//	m_TextResources.Add(ResId.MenuContextPingLink, "Ping");
+		//	m_TextResources.Add(ResId.MenuContextSetAsSelection, "Set This as Selection");
+		//	m_TextResources.Add(ResId.MenuContextAddToSelection, "Add This to Selection");
+		//	m_TextResources.Add(ResId.MenuContextFrameLink, "Frame This in Scene");
+		//	m_TextResources.Add(ResId.MenuContextOpenLink, "Open This");
+		//	m_TextResources.Add(ResId.MenuContextRemoveLink, "Remove This");
+		//	m_TextResources.Add(ResId.MenuContextRemoveAll, "Remove All");
+		//	m_TextResources.Add(ResId.MenuContextSetAsSelectionPlural, "Set These as Selection");
+		//	m_TextResources.Add(ResId.MenuContextAddToSelectionPlural, "Add These to Selection");
+		//	m_TextResources.Add(ResId.MenuContextFrameLinkPlural, "Frame These in Scene");
+		//	m_TextResources.Add(ResId.MenuContextOpenLinkPlural, "Open These");
+		//	m_TextResources.Add(ResId.MenuContextRemoveLinkPlural, "Remove These");
+		//	m_TextResources.Add(ResId.MenuContextSaveLinks, "Save Links");
 
-			m_TextResources.Add(ResId.DialogRemoveAllTitle, "Confirm Remove All");
-			m_TextResources.Add(ResId.DialogRemoveAllMessage, "Are you sure you want to remove all links from the list?");
-			m_TextResources.Add(ResId.DialogYes, "Yes");
-			m_TextResources.Add(ResId.DialogNo, "No");
-		}
+		//	m_TextResources.Add(ResId.DialogRemoveAllTitle, "Confirm Remove All");
+		//	m_TextResources.Add(ResId.DialogRemoveAllMessage, "Are you sure you want to remove all links from the list?");
+		//	m_TextResources.Add(ResId.DialogYes, "Yes");
+		//	m_TextResources.Add(ResId.DialogNo, "No");
+		//}
 
 		private void CleanUp()
 		{

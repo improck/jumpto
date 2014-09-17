@@ -55,40 +55,23 @@ namespace JumpTo
 	}
 
 
-	public class JumpLinks : ScriptableObject
+	public class JumpLinks : EditorScriptableObject<JumpLinks>
 	{
-		#region Pseudo-Singleton
-		private static JumpLinks s_Instance = null;
-
-		public static JumpLinks Instance { get { return s_Instance; } }
-
-		public static JumpLinks Create()
-		{
-			JumpLinks instance = ScriptableObject.CreateInstance<JumpLinks>();
-			instance.hideFlags = HideFlags.HideAndDontSave;
-
-			instance.m_ProjectLinkContainer = ScriptableObject.CreateInstance<ProjectJumpLinkContainer>();
-			instance.m_ProjectLinkContainer.hideFlags = HideFlags.HideAndDontSave;
-			instance.m_HierarchyLinkContainer = ScriptableObject.CreateInstance<HierarchyJumpLinkContainer>();
-			instance.m_HierarchyLinkContainer.hideFlags = HideFlags.HideAndDontSave;
-
-			return instance;
-		}
-
-
-		protected JumpLinks() { s_Instance = this; }
-		#endregion
-
-
 		[SerializeField] private ProjectJumpLinkContainer m_ProjectLinkContainer;
 		[SerializeField] private HierarchyJumpLinkContainer m_HierarchyLinkContainer;
-		[SerializeField] private bool m_HierarchyLinksChanged = false;	//TEMP
-
+		
 
 		public ProjectJumpLinkContainer ProjectLinks { get { return m_ProjectLinkContainer; } }
 		public HierarchyJumpLinkContainer HierarchyLinks { get { return m_HierarchyLinkContainer; } }
-		public bool HierarchyLinksChanged { get { return m_HierarchyLinksChanged; } set { m_HierarchyLinksChanged = value; } }	//TEMP
 
+
+		protected override void Initialize()
+		{
+			m_ProjectLinkContainer = ScriptableObject.CreateInstance<ProjectJumpLinkContainer>();
+			m_ProjectLinkContainer.hideFlags = HideFlags.HideAndDontSave;
+			m_HierarchyLinkContainer = ScriptableObject.CreateInstance<HierarchyJumpLinkContainer>();
+			m_HierarchyLinkContainer.hideFlags = HideFlags.HideAndDontSave;
+		}
 
 		public JumpLinkContainer<T> GetJumpLinkContainer<T>() where T : JumpLink
 		{

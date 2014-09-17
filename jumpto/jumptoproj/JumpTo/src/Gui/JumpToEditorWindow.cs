@@ -31,11 +31,15 @@ using SceneStateDetection;
 //xTODO: make some indicator of hierarchy links save state
 //xTODO: bug! hamburger icon is null when window is open on startup
 //TODO: find the minimum editorwindow width
+//TODO: check out the drag-n-drop bug on jordan's mac
 //TODO: comment all of this code
 
 
 public class JumpToEditorWindow : EditorWindow
 {
+	private static int s_InstanceCount = 0;
+
+
 	[SerializeField] private JumpLinks m_JumpLinks;
 	[SerializeField] private JumpToSettings m_Settings;
 	[SerializeField] private GuiToolbar m_Toolbar;
@@ -46,12 +50,19 @@ public class JumpToEditorWindow : EditorWindow
 	[System.NonSerialized] private bool m_Initialized = false;
 	[System.NonSerialized] private RectRef m_Position = new RectRef();
 	[System.NonSerialized] private double m_LastHierarchyRefreshTime = 0.0f;
+	[System.NonSerialized] private SerializationControl m_SerializationControl = null;
 
 
+	public JumpLinks JumpLinksInstance { get { return m_JumpLinks; } }
+	public JumpToSettings JumpToSettingsInstance { get { return m_Settings; } }
+	public SerializationControl SerializationControlInstance { get { return m_SerializationControl; } }
+
+
+	//NOTE: nobody's using these right now
 	//public static event EditorApplication.CallbackFunction OnWindowOpen;
-	public static event EditorApplication.CallbackFunction OnWillEnable;
-	public static event EditorApplication.CallbackFunction OnWillDisable;
-	public static event EditorApplication.CallbackFunction OnWillClose;
+	//public static event EditorApplication.CallbackFunction OnWillEnable;
+	//public static event EditorApplication.CallbackFunction OnWillDisable;
+	//public static event EditorApplication.CallbackFunction OnWillClose;
 
 
 	//called when window is first open
@@ -68,15 +79,18 @@ public class JumpToEditorWindow : EditorWindow
 	//called after deserialization due to a compile
 	void OnEnable()
 	{
-		Debug.Log("OnEnable()");
-		m_JumpLinks = JumpLinks.Instance;
+		s_InstanceCount++;
 
+		//this.title = GetInstanceID().ToString();
+		//Debug.Log("OnEnable(): " + GetInstanceID() + " " + s_InstanceCount);
+
+		JumpToResources.Instance.LoadResources();
+		GraphicAssets.Instance.InitAssets();
+		
 		if (m_JumpLinks == null)
 		{
 			m_JumpLinks = JumpLinks.Create();
 		}
-
-		m_Settings = JumpToSettings.Instance;
 
 		if (m_Settings == null)
 		{
@@ -116,9 +130,11 @@ public class JumpToEditorWindow : EditorWindow
 
 		SceneLoadDetector.EnsureExistence();
 
-		SerializationControl.CreateInstance();
-
-		ResLoad.Instance.LoadResources();
+		if (m_SerializationControl == null)
+		{
+			m_SerializationControl = new SerializationControl();
+			m_SerializationControl.Initialize(this);
+		}
 
 		EditorApplication.projectWindowChanged += OnProjectWindowChange;
 		EditorApplication.hierarchyWindowChanged += OnHierarchyWindowChange;
@@ -137,8 +153,11 @@ public class JumpToEditorWindow : EditorWindow
 		//		OnWindowOpen();
 		//}
 
-		if (OnWillEnable != null)
-			OnWillEnable();
+		//NOTE: nobody's using it right now
+		//if (OnWillEnable != null)
+		//	OnWillEnable();
+
+		m_SerializationControl.OnWindowEnable();
 
 		m_JumpLinks.RefreshProjectLinks();
 		m_JumpLinks.RefreshHierarchyLinks();
@@ -152,8 +171,11 @@ public class JumpToEditorWindow : EditorWindow
 	//called before serialization due to a compile
 	void OnDisable()
 	{
-		if (OnWillDisable != null)
-			OnWillDisable();
+		//NOTE: nobody's using it right now
+		//if (OnWillDisable != null)
+		//	OnWillDisable();
+
+		m_SerializationControl.OnWindowDisable();
 
 		SceneLoadDetector.TemporarilyDestroyInstance();
 
@@ -165,22 +187,26 @@ public class JumpToEditorWindow : EditorWindow
 
 		m_Initialized = false;
 
-		Debug.Log("OnDisable()");
+		//Debug.Log("OnDisable(): " + GetInstanceID() + " " + s_InstanceCount);
 	}
 
 	//void OnLostFocus()
 	//{
-	//	Debug.Log("OnLostFocus()");
+	//	Debug.Log("OnLostFocus(): " + GetInstanceID() + " " + s_InstanceCount);
 	//}
 
 	//NOT called when unity editor is closed
 	//called when window is closed
 	void OnDestroy()
 	{
-		Debug.Log("OnDestroy()");
+		s_InstanceCount--;
+		//Debug.Log("OnDestroy(): " + GetInstanceID() + " " + s_InstanceCount);
 
-		if (OnWillClose != null)
-			OnWillClose();
+		//NOTE: nobody's using it right now
+		//if (OnWillClose != null)
+		//	OnWillClose();
+
+		m_SerializationControl.OnWindowClose();
 
 		//NOTE: this doesn't get called on editor close!
 		//using (System.IO.StreamWriter streamWriter = new System.IO.StreamWriter(@"r:\testfile.txt"))
@@ -194,9 +220,9 @@ public class JumpToEditorWindow : EditorWindow
 
 		SceneLoadDetector.PermanentlyDestroyInstance();
 
-		SerializationControl.DestroyInstance();
-		GraphicAssets.DestroyInstance();
-		ResLoad.DestroyInstance();
+		m_SerializationControl.Uninitialize();
+		//GraphicAssets.DestroyInstance();
+		//ResLoad.DestroyInstance();
 	}
 
 	private void Init()
@@ -226,7 +252,7 @@ public class JumpToEditorWindow : EditorWindow
 	//apparently OnFocus() gets called before OnEnable()!
 	//void OnFocus()
 	//{
-	//	Debug.Log("OnFocus()");
+	//	Debug.Log("OnFocus(): " + GetInstanceID());
 	//}
 
 	void OnBecameVisible()
@@ -299,7 +325,7 @@ public class JumpToEditorWindow : EditorWindow
 		#region Removed Filtering
 		//NOTE: already fully tested, but decided against it due
 		//		to a potentially negative user experience
-		//switch (JumpToSettings.Instance.Visibility)
+		//switch (m_Window.JumpToSettingsInstance.Visibility)
 		//{
 		//case JumpToSettings.VisibleList.ProjectAndHierarchy:
 		//	{
@@ -354,7 +380,7 @@ public class JumpToEditorWindow : EditorWindow
 		}
 	}
 	
-	[MenuItem("Tools/Jump To")]
+	[MenuItem("Window/Jump To")]
 	public static void JumpTo_InitMainMenu()
 	{
 		JumpToEditorWindow window = GetOrCreateWindow();
@@ -367,7 +393,7 @@ public class JumpToEditorWindow : EditorWindow
 		JumpToEditorWindow[] windows = Resources.FindObjectsOfTypeAll<JumpToEditorWindow>();
 
 		Object[] selected = Selection.objects;
-		return windows.Length > 0 && JumpLinks.Instance != null && selected != null && selected.Length > 0;
+		return windows.Length > 0 && windows[0].m_JumpLinks != null && selected != null && selected.Length > 0;
 	}
 
 	[MenuItem("Assets/Create/Jump Link", false)]
@@ -384,7 +410,7 @@ public class JumpToEditorWindow : EditorWindow
 		JumpToEditorWindow[] windows = Resources.FindObjectsOfTypeAll<JumpToEditorWindow>();
 
 		Object[] selected = Selection.objects;
-		return windows.Length > 0 && JumpLinks.Instance != null && selected != null && selected.Length > 0;
+		return windows.Length > 0 && windows[0].m_JumpLinks != null && selected != null && selected.Length > 0;
 	}
 
 	[MenuItem("GameObject/Create Other/Jump Link", false)]

@@ -21,7 +21,7 @@ namespace JumpTo
 
 				m_Links.Add(link);
 
-				JumpLinks.Instance.HierarchyLinksChanged = true;	//TEMP
+				RaiseOnLinksChanged();
 			}
 		}
 

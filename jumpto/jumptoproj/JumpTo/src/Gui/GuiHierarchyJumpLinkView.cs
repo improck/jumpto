@@ -11,19 +11,31 @@ namespace JumpTo
 		private GUIContent m_MenuFrameLinkPlural;
 		private GUIContent m_MenuSaveLinks;
 		private string m_TitleText;	//TEMP
+		[SerializeField] private bool m_HierarchyLinksChanged = false;	//TEMP
 		
 		
 		public override void OnWindowEnable(EditorWindow window)
 		{
 			base.OnWindowEnable(window);
 
-			m_ControlTitle = new GUIContent(ResLoad.Instance.GetText(ResId.LabelHierarchyLinks));
-			m_MenuFrameLink = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextFrameLink));
-			m_MenuFrameLinkPlural = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextFrameLinkPlural));
-			m_MenuSaveLinks = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextSaveLinks));
+			m_LinkContainer.OnLinksChanged += OnHierarchyLinksChanged;
+
+			m_MenuFrameLink = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextFrameLink));
+			m_MenuFrameLinkPlural = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextFrameLinkPlural));
+			m_MenuSaveLinks = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextSaveLinks));
 
 			//TEMP
-			m_TitleText = m_ControlTitle.text;
+			m_TitleText = JumpToResources.Instance.GetText(ResId.LabelHierarchyLinks);
+
+			if (m_HierarchyLinksChanged)
+				m_ControlTitle = new GUIContent(m_TitleText + '*');
+			else
+				m_ControlTitle = new GUIContent(m_TitleText);
+		}
+
+		public override void OnWindowDisable(EditorWindow window)
+		{
+			m_LinkContainer.OnLinksChanged -= OnHierarchyLinksChanged;
 		}
 
 		protected override Color DetermineNormalTextColor(HierarchyJumpLink link)
@@ -50,7 +62,7 @@ namespace JumpTo
 			//		to appear right-justified and all caps in a GenericMenu. the name is being
 			//		parsed for hotkeys, and " _" indicates 'no modifiers' in the hotkey string.
 			//		See: http://docs.unity3d.com/ScriptReference/MenuItem.html
-			m_MenuPingLink.text = ResLoad.Instance.GetText(ResId.MenuContextPingLink) + " \"" + m_LinkContainer.ActiveSelectedObject.LinkReference.name + "\"";
+			m_MenuPingLink.text = JumpToResources.Instance.GetText(ResId.MenuContextPingLink) + " \"" + m_LinkContainer.ActiveSelectedObject.LinkReference.name + "\"";
 
 			int selectionCount = m_LinkContainer.SelectionCount;
 			if (selectionCount == 0)
@@ -69,7 +81,7 @@ namespace JumpTo
 
 				menu.AddSeparator(string.Empty);
 
-				menu.AddItem(m_MenuRemoveLink, false, RemoveSelectedAndFlag);
+				menu.AddItem(m_MenuRemoveLink, false, RemoveSelected);
 			}
 			else if (selectionCount > 1)
 			{
@@ -84,7 +96,7 @@ namespace JumpTo
 
 				menu.AddSeparator(string.Empty);
 
-				menu.AddItem(m_MenuRemoveLinkPlural, false, RemoveSelectedAndFlag);
+				menu.AddItem(m_MenuRemoveLinkPlural, false, RemoveSelected);
 			}
 
 			menu.ShowAsContext();
@@ -94,8 +106,7 @@ namespace JumpTo
 		{
 			GenericMenu menu = null;
 
-			if (EditorApplication.currentScene != string.Empty &&
-				JumpLinks.Instance.HierarchyLinksChanged)
+			if (EditorApplication.currentScene != string.Empty && m_HierarchyLinksChanged)
 			{
 				menu = new GenericMenu();
 				menu.AddItem(m_MenuSaveLinks, false, SaveLinks);
@@ -106,7 +117,7 @@ namespace JumpTo
 				if (menu == null)
 					menu = new GenericMenu();
 
-				menu.AddItem(m_MenuRemoveAll, false, RemoveAllAndFlag);
+				menu.AddItem(m_MenuRemoveAll, false, RemoveAll);
 			}
 
 			if (menu != null)
@@ -140,9 +151,10 @@ namespace JumpTo
 		private void SaveLinks()
 		{
 			//TODO: detect links to objects not saved in the scene, warn the user
-			SerializationControl.Instance.SaveHierarchyLinks(EditorApplication.currentScene);
+			m_Window.SerializationControlInstance.SaveHierarchyLinks(EditorApplication.currentScene);
 
-			JumpLinks.Instance.HierarchyLinksChanged = false;
+			m_ControlTitle.text = m_TitleText;
+			m_HierarchyLinksChanged = false;
 		}
 
 		private bool ValidateSceneView()
@@ -150,29 +162,10 @@ namespace JumpTo
 			return SceneView.lastActiveSceneView != null || SceneView.currentDrawingSceneView != null;
 		}
 
-		//TEMP
-		private void RemoveSelectedAndFlag()
+		protected void OnHierarchyLinksChanged()
 		{
-			JumpLinks.Instance.HierarchyLinksChanged = true;
-			RemoveSelected();
-		}
-
-		//TEMP
-		private void RemoveAllAndFlag()
-		{
-			JumpLinks.Instance.HierarchyLinksChanged = true;
-			RemoveAll();
-		}
-
-		//TEMP
-		protected override void OnGui()
-		{
-			if (JumpLinks.Instance.HierarchyLinksChanged)
-				m_ControlTitle.text = m_TitleText + '*';
-			else
-				m_ControlTitle.text = m_TitleText;
-
-			base.OnGui();
+			m_ControlTitle.text = m_TitleText + '*';
+			m_HierarchyLinksChanged = true;
 		}
 	}
 }

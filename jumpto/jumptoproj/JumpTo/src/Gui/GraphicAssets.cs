@@ -22,7 +22,6 @@ namespace JumpTo
 		{
 			if (s_Instance != null)
 			{
-				s_Instance.Cleanup();
 				s_Instance = null;
 			}
 		}
@@ -97,15 +96,11 @@ namespace JumpTo
 
 			DividerVerticalStyle = new GUIStyle();
 			DividerVerticalStyle.name = "JumpTo Divider V";
-			DividerVerticalStyle.normal.background = ResLoad.Instance.GetImage(ResId.ImageDividerVertical);
+			DividerVerticalStyle.normal.background = JumpToResources.Instance.GetImage(ResId.ImageDividerVertical);
 			DividerVerticalStyle.border = new RectOffset(0, 0, 2, 2);
 		}
 
-		private void Cleanup()
-		{
-		}
-
-		private void InitAssets()
+		public void InitAssets()
 		{
 			IconPrefabNormal = EditorGUIUtility.FindTexture("PrefabNormal Icon");
 			IconPrefabModel = EditorGUIUtility.FindTexture("PrefabModel Icon");

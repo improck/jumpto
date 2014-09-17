@@ -13,6 +13,8 @@ namespace JumpTo
 		private RectRef m_DrawRect = new RectRef();
 		private Rect m_DividerRect;
 
+		private JumpToEditorWindow m_Window;
+
 		private const float DividerHalfThickness = 3.0f;
 		public const float DividerMin = 74.0f;
 
@@ -22,6 +24,8 @@ namespace JumpTo
 
 		public override void OnWindowEnable(EditorWindow window)
 		{
+			m_Window = window as JumpToEditorWindow;
+
 			if (m_ProjectView == null)
 			{
 				m_ProjectView = GuiBase.Create<GuiProjectJumpLinkView>();
@@ -32,13 +36,13 @@ namespace JumpTo
 				m_HierarchyView = GuiBase.Create<GuiHierarchyJumpLinkView>();
 			}
 
-			//JumpLinks.Instance.RefreshLinksY();
+			//m_Window.JumpLinksInstance.RefreshLinksY();
 
 			m_ProjectView.OnWindowEnable(window);
 			m_HierarchyView.OnWindowEnable(window);
 
-			if (JumpToSettings.Instance.DividerPosition >= 0.0f)
-				m_Divider = JumpToSettings.Instance.DividerPosition;
+			if (m_Window.JumpToSettingsInstance.DividerPosition >= 0.0f)
+				m_Divider = m_Window.JumpToSettingsInstance.DividerPosition;
 		}
 
 		protected override void OnGui()
@@ -50,7 +54,7 @@ namespace JumpTo
 
 			Color bgColorBak = GUI.backgroundColor;
 
-			switch (JumpToSettings.Instance.Visibility)
+			switch (m_Window.JumpToSettingsInstance.Visibility)
 			{
 			case JumpToSettings.VisibleList.ProjectAndHierarchy:
 				{
@@ -58,7 +62,7 @@ namespace JumpTo
 					float adjHeight = m_Size.y;
 
 					//draw the top/left box
-					if (JumpToSettings.Instance.Vertical)
+					if (m_Window.JumpToSettingsInstance.Vertical)
 					{
 						adjHeight = Mathf.Floor(m_Size.y * m_Divider);
 						m_DrawRect.Set(0.0f, 0.0f, m_Size.x, adjHeight - DividerHalfThickness);
@@ -79,7 +83,7 @@ namespace JumpTo
 						m_DividerRect.height = m_Size.y;
 					}
 
-					if (JumpToSettings.Instance.ProjectFirst)
+					if (m_Window.JumpToSettingsInstance.ProjectFirst)
 					{
 						m_ProjectView.Draw(m_DrawRect);
 						if (m_ProjectView.HasFocus)
@@ -93,7 +97,7 @@ namespace JumpTo
 					}
 					
 					//draw the bottom/right box
-					if (JumpToSettings.Instance.Vertical)
+					if (m_Window.JumpToSettingsInstance.Vertical)
 					{
 						m_DrawRect.Set(0.0f, adjHeight + DividerHalfThickness, m_Size.x, (m_Size.y - adjHeight) - DividerHalfThickness);
 					}
@@ -102,7 +106,7 @@ namespace JumpTo
 						m_DrawRect.Set(adjWidth + DividerHalfThickness, 0.0f, (m_Size.x - adjWidth) - DividerHalfThickness, m_Size.y);
 					}
 
-					if (JumpToSettings.Instance.ProjectFirst)
+					if (m_Window.JumpToSettingsInstance.ProjectFirst)
 					{
 						m_HierarchyView.Draw(m_DrawRect);
 						if (m_HierarchyView.HasFocus)
@@ -147,7 +151,7 @@ namespace JumpTo
 		{
 			int controlId = GUIUtility.GetControlID(DividerHash, FocusType.Passive, m_DividerRect);
 
-			if (JumpToSettings.Instance.Vertical)
+			if (m_Window.JumpToSettingsInstance.Vertical)
 				EditorGUIUtility.AddCursorRect(m_DividerRect, MouseCursor.SplitResizeUpDown, controlId);
 			else
 				EditorGUIUtility.AddCursorRect(m_DividerRect, MouseCursor.SplitResizeLeftRight, controlId);
@@ -171,7 +175,7 @@ namespace JumpTo
 						GUIUtility.hotControl = 0;
 						current.Use();
 
-						JumpToSettings.Instance.DividerPosition = m_Divider;
+						m_Window.JumpToSettingsInstance.DividerPosition = m_Divider;
 					}
 				}
 				break;
@@ -179,7 +183,7 @@ namespace JumpTo
 				{
 					if (GUIUtility.hotControl == controlId && current.button == 0)
 					{
-						if (JumpToSettings.Instance.Vertical)
+						if (m_Window.JumpToSettingsInstance.Vertical)
 						{
 							m_Divider = Mathf.Clamp(current.mousePosition.y, DividerMin, m_Size.y - DividerMin) / m_Size.y;
 						}
@@ -194,7 +198,7 @@ namespace JumpTo
 				break;
 			case EventType.Repaint:
 				{
-					if (JumpToSettings.Instance.Vertical)
+					if (m_Window.JumpToSettingsInstance.Vertical)
 					{
 						GraphicAssets.Instance.DividerHorizontalStyle.Draw(m_DividerRect, false, false, false, false);
 					}
@@ -230,7 +234,7 @@ namespace JumpTo
 
 							//TODO: component links??
 
-							switch (JumpToSettings.Instance.Visibility)
+							switch (m_Window.JumpToSettingsInstance.Visibility)
 							{
 							case JumpToSettings.VisibleList.ProjectAndHierarchy:
 								{
@@ -278,7 +282,7 @@ namespace JumpTo
 
 					DragAndDrop.AcceptDrag();
 
-					switch (JumpToSettings.Instance.Visibility)
+					switch (m_Window.JumpToSettingsInstance.Visibility)
 					{
 					case JumpToSettings.VisibleList.ProjectAndHierarchy:
 						{
@@ -317,7 +321,7 @@ namespace JumpTo
 			{
 				for (int i = 0; i < objectReferences.Length; i++)
 				{
-					JumpLinks.Instance.CreateJumpLink(objectReferences[i]);
+					m_Window.JumpLinksInstance.CreateJumpLink(objectReferences[i]);
 				}
 			}
 		}
@@ -329,7 +333,7 @@ namespace JumpTo
 			{
 				for (int i = 0; i < objectReferences.Length; i++)
 				{
-					JumpLinks.Instance.CreateOnlyHierarchyJumpLink(objectReferences[i]);
+					m_Window.JumpLinksInstance.CreateOnlyHierarchyJumpLink(objectReferences[i]);
 				}
 			}
 		}
@@ -341,7 +345,7 @@ namespace JumpTo
 			{
 				for (int i = 0; i < objectReferences.Length; i++)
 				{
-					JumpLinks.Instance.CreateOnlyProjectJumpLink(objectReferences[i]);
+					m_Window.JumpLinksInstance.CreateOnlyProjectJumpLink(objectReferences[i]);
 				}
 			}
 		}

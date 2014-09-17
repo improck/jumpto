@@ -50,20 +50,20 @@ namespace JumpTo
 
 		public override void OnWindowEnable(EditorWindow window)
 		{
-			m_MenuPingLink = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextPingLink));
-			m_MenuSetAsSelection = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextSetAsSelection));
-			m_MenuAddToSelection = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextAddToSelection));
-			m_MenuRemoveLink = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextRemoveLink));
-			m_MenuRemoveAll = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextRemoveAll));
-			m_MenuSetAsSelectionPlural = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextSetAsSelectionPlural));
-			m_MenuAddToSelectionPlural = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextAddToSelectionPlural));
-			m_MenuRemoveLinkPlural = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextRemoveLinkPlural));
-
-			m_IconHamburger = ResLoad.Instance.GetImage(ResId.ImageHamburger);
-
 			m_Window = window as JumpToEditorWindow;
 
-			m_LinkContainer = JumpLinks.Instance.GetJumpLinkContainer<T>();
+			m_MenuPingLink = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextPingLink));
+			m_MenuSetAsSelection = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextSetAsSelection));
+			m_MenuAddToSelection = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextAddToSelection));
+			m_MenuRemoveLink = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextRemoveLink));
+			m_MenuRemoveAll = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextRemoveAll));
+			m_MenuSetAsSelectionPlural = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextSetAsSelectionPlural));
+			m_MenuAddToSelectionPlural = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextAddToSelectionPlural));
+			m_MenuRemoveLinkPlural = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextRemoveLinkPlural));
+
+			m_IconHamburger = JumpToResources.Instance.GetImage(ResId.ImageHamburger);
+
+			m_LinkContainer = m_Window.JumpLinksInstance.GetJumpLinkContainer<T>();
 
 			m_ControlRect.y = 7.0f;
 			m_ControlRect.width = 10.0f;
@@ -447,10 +447,10 @@ namespace JumpTo
 		protected void RemoveAll()
 		{
 			//if confirmed, remove all
-			if (EditorUtility.DisplayDialog(ResLoad.Instance.GetText(ResId.DialogRemoveAllTitle),
-				ResLoad.Instance.GetText(ResId.DialogRemoveAllMessage),
-				ResLoad.Instance.GetText(ResId.DialogYes),
-				ResLoad.Instance.GetText(ResId.DialogNo)))
+			if (EditorUtility.DisplayDialog(JumpToResources.Instance.GetText(ResId.DialogRemoveAllTitle),
+				JumpToResources.Instance.GetText(ResId.DialogRemoveAllMessage),
+				JumpToResources.Instance.GetText(ResId.DialogYes),
+				JumpToResources.Instance.GetText(ResId.DialogNo)))
 			{
 				m_LinkContainer.RemoveAll();
 			}

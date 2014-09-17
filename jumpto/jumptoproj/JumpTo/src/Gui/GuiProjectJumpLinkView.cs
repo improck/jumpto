@@ -14,9 +14,9 @@ namespace JumpTo
 		{
 			base.OnWindowEnable(window);
 
-			m_ControlTitle = new GUIContent(ResLoad.Instance.GetText(ResId.LabelProjectLinks));
-			m_MenuOpenLink = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextOpenLink));
-			m_MenuOpenLinkPlural = new GUIContent(ResLoad.Instance.GetText(ResId.MenuContextOpenLinkPlural));
+			m_ControlTitle = new GUIContent(JumpToResources.Instance.GetText(ResId.LabelProjectLinks));
+			m_MenuOpenLink = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextOpenLink));
+			m_MenuOpenLinkPlural = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextOpenLinkPlural));
 		}
 
 		protected override void ShowContextMenu()
@@ -27,7 +27,7 @@ namespace JumpTo
 			//		to appear right-justified and all caps in a GenericMenu. the name is being
 			//		parsed for hotkeys, and " _" indicates 'no modifiers' in the hotkey string.
 			//		See: http://docs.unity3d.com/ScriptReference/MenuItem.html
-			m_MenuPingLink.text = ResLoad.Instance.GetText(ResId.MenuContextPingLink) + " \"" + m_LinkContainer.ActiveSelectedObject.LinkLabelContent.text + "\"";
+			m_MenuPingLink.text = JumpToResources.Instance.GetText(ResId.MenuContextPingLink) + " \"" + m_LinkContainer.ActiveSelectedObject.LinkLabelContent.text + "\"";
 
 			int selectionCount = m_LinkContainer.SelectionCount;
 			if (selectionCount == 0)
