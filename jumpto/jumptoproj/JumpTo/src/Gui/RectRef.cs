@@ -5,7 +5,7 @@ using UnityEngine;
 namespace JumpTo
 {
 	[System.Serializable]
-	public class RectRef
+	internal class RectRef
 	{
 		[SerializeField]
 		private Rect m_RectInternal;

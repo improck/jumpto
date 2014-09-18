@@ -5,7 +5,7 @@ using UnityEngine;
 namespace SceneStateDetection
 {
 	[System.Serializable]
-	public class SceneStateControl
+	internal sealed class SceneStateControl
 	{
 		#region Pseudo-Singleton
 		private static SceneStateControl s_Instance = null;

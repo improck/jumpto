@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace JumpTo
 {
-	public class HierarchyJumpLinkContainer : JumpLinkContainer<HierarchyJumpLink>
+	internal sealed class HierarchyJumpLinkContainer : JumpLinkContainer<HierarchyJumpLink>
 	{
 		public override void AddLink(UnityEngine.Object linkReference, PrefabType prefabType)
 		{

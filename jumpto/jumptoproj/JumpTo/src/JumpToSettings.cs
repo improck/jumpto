@@ -5,10 +5,10 @@ using System.IO;
 
 namespace JumpTo
 {
-	public class JumpToSettings : EditorScriptableObject<JumpToSettings>
+	internal sealed class JumpToSettings : EditorScriptableObject<JumpToSettings>
 	{
 		[System.Serializable]
-		public enum VisibleList
+		internal enum VisibleList
 		{
 			ProjectOnly,
 			HierarchyOnly,

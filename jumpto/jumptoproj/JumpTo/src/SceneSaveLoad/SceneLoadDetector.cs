@@ -17,7 +17,7 @@ namespace SceneStateDetection
 	/// referenced by any scene object, we have a way to generate an event when a scene
 	/// is unloaded and when a new scene is loaded.
 	/// </summary>
-	public class SceneLoadDetector : ScriptableObject
+	internal sealed class SceneLoadDetector : ScriptableObject
 	{
 		private static SceneLoadDetector s_Instance;
 		private bool m_KeepAlive = true;

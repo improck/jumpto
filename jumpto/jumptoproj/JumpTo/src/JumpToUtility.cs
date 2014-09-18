@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace JumpTo
 {
-	public static class JumpToUtility
+	internal static class JumpToUtility
 	{
 		public static string GetTransformPath(Transform transform)
 		{
@@ -21,7 +21,7 @@ namespace JumpTo
 	}
 
 
-	public static class SerializedObjectExtension
+	internal static class SerializedObjectExtension
 	{
 		private static PropertyInfo m_InspectorModeProperty = null;
 

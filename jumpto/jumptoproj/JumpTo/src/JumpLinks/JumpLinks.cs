@@ -7,7 +7,7 @@ using System.IO;
 namespace JumpTo
 {
 	[System.Serializable]
-	public enum LinkReferenceType
+	internal enum LinkReferenceType
 	{
 		Asset = 0,
 		GameObject = 0,
@@ -19,7 +19,7 @@ namespace JumpTo
 	}
 
 	
-	public abstract class JumpLink : ScriptableObject
+	internal abstract class JumpLink : ScriptableObject
 	{
 		[SerializeField] protected UnityEngine.Object m_LinkReference;
 		[SerializeField] protected GUIContent m_LinkLabelContent = new GUIContent();
@@ -41,12 +41,12 @@ namespace JumpTo
 	}
 
 
-	public class ProjectJumpLink : JumpLink
+	internal sealed class ProjectJumpLink : JumpLink
 	{
 	}
 
 
-	public class HierarchyJumpLink : JumpLink
+	internal sealed class HierarchyJumpLink : JumpLink
 	{
 		[SerializeField] protected bool m_Active = true;
 
@@ -55,7 +55,7 @@ namespace JumpTo
 	}
 
 
-	public class JumpLinks : EditorScriptableObject<JumpLinks>
+	internal sealed class JumpLinks : EditorScriptableObject<JumpLinks>
 	{
 		[SerializeField] private ProjectJumpLinkContainer m_ProjectLinkContainer;
 		[SerializeField] private HierarchyJumpLinkContainer m_HierarchyLinkContainer;

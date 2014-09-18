@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace JumpTo
 {
-	public class GuiProjectJumpLinkView : GuiJumpLinkViewBase<ProjectJumpLink>
+	internal sealed class GuiProjectJumpLinkView : GuiJumpLinkViewBase<ProjectJumpLink>
 	{
 		protected GUIContent m_MenuOpenLink;
 		protected GUIContent m_MenuOpenLinkPlural;

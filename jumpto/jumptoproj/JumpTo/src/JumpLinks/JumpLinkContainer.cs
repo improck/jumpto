@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace JumpTo
 {
-	public abstract class JumpLinkContainer<T> : ScriptableObject where T : JumpLink
+	internal abstract class JumpLinkContainer<T> : ScriptableObject where T : JumpLink
 	{
 		[SerializeField] protected List<T> m_Links = new List<T>();
 		[SerializeField] protected int m_ActiveSelection = -1;

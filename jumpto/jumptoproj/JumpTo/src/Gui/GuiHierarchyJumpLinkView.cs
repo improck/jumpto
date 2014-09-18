@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace JumpTo
 {
-	public class GuiHierarchyJumpLinkView : GuiJumpLinkViewBase<HierarchyJumpLink>
+	internal sealed class GuiHierarchyJumpLinkView : GuiJumpLinkViewBase<HierarchyJumpLink>
 	{
 		private GUIContent m_MenuFrameLink;
 		private GUIContent m_MenuFrameLinkPlural;

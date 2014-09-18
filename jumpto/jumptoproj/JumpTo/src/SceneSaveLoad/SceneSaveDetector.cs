@@ -6,7 +6,7 @@ namespace SceneStateDetection
 	/// <summary>
 	/// Attempts to detect when a scene is saved as an asset in the project.
 	/// </summary>
-	public class SceneSaveDetector : UnityEditor.AssetModificationProcessor
+	internal sealed class SceneSaveDetector : UnityEditor.AssetModificationProcessor
 	{
 		public static string[] OnWillSaveAssets(string[] assetPaths)
 		{

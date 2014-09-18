@@ -8,7 +8,7 @@ using SceneStateDetection;
 namespace JumpTo
 {
 	//TODO: all auto-saving of hierarchy links is disabled. not enough info from unity editor to make it work.
-	public class SerializationControl
+	internal sealed class SerializationControl
 	{
 		private string m_SaveDirectory = string.Empty;
 		private string m_HierarchySaveDirectory = string.Empty;

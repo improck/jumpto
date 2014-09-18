@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace JumpTo
 {
-	public class GuiJumpLinkListView : GuiBase
+	internal sealed class GuiJumpLinkListView : GuiBase
 	{
 		[SerializeField] private float m_Divider = 0.5f;
 		[SerializeField] private GuiProjectJumpLinkView m_ProjectView;

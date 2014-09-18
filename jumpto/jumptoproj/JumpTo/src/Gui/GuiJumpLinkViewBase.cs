@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace JumpTo
 {
-	public abstract class GuiJumpLinkViewBase<T> : GuiBase where T : JumpLink
+	internal abstract class GuiJumpLinkViewBase<T> : GuiBase where T : JumpLink
 	{
 		[SerializeField] protected Vector2 m_ScrollViewPosition;
 		[SerializeField] protected bool m_HasFocus = false;
@@ -319,6 +319,7 @@ namespace JumpTo
 
 					//Debug.Log("Start Drag");
 					DragAndDrop.PrepareStartDrag();
+					DragAndDrop.paths = new string[] { };
 					DragAndDrop.objectReferences = m_LinkContainer.SelectedLinkReferences;
 					DragAndDrop.StartDrag("Project Reference(s)");
 					//NOTE: tried to set the visual mode here. always got reset to none.

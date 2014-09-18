@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace JumpTo
 {
-	public class GuiToolbar : GuiBase
+	internal sealed class GuiToolbar : GuiBase
 	{
 		private Rect m_DrawRect;
 

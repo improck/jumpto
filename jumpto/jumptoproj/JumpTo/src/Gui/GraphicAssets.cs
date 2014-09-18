@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace JumpTo
 {
-	public class GraphicAssets
+	internal sealed class GraphicAssets
 	{
 		#region Singleton
 		private static GraphicAssets s_Instance = null;

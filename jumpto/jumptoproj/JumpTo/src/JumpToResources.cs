@@ -9,7 +9,7 @@ using System.Resources;
 
 namespace JumpTo
 {
-	public static class ResId
+	internal static class ResId
 	{
 		public static readonly int LabelProjectLinks = "label_projectLinks".GetHashCode();
 		public static readonly int LabelHierarchyLinks = "label_hierarchyLinks".GetHashCode();
@@ -48,7 +48,7 @@ namespace JumpTo
 		public static readonly int ImageHamburger = "hamburger.png".GetHashCode();
 	}
 
-	public class JumpToResources
+	internal sealed class JumpToResources
 	{
 		#region Singleton
 		private static JumpToResources s_Instance = null;

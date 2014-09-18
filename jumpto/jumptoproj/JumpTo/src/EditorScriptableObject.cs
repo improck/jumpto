@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace JumpTo
 {
-	public abstract class EditorScriptableObject<T> : ScriptableObject where T : EditorScriptableObject<T>
+	internal abstract class EditorScriptableObject<T> : ScriptableObject where T : EditorScriptableObject<T>
 	{
 		public static T Create()
 		{

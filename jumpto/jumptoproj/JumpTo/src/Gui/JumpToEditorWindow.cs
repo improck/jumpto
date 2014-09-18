@@ -35,7 +35,7 @@ using SceneStateDetection;
 //TODO: comment all of this code
 
 
-public class JumpToEditorWindow : EditorWindow
+internal sealed class JumpToEditorWindow : EditorWindow
 {
 	private static int s_InstanceCount = 0;
 

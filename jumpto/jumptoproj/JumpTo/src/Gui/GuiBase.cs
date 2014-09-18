@@ -5,7 +5,7 @@ using System.Collections;
 
 namespace JumpTo
 {
-	public abstract class GuiBase : ScriptableObject
+	internal abstract class GuiBase : ScriptableObject
 	{
 		protected Vector2 m_Size;
 
