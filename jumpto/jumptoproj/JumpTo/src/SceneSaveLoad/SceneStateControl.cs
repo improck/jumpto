@@ -63,6 +63,9 @@ namespace SceneStateDetection
 
 		public static void SceneIsUnloading()
 		{
+			if (s_Instance == null)
+				return;
+
 			s_Instance.m_HierarchyChanged = false;
 			EditorApplication.hierarchyWindowChanged += OnHierarchyWindowChanged;
 
@@ -71,7 +74,10 @@ namespace SceneStateDetection
 		}
 
 		public static void SceneWillLoad()
-		{	
+		{
+			if (s_Instance == null)
+				return;
+
 			EditorApplication.delayCall +=
 				delegate()
 				{
@@ -109,6 +115,9 @@ namespace SceneStateDetection
 
 		private static void OnHierarchyWindowChanged()
 		{
+			if (s_Instance == null)
+				return;
+
 			s_Instance.m_HierarchyChanged = true;
 			EditorApplication.hierarchyWindowChanged -= OnHierarchyWindowChanged;
 		}

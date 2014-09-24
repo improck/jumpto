@@ -30,8 +30,8 @@ using SceneStateDetection;
 //xTODO: save the divider placement to settings
 //xTODO: make some indicator of hierarchy links save state
 //xTODO: bug! hamburger icon is null when window is open on startup
+//xTODO: check out the drag-n-drop bug on jordan's mac
 //TODO: find the minimum editorwindow width
-//TODO: check out the drag-n-drop bug on jordan's mac
 //TODO: comment all of this code
 
 
@@ -128,7 +128,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 			m_SceneState = SceneStateControl.Create();
 		}
 
-		SceneLoadDetector.EnsureExistence();
+		EditorApplication.delayCall += OnPostEnable;
 
 		if (m_SerializationControl == null)
 		{
@@ -165,6 +165,16 @@ internal sealed class JumpToEditorWindow : EditorWindow
 
 		m_Toolbar.OnWindowEnable(this);
 		m_View.OnWindowEnable(this);
+	}
+
+	void OnPostEnable()
+	{
+		if (!EditorApplication.isPlayingOrWillChangePlaymode)
+			SceneLoadDetector.EnsureExistence();
+		else
+		{
+			EditorApplication.playmodeStateChanged += OnPlayModeStateChanged;
+		}
 	}
 	
 	//called before window closes
@@ -317,6 +327,17 @@ internal sealed class JumpToEditorWindow : EditorWindow
 	private void OnSceneLoaded(string sceneAssetPath)
 	{
 		Repaint();
+	}
+
+	private void OnPlayModeStateChanged()
+	{
+		//attempting to detect stops
+		if (!EditorApplication.isPlaying &&
+			!EditorApplication.isPaused)
+		{
+			SceneLoadDetector.EnsureExistence();
+			EditorApplication.playmodeStateChanged -= OnPlayModeStateChanged;
+		}
 	}
 
 
