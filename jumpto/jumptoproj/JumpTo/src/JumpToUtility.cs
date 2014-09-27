@@ -18,6 +18,20 @@ namespace JumpTo
 
 			return path;
 		}
+
+		public static void SetWindowTitleContent(EditorWindow window, Texture2D tabIcon, string text)
+		{
+			//technique found at:
+			//	https://code.google.com/p/hounitylibs/source/browse/trunk/HOEditorUtils/HOPanelUtils.cs
+
+			const BindingFlags bFlags = BindingFlags.Instance | BindingFlags.NonPublic;
+            PropertyInfo cachedTitleContentProperty = typeof(EditorWindow).GetProperty("cachedTitleContent", bFlags);
+            if (cachedTitleContentProperty == null) return;
+
+			GUIContent guiContent = cachedTitleContentProperty.GetValue(window, null) as GUIContent;
+			guiContent.image = tabIcon;
+			guiContent.text = text;
+		}
 	}
 
 

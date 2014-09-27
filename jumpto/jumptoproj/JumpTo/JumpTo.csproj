@@ -80,6 +80,9 @@
   <ItemGroup>
     <EmbeddedResource Include="res\image\hamburger.png" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="res\image\tabicon.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy /y "$(TargetPath)" "$(SolutionDir)Assets\JumpTo\Editor"

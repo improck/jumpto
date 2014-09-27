@@ -46,6 +46,7 @@ namespace JumpTo
 		public static readonly int ImageHorizontalView = "horizontal.png".GetHashCode();
 		public static readonly int ImageVerticalView = "vertical.png".GetHashCode();
 		public static readonly int ImageHamburger = "hamburger.png".GetHashCode();
+		public static readonly int ImageTabIcon = "tabicon.png".GetHashCode();
 	}
 
 	internal sealed class JumpToResources
@@ -102,6 +103,7 @@ namespace JumpTo
 			LoadImage("horizontal.png");
 			LoadImage("vertical.png");
 			LoadImage("hamburger.png");
+			LoadImage("tabicon.png");
 		}
 
 		private void LoadText(string fileName)

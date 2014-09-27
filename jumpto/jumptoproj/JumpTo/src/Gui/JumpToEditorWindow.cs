@@ -86,6 +86,8 @@ internal sealed class JumpToEditorWindow : EditorWindow
 
 		JumpToResources.Instance.LoadResources();
 		GraphicAssets.Instance.InitAssets();
+
+		JumpToUtility.SetWindowTitleContent(this, JumpToResources.Instance.GetImage(ResId.ImageTabIcon), "JumpTo");
 		
 		if (m_JumpLinks == null)
 		{
