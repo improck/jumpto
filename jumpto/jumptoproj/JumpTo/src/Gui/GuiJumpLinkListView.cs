@@ -16,7 +16,7 @@ namespace JumpTo
 		private JumpToEditorWindow m_Window;
 
 		private const float DividerHalfThickness = 3.0f;
-		public const float DividerMin = 74.0f;
+		public const int DividerMin = 122;
 
 		private readonly Vector2 IconSize = new Vector2(16.0f, 16.0f);
 		private readonly int DividerHash = "divider".GetHashCode();
@@ -60,6 +60,8 @@ namespace JumpTo
 				{
 					float adjWidth = m_Size.x;
 					float adjHeight = m_Size.y;
+
+					RefreshDividerPosition();
 
 					//draw the top/left box
 					if (m_Window.JumpToSettingsInstance.Vertical)
@@ -185,11 +187,11 @@ namespace JumpTo
 					{
 						if (m_Window.JumpToSettingsInstance.Vertical)
 						{
-							m_Divider = Mathf.Clamp(current.mousePosition.y, DividerMin, m_Size.y - DividerMin) / m_Size.y;
+							m_Divider = Mathf.Clamp((int)current.mousePosition.y, DividerMin, (int)m_Size.y - DividerMin) / m_Size.y;
 						}
 						else
 						{
-							m_Divider = Mathf.Clamp(current.mousePosition.x, DividerMin, m_Size.x - DividerMin) / m_Size.x;
+							m_Divider = Mathf.Clamp((int)current.mousePosition.x, DividerMin, (int)m_Size.x - DividerMin) / m_Size.x;
 						}
 
 						current.Use();
@@ -347,6 +349,18 @@ namespace JumpTo
 				{
 					m_Window.JumpLinksInstance.CreateOnlyProjectJumpLink(objectReferences[i]);
 				}
+			}
+		}
+
+		public void RefreshDividerPosition()
+		{
+			if (m_Window.JumpToSettingsInstance.Vertical)
+			{
+				m_Divider = Mathf.Clamp(m_Divider * (int)m_Size.y, DividerMin, (int)m_Size.y - DividerMin) / m_Size.y;
+			}
+			else
+			{
+				m_Divider = Mathf.Clamp(m_Divider * (int)m_Size.x, DividerMin, (int)m_Size.x - DividerMin) / m_Size.x;
 			}
 		}
 	}

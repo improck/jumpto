@@ -154,19 +154,25 @@ namespace JumpTo
 			Object[] linkReferences = m_Window.JumpLinksInstance.GetJumpLinkContainer<ProjectJumpLink>().AllLinkReferences;
 			if (linkReferences != null)
 			{
-				//TODO: error handling
 				using (StreamWriter streamWriter = new StreamWriter(filePath))
 				{
-					int instanceId;
-					string line;
-					for (int i = 0; i < linkReferences.Length; i++)
+					try
 					{
-						instanceId = linkReferences[i].GetInstanceID();
-						line = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(instanceId));
-						if (AssetDatabase.IsSubAsset(instanceId))
-							line += "|" + instanceId;
+						int instanceId;
+						string line;
+						for (int i = 0; i < linkReferences.Length; i++)
+						{
+							instanceId = linkReferences[i].GetInstanceID();
+							line = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(instanceId));
+							if (AssetDatabase.IsSubAsset(instanceId))
+								line += "|" + instanceId;
 
-						streamWriter.WriteLine(line);
+							streamWriter.WriteLine(line);
+						}
+					}
+					catch (System.Exception ex)
+					{
+						Debug.LogError("JumpTo Error: Unable to save project links; error when writing to file\n" + ex.Message);
 					}
 				}
 			}
@@ -185,14 +191,20 @@ namespace JumpTo
 			string filePath = m_HierarchySaveDirectory + sceneGuid + SaveFileExtension;
 			if (m_HierarchyLinkPaths != null)
 			{
-				//TODO: error handling
 				using (StreamWriter streamWriter = new StreamWriter(filePath))
 				{
-					for (int i = 0; i < m_HierarchyLinkPaths.Length; i++)
+					try
 					{
-						if (m_HierarchyLinkPaths[i] != null &&
-							m_HierarchyLinkPaths[i].Length > 0)
-							streamWriter.WriteLine(m_HierarchyLinkPaths[i]);
+						for (int i = 0; i < m_HierarchyLinkPaths.Length; i++)
+						{
+							if (m_HierarchyLinkPaths[i] != null &&
+								m_HierarchyLinkPaths[i].Length > 0)
+								streamWriter.WriteLine(m_HierarchyLinkPaths[i]);
+						}
+					}
+					catch (System.Exception ex)
+					{
+						Debug.LogError("JumpTo Error: Unable to save hierarchy links; error when writing to file\n" + ex.Message);
 					}
 				}
 			}
@@ -225,44 +237,50 @@ namespace JumpTo
 			JumpLinkContainer<ProjectJumpLink> links = m_Window.JumpLinksInstance.GetJumpLinkContainer<ProjectJumpLink>();
 			links.RemoveAll();
 
-			//TODO: error handling
 			using (StreamReader streamReader = new StreamReader(filePath))
 			{
-				int instanceId;
-				string line;
-				string path;
-				while (!streamReader.EndOfStream)
+				try
 				{
-					JumpLinks jumpLinks = m_Window.JumpLinksInstance;
+					int instanceId;
+					string line;
+					string path;
+					while (!streamReader.EndOfStream)
+					{
+						JumpLinks jumpLinks = m_Window.JumpLinksInstance;
 
-					line = streamReader.ReadLine();
-					if (line.Length == 32)
-					{
-						path = AssetDatabase.GUIDToAssetPath(line);
-						if (!string.IsNullOrEmpty(path))
+						line = streamReader.ReadLine();
+						if (line.Length == 32)
 						{
-							Object obj = AssetDatabase.LoadMainAssetAtPath(path);
-							if (obj != null)
-								jumpLinks.CreateOnlyProjectJumpLink(obj);
-						}
-					}
-					else if (line.Length > 33 && line[32] == '|')
-					{
-						instanceId = int.Parse(line.Substring(33));
-						path = AssetDatabase.GUIDToAssetPath(line.Substring(0, 32));
-						if (!string.IsNullOrEmpty(path))
-						{
-							Object[] objs = AssetDatabase.LoadAllAssetsAtPath(path);
-							if (objs != null)
+							path = AssetDatabase.GUIDToAssetPath(line);
+							if (!string.IsNullOrEmpty(path))
 							{
-								for (int j = 0; j < objs.Length; j++)
+								Object obj = AssetDatabase.LoadMainAssetAtPath(path);
+								if (obj != null)
+									jumpLinks.CreateOnlyProjectJumpLink(obj);
+							}
+						}
+						else if (line.Length > 33 && line[32] == '|')
+						{
+							instanceId = int.Parse(line.Substring(33));
+							path = AssetDatabase.GUIDToAssetPath(line.Substring(0, 32));
+							if (!string.IsNullOrEmpty(path))
+							{
+								Object[] objs = AssetDatabase.LoadAllAssetsAtPath(path);
+								if (objs != null)
 								{
-									if (objs[j].GetInstanceID() == instanceId)
-										jumpLinks.CreateOnlyProjectJumpLink(objs[j]);
+									for (int j = 0; j < objs.Length; j++)
+									{
+										if (objs[j].GetInstanceID() == instanceId)
+											jumpLinks.CreateOnlyProjectJumpLink(objs[j]);
+									}
 								}
 							}
 						}
 					}
+				}
+				catch (System.Exception ex)
+				{
+					Debug.LogError("JumpTo Error: Unable to load project links; error when reading from file\n" + ex.Message);
 				}
 			}
 		}
@@ -283,82 +301,86 @@ namespace JumpTo
 			if (!File.Exists(filePath))
 				return;
 
-			//TODO: error handling
 			using (StreamReader streamReader = new StreamReader(filePath))
 			{
-				PropertyInfo inspectorModeProperty = typeof(SerializedObject).GetProperty("inspectorMode", BindingFlags.NonPublic | BindingFlags.Instance);
-
-				string line;
-				string transPath;
-				string objName;
-				int localId = 0;
-				int searchId = 0;
-				int pipeLoc = 0;
-				GameObject obj;
-				SerializedObject serializedObject;
-				while (!streamReader.EndOfStream)
+				try
 				{
-					JumpLinks jumpLinks = m_Window.JumpLinksInstance;
-
-					line = streamReader.ReadLine();
-					if (line == null || line.Length == 0)
-						continue;
-
-					pipeLoc = line.LastIndexOf('|');
-					transPath = line.Substring(0, pipeLoc);
-					localId = int.Parse(line.Substring(pipeLoc + 1));
-					
-					obj = GameObject.Find(transPath);
-					if (obj != null)
+					string line;
+					string transPath;
+					string objName;
+					int localId = 0;
+					int searchId = 0;
+					int pipeLoc = 0;
+					GameObject obj;
+					SerializedObject serializedObject;
+					while (!streamReader.EndOfStream)
 					{
-						serializedObject = new SerializedObject(obj);
-						serializedObject.SetInspectorMode(InspectorMode.Debug);
-						searchId = serializedObject.GetLocalIdInFile();
+						JumpLinks jumpLinks = m_Window.JumpLinksInstance;
 
-						if (searchId == localId)
+						line = streamReader.ReadLine();
+						if (line == null || line.Length == 0)
+							continue;
+
+						pipeLoc = line.LastIndexOf('|');
+						transPath = line.Substring(0, pipeLoc);
+						localId = int.Parse(line.Substring(pipeLoc + 1));
+					
+						obj = GameObject.Find(transPath);
+						if (obj != null)
 						{
-							jumpLinks.CreateOnlyHierarchyJumpLink(obj);
-						}
-						else if (obj.transform.parent != null)
-						{
-							objName = obj.name;
-							foreach (Transform trans in obj.transform.parent)
+							serializedObject = new SerializedObject(obj);
+							serializedObject.SetInspectorMode(InspectorMode.Debug);
+							searchId = serializedObject.GetLocalIdInFile();
+
+							if (searchId == localId)
 							{
-								if (trans.name == objName && trans.gameObject != obj)
+								jumpLinks.CreateOnlyHierarchyJumpLink(obj);
+							}
+							else if (obj.transform.parent != null)
+							{
+								objName = obj.name;
+								foreach (Transform trans in obj.transform.parent)
 								{
-									serializedObject = new SerializedObject(trans.gameObject);
-									serializedObject.SetInspectorMode(InspectorMode.Debug);
-									searchId = serializedObject.GetLocalIdInFile();
-									if (searchId == localId)
+									if (trans.name == objName && trans.gameObject != obj)
 									{
-										jumpLinks.CreateOnlyHierarchyJumpLink(trans.gameObject);
-										break;
+										serializedObject = new SerializedObject(trans.gameObject);
+										serializedObject.SetInspectorMode(InspectorMode.Debug);
+										searchId = serializedObject.GetLocalIdInFile();
+										if (searchId == localId)
+										{
+											jumpLinks.CreateOnlyHierarchyJumpLink(trans.gameObject);
+											break;
+										}
 									}
 								}
 							}
-						}
-						else
-						{
-							objName = obj.name;
-
-							HierarchyProperty hierarchyProperty = new HierarchyProperty(HierarchyType.GameObjects);
-							int[] expanded = new int[0];
-							while (hierarchyProperty.Next(expanded))
+							else
 							{
-								if (hierarchyProperty.name == objName && hierarchyProperty.pptrValue != obj)
+								objName = obj.name;
+
+								HierarchyProperty hierarchyProperty = new HierarchyProperty(HierarchyType.GameObjects);
+								int[] expanded = new int[0];
+								while (hierarchyProperty.Next(expanded))
 								{
-									serializedObject = new SerializedObject(hierarchyProperty.pptrValue);
-									serializedObject.SetInspectorMode(InspectorMode.Debug);
-									searchId = serializedObject.GetLocalIdInFile();
-									if (searchId == localId)
+									if (hierarchyProperty.name == objName && hierarchyProperty.pptrValue != obj)
 									{
-										jumpLinks.CreateOnlyHierarchyJumpLink(hierarchyProperty.pptrValue);
-										break;
+										serializedObject = new SerializedObject(hierarchyProperty.pptrValue);
+										serializedObject.SetInspectorMode(InspectorMode.Debug);
+										searchId = serializedObject.GetLocalIdInFile();
+										if (searchId == localId)
+										{
+											jumpLinks.CreateOnlyHierarchyJumpLink(hierarchyProperty.pptrValue);
+											break;
+										}
 									}
 								}
 							}
-						}
-					}
+						}	//if obj !null
+					}	//while ! end of stream
+				}	//try
+				catch (System.Exception ex)
+				{
+					Debug.LogError("JumpTo Error: Unable to load hierarchy links; error when reading from file\n" + ex.Message);
 				}
 			}
 		}

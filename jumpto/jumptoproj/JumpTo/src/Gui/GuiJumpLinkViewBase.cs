@@ -207,7 +207,8 @@ namespace JumpTo
 							m_Window.Repaint();
 						}
 						//or the click was on a link and the control/command key was down
-						else if (currentEvent.control || currentEvent.command)
+						else if (currentEvent.control ||
+							(Application.platform == RuntimePlatform.OSXEditor && currentEvent.command))
 						{
 							//toggle clicked link selection state
 							if (!m_LinkContainer[hit].Selected)

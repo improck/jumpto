@@ -57,6 +57,7 @@ namespace JumpTo
 			{
 				m_Window.JumpToSettingsInstance.Vertical = !m_Window.JumpToSettingsInstance.Vertical;
 				RefreshOrientationButton();
+				m_Window.RefreshMinSize();
 			}
 
 			//m_DrawRect.x += m_DrawRect.width;
@@ -78,6 +79,7 @@ namespace JumpTo
 			if (GUI.changed)
 			{
 				m_Window.JumpToSettingsInstance.Visibility = (JumpToSettings.VisibleList)m_SelectedView;
+				m_Window.RefreshMinSize();
 			}
 		}
 

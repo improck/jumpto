@@ -31,7 +31,7 @@ using SceneStateDetection;
 //xTODO: make some indicator of hierarchy links save state
 //xTODO: bug! hamburger icon is null when window is open on startup
 //xTODO: check out the drag-n-drop bug on jordan's mac
-//TODO: find the minimum editorwindow width
+//xTODO: find the minimum editorwindow size
 //TODO: comment all of this code
 
 
@@ -109,22 +109,6 @@ internal sealed class JumpToEditorWindow : EditorWindow
 			m_View = GuiBase.Create<GuiJumpLinkListView>();
 		}
 
-		if (m_Settings.Visibility == JumpToSettings.VisibleList.ProjectAndHierarchy)
-		{
-			if (m_Settings.Vertical)
-			{
-				this.minSize = new Vector2(120.0f, GuiJumpLinkListView.DividerMin * 2.0f);
-			}
-			else
-			{
-				this.minSize = new Vector2(240.0f, GuiJumpLinkListView.DividerMin);
-			}
-		}
-		else
-		{
-			this.minSize = new Vector2(120.0f, GuiJumpLinkListView.DividerMin);
-		}
-
 		if (m_SceneState == null)
 		{
 			m_SceneState = SceneStateControl.Create();
@@ -160,6 +144,8 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		//	OnWillEnable();
 
 		m_SerializationControl.OnWindowEnable();
+
+		RefreshMinSize();
 
 		m_JumpLinks.RefreshProjectLinks();
 		m_JumpLinks.RefreshHierarchyLinks();
@@ -342,6 +328,45 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		}
 	}
 
+	public void RefreshMinSize()
+	{
+		//TODO: need to notify the parent HostView's ContainerWindow of a minSize change
+		//	See ContainerWindow.OnResize()
+		if (m_Settings.Visibility == JumpToSettings.VisibleList.ProjectAndHierarchy)
+		{
+			if (m_Settings.Vertical)
+			{
+				this.minSize = new Vector2(139.0f, GuiJumpLinkListView.DividerMin * 2.0f);
+			}
+			else
+			{
+				this.minSize = new Vector2(GuiJumpLinkListView.DividerMin * 2.0f, GuiJumpLinkListView.DividerMin);
+			}
+		}
+		else
+		{
+			this.minSize = new Vector2(139.0f, GuiJumpLinkListView.DividerMin);
+		}
+
+		//NOTE: if docked, this makes the window pop out to a new container
+		//	See this.set_position(), and this.CreateNewWindowForEditorWindow()
+		//Rect pos = position;
+
+		//if (minSize.x > pos.width)
+		//{
+		//	pos.width = minSize.x;
+		//}
+
+		//if (minSize.y > pos.height)
+		//{
+		//	pos.height = minSize.y;
+		//}
+
+		//position = pos;
+
+		Repaint();
+	}
+
 
 	private void CreateMultipleJumpLinks(UnityEngine.Object[] linkReferences)
 	{
@@ -388,7 +413,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 
 	public static JumpToEditorWindow GetOrCreateWindow()
 	{
-		return EditorWindow.GetWindow<JumpToEditorWindow>("Jump To");
+		return EditorWindow.GetWindow<JumpToEditorWindow>("JumpTo");
 	}
 
 	public static void RepaintOpenWindows()
@@ -403,7 +428,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		}
 	}
 	
-	[MenuItem("Window/Jump To")]
+	[MenuItem("Window/JumpTo")]
 	public static void JumpTo_InitMainMenu()
 	{
 		JumpToEditorWindow window = GetOrCreateWindow();
