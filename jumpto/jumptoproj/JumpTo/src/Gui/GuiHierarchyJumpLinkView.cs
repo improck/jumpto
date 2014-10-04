@@ -162,7 +162,7 @@ namespace JumpTo
 			return SceneView.lastActiveSceneView != null || SceneView.currentDrawingSceneView != null;
 		}
 
-		protected void OnHierarchyLinksChanged()
+		private void OnHierarchyLinksChanged()
 		{
 			m_ControlTitle.text = m_TitleText + '*';
 			m_HierarchyLinksChanged = true;

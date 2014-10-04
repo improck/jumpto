@@ -52,6 +52,8 @@ internal sealed class JumpToEditorWindow : EditorWindow
 	[System.NonSerialized] private double m_LastHierarchyRefreshTime = 0.0f;
 	[System.NonSerialized] private SerializationControl m_SerializationControl = null;
 
+	private EditorWindowCachedTitleContentWrapper m_CachedTitleContent = null;
+
 
 	public JumpLinks JumpLinksInstance { get { return m_JumpLinks; } }
 	public JumpToSettings JumpToSettingsInstance { get { return m_Settings; } }
@@ -87,8 +89,6 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		JumpToResources.Instance.LoadResources();
 		GraphicAssets.Instance.InitAssets();
 
-		JumpToUtility.SetWindowTitleContent(this, JumpToResources.Instance.GetImage(ResId.ImageTabIcon), "JumpTo");
-		
 		if (m_JumpLinks == null)
 		{
 			m_JumpLinks = JumpLinks.Create();
@@ -153,6 +153,15 @@ internal sealed class JumpToEditorWindow : EditorWindow
 
 		m_Toolbar.OnWindowEnable(this);
 		m_View.OnWindowEnable(this);
+
+		m_CachedTitleContent = new EditorWindowCachedTitleContentWrapper(this);
+		GUIContent titleContent = m_CachedTitleContent.TitleContent;
+		titleContent.text = "JumpTo";
+		titleContent.image = JumpToResources.Instance.GetImage(ResId.ImageTabIcon);
+		//JumpToUtility.SetWindowTitleContent(this, JumpToResources.Instance.GetImage(ResId.ImageTabIcon), "JumpTo");
+		//m_CachedWindowTitleContent = JumpToUtility.GetWindowTitleContent(this);
+		//m_CachedWindowTitleContent.text = "JumpTo";
+		//m_CachedWindowTitleContent.image = JumpToResources.Instance.GetImage(ResId.ImageTabIcon);
 	}
 
 	void OnPostEnable()
@@ -232,6 +241,8 @@ internal sealed class JumpToEditorWindow : EditorWindow
 
 	void OnGUI()
 	{
+		m_CachedTitleContent.TitleContent.image = JumpToResources.Instance.GetImage(ResId.ImageTabIcon);
+
 		//NOTE: it's ridiculous that I have to do this here.
 		if (!m_Initialized)
 			Init();

@@ -21,7 +21,7 @@ namespace SceneStateDetection
 		}
 
 
-		protected SceneStateControl() { s_Instance = this; }
+		private SceneStateControl() { s_Instance = this; }
 		#endregion
 
 

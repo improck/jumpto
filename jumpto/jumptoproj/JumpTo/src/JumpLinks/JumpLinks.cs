@@ -48,7 +48,7 @@ namespace JumpTo
 
 	internal sealed class HierarchyJumpLink : JumpLink
 	{
-		[SerializeField] protected bool m_Active = true;
+		[SerializeField] private bool m_Active = true;
 
 
 		public bool Active { get { return m_Active; } set { m_Active = value; } }

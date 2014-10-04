@@ -6,8 +6,8 @@ namespace JumpTo
 {
 	internal sealed class GuiProjectJumpLinkView : GuiJumpLinkViewBase<ProjectJumpLink>
 	{
-		protected GUIContent m_MenuOpenLink;
-		protected GUIContent m_MenuOpenLinkPlural;
+		private GUIContent m_MenuOpenLink;
+		private GUIContent m_MenuOpenLinkPlural;
 
 
 		public override void OnWindowEnable(EditorWindow window)
