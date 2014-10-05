@@ -158,10 +158,6 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		GUIContent titleContent = m_CachedTitleContent.TitleContent;
 		titleContent.text = "JumpTo";
 		titleContent.image = JumpToResources.Instance.GetImage(ResId.ImageTabIcon);
-		//JumpToUtility.SetWindowTitleContent(this, JumpToResources.Instance.GetImage(ResId.ImageTabIcon), "JumpTo");
-		//m_CachedWindowTitleContent = JumpToUtility.GetWindowTitleContent(this);
-		//m_CachedWindowTitleContent.text = "JumpTo";
-		//m_CachedWindowTitleContent.image = JumpToResources.Instance.GetImage(ResId.ImageTabIcon);
 	}
 
 	void OnPostEnable()
@@ -446,7 +442,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		window.Show();
 	}
 
-	[MenuItem("Assets/Create/Jump Link", true)]
+	[MenuItem("Assets/Create/JumpTo Link", true)]
 	public static bool JumpTo_AssetsCreateJumpLink_Validate()
 	{
 		JumpToEditorWindow[] windows = Resources.FindObjectsOfTypeAll<JumpToEditorWindow>();
@@ -455,7 +451,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		return windows.Length > 0 && windows[0].m_JumpLinks != null && selected != null && selected.Length > 0;
 	}
 
-	[MenuItem("Assets/Create/Jump Link", false)]
+	[MenuItem("Assets/Create/JumpTo Link", false)]
 	public static void JumpTo_AssetsCreateJumpLink()
 	{
 		Object[] selected = Selection.objects;
@@ -463,7 +459,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		window.CreateMultipleJumpLinks(selected);
 	}
 
-	[MenuItem("GameObject/Create Other/Jump Link", true)]
+	[MenuItem("GameObject/Create Other/JumpTo Link", true)]
 	public static bool JumpTo_GameObjectCreateOtherJumpLink_Validate()
 	{
 		JumpToEditorWindow[] windows = Resources.FindObjectsOfTypeAll<JumpToEditorWindow>();
@@ -472,7 +468,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		return windows.Length > 0 && windows[0].m_JumpLinks != null && selected != null && selected.Length > 0;
 	}
 
-	[MenuItem("GameObject/Create Other/Jump Link", false)]
+	[MenuItem("GameObject/Create Other/JumpTo Link", false)]
 	public static void JumpTo_GameObjectCreateOtherJumpLink()
 	{
 		Object[] selected = Selection.objects;

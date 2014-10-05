@@ -39,7 +39,7 @@ namespace SceneStateDetection
 		{
 			//s_SceneAssetSavePath = sceneAssetPath;
 
-			SceneLoadDetector.TemporarilyDestroyInstance();
+			SceneLoadDetector.TemporarilyDestroyInstance(true);
 
 			//NOTE: for Save As, the currentScene has not been updated at
 			//		this point.

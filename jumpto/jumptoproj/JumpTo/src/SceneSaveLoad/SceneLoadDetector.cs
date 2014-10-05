@@ -21,6 +21,7 @@ namespace SceneStateDetection
 	{
 		private static SceneLoadDetector s_Instance;
 		private bool m_KeepAlive = true;
+		private bool m_DoNotRaise = false;
 
 
 		/// <summary>
@@ -37,7 +38,12 @@ namespace SceneStateDetection
 			//	'frame' of the Unity Editor. That is, on the next update.
 			//	the method is unsubscribed just before being called, so it
 			//	is only called once.
-			EditorApplication.delayCall += WaitToCreate;
+			EditorApplication.delayCall += CreateInstanceAndRaise;
+		}
+
+		public static void EnsureExistenceDoNotRaise()
+		{
+			EditorApplication.delayCall += CreateInstanceDoNotRaise;
 		}
 
 		/// <summary>
@@ -52,6 +58,19 @@ namespace SceneStateDetection
 		{
 			if (s_Instance != null)
 			{
+				//NOTE: as soon as OnDestroy() gets called, a new instance
+				//		is scheduled to be created in the next editor frame
+				DestroyImmediate(s_Instance);
+				s_Instance = null;
+			}
+		}
+
+		public static void TemporarilyDestroyInstance(bool doNotRaiseOnReload)
+		{
+			if (s_Instance != null)
+			{
+				s_Instance.m_DoNotRaise = doNotRaiseOnReload;
+
 				//NOTE: as soon as OnDestroy() gets called, a new instance
 				//		is scheduled to be created in the next editor frame
 				DestroyImmediate(s_Instance);
@@ -81,7 +100,7 @@ namespace SceneStateDetection
 		/// Looks for an instance of this object. If one is not found, it creates one
 		/// and signals that a scene has been loaded.
 		/// </summary>
-		private static void WaitToCreate()
+		private static void CreateInstanceAndRaise()
 		{
 			if (Resources.FindObjectsOfTypeAll<SceneLoadDetector>().Length == 0)
 			{
@@ -89,6 +108,15 @@ namespace SceneStateDetection
 				s_Instance.hideFlags = HideFlags.HideInHierarchy;
 
 				SceneStateControl.SceneWillLoad();
+			}
+		}
+
+		private static void CreateInstanceDoNotRaise()
+		{
+			if (Resources.FindObjectsOfTypeAll<SceneLoadDetector>().Length == 0)
+			{
+				s_Instance = CreateInstance<SceneLoadDetector>();
+				s_Instance.hideFlags = HideFlags.HideInHierarchy;
 			}
 		}
 
@@ -107,7 +135,10 @@ namespace SceneStateDetection
 		{
 			if (m_KeepAlive)
 			{
-				EnsureExistence();
+				if (!m_DoNotRaise)
+					EnsureExistence();
+				else
+					EnsureExistenceDoNotRaise();
 			}
 		}
 	}
