@@ -42,11 +42,29 @@ namespace JumpTo
 		public static readonly int DialogYes = "dialog_yes".GetHashCode();
 		public static readonly int DialogNo = "dialog_no".GetHashCode();
 
-		public static readonly int ImageDividerVertical = "divider_v.png".GetHashCode();
-		public static readonly int ImageHorizontalView = "horizontal.png".GetHashCode();
-		public static readonly int ImageVerticalView = "vertical.png".GetHashCode();
-		public static readonly int ImageHamburger = "hamburger.png".GetHashCode();
+		public static readonly int ImageDividerVertical;
+		public static readonly int ImageHorizontalView;
+		public static readonly int ImageVerticalView;
+		public static readonly int ImageHamburger;
 		public static readonly int ImageTabIcon = "tabicon.png".GetHashCode();
+
+		static ResId()
+		{
+			if (EditorGUIUtility.isProSkin)
+			{
+				ImageDividerVertical = "divider_v_pro.png".GetHashCode();
+				ImageHorizontalView = "horizontal_pro.png".GetHashCode();
+				ImageVerticalView = "vertical_pro.png".GetHashCode();
+				ImageHamburger = "hamburger_pro.png".GetHashCode();
+			}
+			else
+			{
+				ImageDividerVertical = "divider_v.png".GetHashCode();
+				ImageHorizontalView = "horizontal.png".GetHashCode();
+				ImageVerticalView = "vertical.png".GetHashCode();
+				ImageHamburger = "hamburger.png".GetHashCode();
+			}
+		}
 	}
 
 	internal sealed class JumpToResources
@@ -99,11 +117,24 @@ namespace JumpTo
 			}
 
 			//image resources
-			LoadImage("divider_v.png");
-			LoadImage("horizontal.png");
-			LoadImage("vertical.png");
-			LoadImage("hamburger.png");
 			LoadImage("tabicon.png");
+
+			if (EditorGUIUtility.isProSkin)
+			{
+				//pro skin
+				LoadImage("divider_v_pro.png");
+				LoadImage("horizontal_pro.png");
+				LoadImage("vertical_pro.png");
+				LoadImage("hamburger_pro.png");
+			}
+			else
+			{
+				//free skin
+				LoadImage("divider_v.png");
+				LoadImage("horizontal.png");
+				LoadImage("vertical.png");
+				LoadImage("hamburger.png");
+			}
 		}
 
 		private void LoadText(string fileName)
@@ -154,9 +185,12 @@ namespace JumpTo
 					byte[] fileBytes = new byte[resStream.Length];
 					resStream.Read(fileBytes, 0, fileBytes.Length);
 
-					Texture2D texture = new Texture2D(4, 4);
+					Texture2D texture = new Texture2D(4, 4, TextureFormat.ARGB32, false);
 					texture.LoadImage(fileBytes);
 					texture.hideFlags = HideFlags.HideAndDontSave;
+					texture.wrapMode = TextureWrapMode.Clamp;
+					texture.anisoLevel = 1;
+					texture.Apply();
 
 					m_ImageResources.Add(fileNameHash, texture);
 				}

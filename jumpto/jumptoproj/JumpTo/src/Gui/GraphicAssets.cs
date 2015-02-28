@@ -39,7 +39,6 @@ namespace JumpTo
 
 		public GUIStyle LinkViewTitleStyle { get; private set; }
 		public GUIStyle LinkLabelStyle { get; private set; }
-		//public GUIStyle LinkBoxStyle { get; private set; }
 		public GUIStyle ToolbarStyle { get; private set; }
 		public GUIStyle ToolbarButtonStyle { get; private set; }
 		public GUIStyle ToolbarPopupStyle { get; private set; }
@@ -58,12 +57,13 @@ namespace JumpTo
 		public const float LinkHeight = 16.0f;
 
 
-		//private Texture2D m_Outline;
-
-
 		public void InitGuiStyle()
 		{
-			GUISkin editorSkin = EditorGUIUtility.GetBuiltinSkin(EditorSkin.Inspector);
+			GUISkin editorSkin = null;
+			if (EditorGUIUtility.isProSkin)
+				editorSkin = EditorGUIUtility.GetBuiltinSkin(EditorSkin.Scene);
+			else
+				editorSkin = EditorGUIUtility.GetBuiltinSkin(EditorSkin.Inspector);
 
 			LinkViewTitleStyle = new GUIStyle(editorSkin.GetStyle("IN BigTitle"));
 			LinkViewTitleStyle.name = "JumpTo Title";
@@ -72,14 +72,6 @@ namespace JumpTo
 			LinkLabelStyle = new GUIStyle(editorSkin.GetStyle("PR Label"));
 			LinkLabelStyle.name = "Link Label Style";
 			LinkLabelStyle.padding.left = 8;
-
-			//LinkBoxStyle = new GUIStyle(GUI.skin.box);
-			//LinkBoxStyle.fontStyle = FontStyle.Bold;
-			//LinkBoxStyle.alignment = TextAnchor.UpperLeft;
-			//LinkBoxStyle.normal.background = m_Outline;
-			//Vector2 contentOffset = LinkBoxStyle.contentOffset;
-			//contentOffset.x = 2.0f;
-			//LinkBoxStyle.contentOffset = contentOffset;
 
 			ToolbarStyle = new GUIStyle(editorSkin.GetStyle("Toolbar"));
 			ToolbarPopupStyle = new GUIStyle(editorSkin.GetStyle("ToolbarPopup"));
@@ -114,7 +106,7 @@ namespace JumpTo
 				{
 					new Color(0.7f, 0.7f, 0.7f, 1.0f),		//normal
 					new Color(0.84f, 0.6f, 0.92f, 1.0f),	//model
-					new Color(0.3f, 0.5f, 0.85f, 1.0f),		//prefab
+					new Color(0.298f, 0.5f, 0.85f, 1.0f),	//prefab
 					new Color(0.7f, 0.4f, 0.4f, 1.0f)		//broken prefab
 				};
 			}
