@@ -7,8 +7,8 @@
     <ProjectGuid>{1B5D1206-69FA-4B5F-87FE-5BACB208216D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>JumpTo</RootNamespace>
-    <AssemblyName>JumpTo</AssemblyName>
+    <RootNamespace>ImpRock.JumpTo.Editor</RootNamespace>
+    <AssemblyName>ImpRock.JumpTo.Editor</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -91,14 +91,12 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy /y "$(TargetPath)" "$(SolutionDir)Assets\JumpTo\Editor"
-copy /y "$(TargetDir)$(TargetName).pdb" "$(SolutionDir)Assets\JumpTo\Editor"</PostBuildEvent>
+    <PostBuildEvent>copy $(TargetPath) $(SolutionDir)..\unityproject\Assets\ImpRock\JumpTo\Editor
+copy $(TargetDir)$(TargetName).pdb $(SolutionDir)..\unityproject\Assets\ImpRock\JumpTo\Editor</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>del "$(SolutionDir)Assets\JumpTo\Editor\$(TargetName).dll"
-del "$(SolutionDir)Assets\JumpTo\Editor\$(TargetName).pdb"
-del "$(SolutionDir)Assets\JumpTo\Editor\$(TargetName).dll.mdb"
-del "$(SolutionDir)Assets\JumpTo\Editor\$(TargetName).dll.mdb.meta"</PreBuildEvent>
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
