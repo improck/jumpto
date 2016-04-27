@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 
 
-namespace JumpTo
+namespace ImpRock.JumpTo.Editor
 {
 	internal sealed class GuiHierarchyJumpLinkView : GuiJumpLinkViewBase<HierarchyJumpLink>
 	{

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 
 
-namespace JumpTo
+namespace ImpRock.JumpTo.Editor
 {
 	[System.Serializable]
 	internal enum LinkReferenceType

@@ -3,7 +3,7 @@ using UnityEngine;
 using System.IO;
 
 
-namespace JumpTo
+namespace ImpRock.JumpTo.Editor
 {
 	internal sealed class JumpToSettings : EditorScriptableObject<JumpToSettings>
 	{

@@ -2,7 +2,7 @@
 using UnityEngine;
 
 
-namespace JumpTo
+namespace ImpRock.JumpTo.Editor
 {
 	[System.Serializable]
 	internal class RectRef

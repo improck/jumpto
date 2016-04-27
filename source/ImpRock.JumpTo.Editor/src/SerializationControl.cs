@@ -1,11 +1,11 @@
 ﻿using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using System.IO;
-using System.Reflection;
 using SceneStateDetection;
 
 
-namespace JumpTo
+namespace ImpRock.JumpTo.Editor
 {
 	//TODO: all auto-saving of hierarchy links is disabled. not enough info from unity editor to make it work.
 	internal sealed class SerializationControl
@@ -290,6 +290,8 @@ namespace JumpTo
 			HierarchyJumpLinkContainer links = m_Window.JumpLinksInstance.HierarchyLinks;
 			links.RemoveAll();
 
+			//TODO: make compatible with multiple scenes
+
 			string currentScene = EditorApplication.currentScene;
 
 			if (string.IsNullOrEmpty(currentScene))
@@ -297,7 +299,7 @@ namespace JumpTo
 
 			string sceneGuid = AssetDatabase.AssetPathToGUID(currentScene);
 			string filePath = m_HierarchySaveDirectory + sceneGuid + SaveFileExtension;
-			
+
 			if (!File.Exists(filePath))
 				return;
 
@@ -305,82 +307,134 @@ namespace JumpTo
 			{
 				try
 				{
+					JumpLinks jumpLinks = m_Window.JumpLinksInstance;
+					GameObject[] unorderedRootObjects = EditorSceneManager.GetActiveScene().GetRootGameObjects();
+					//TODO: do this smarter
+					GameObject[] rootObjects = new GameObject[unorderedRootObjects.Length];
+					for (int i = 0; i < rootObjects.Length; i++)
+					{
+						SerializedObject so = new SerializedObject(unorderedRootObjects[i].transform);
+						rootObjects[so.FindProperty("m_RootOrder").intValue] = unorderedRootObjects[i];
+					}
+
 					string line;
-					string transPath;
-					string objName;
+					//string transPath;
+					//string idDescriptor;
+					//string objName;
 					int localId = 0;
-					int searchId = 0;
-					int pipeLoc = 0;
-					GameObject obj;
-					SerializedObject serializedObject;
+					int rootOrder = 0;
+					char[] delimiterPipe = new char[] { '|' };
+					char[] delimeterForwardSlash = new char[] { '/' };
+					string[] lineSegments;
+					string[] rootOrders;
+					//int searchId = 0;
+					//GameObject obj;
+					//SerializedObject serializedObject;
 					while (!streamReader.EndOfStream)
 					{
-						JumpLinks jumpLinks = m_Window.JumpLinksInstance;
-
 						line = streamReader.ReadLine();
 						if (line == null || line.Length == 0)
 							continue;
 
-						pipeLoc = line.LastIndexOf('|');
-						transPath = line.Substring(0, pipeLoc);
-						localId = int.Parse(line.Substring(pipeLoc + 1));
-					
-						obj = GameObject.Find(transPath);
-						if (obj != null)
+						lineSegments = line.Split(delimiterPipe, System.StringSplitOptions.RemoveEmptyEntries);
+
+						localId = int.Parse(lineSegments[0]);
+
+						//find the root transform of the object
+						rootOrders = lineSegments[1].Split(new[] { '/' }, System.StringSplitOptions.RemoveEmptyEntries);
+						rootOrder = int.Parse(rootOrders[0]);
+						Transform traversal = rootObjects[rootOrder].transform;
+						for (int i = 1; i < rootOrders.Length; i++)
 						{
-							serializedObject = new SerializedObject(obj);
-							serializedObject.SetInspectorMode(InspectorMode.Debug);
-							searchId = serializedObject.GetLocalIdInFile();
+							traversal = traversal.GetChild(int.Parse(rootOrders[i]));
+						}
 
-							if (searchId == localId)
-							{
-								jumpLinks.CreateOnlyHierarchyJumpLink(obj);
-							}
-							else if (obj.transform.parent != null)
-							{
-								objName = obj.name;
-								foreach (Transform trans in obj.transform.parent)
-								{
-									if (trans.name == objName && trans.gameObject != obj)
-									{
-										serializedObject = new SerializedObject(trans.gameObject);
-										serializedObject.SetInspectorMode(InspectorMode.Debug);
-										searchId = serializedObject.GetLocalIdInFile();
-										if (searchId == localId)
-										{
-											jumpLinks.CreateOnlyHierarchyJumpLink(trans.gameObject);
-											break;
-										}
-									}
-								}
-							}
-							else
-							{
-								objName = obj.name;
+						if (traversal != null)
+						{
+							jumpLinks.CreateOnlyHierarchyJumpLink(traversal.gameObject);
+						}
+						else if (localId != 0)
+						{
+							//TODO: fall back to the old school
+							//lineSegments[2] is the transform path
+						}
 
-								HierarchyProperty hierarchyProperty = new HierarchyProperty(HierarchyType.GameObjects);
-								int[] expanded = new int[0];
-								while (hierarchyProperty.Next(expanded))
-								{
-									if (hierarchyProperty.name == objName && hierarchyProperty.pptrValue != obj)
-									{
-										serializedObject = new SerializedObject(hierarchyProperty.pptrValue);
-										serializedObject.SetInspectorMode(InspectorMode.Debug);
-										searchId = serializedObject.GetLocalIdInFile();
-										if (searchId == localId)
-										{
-											jumpLinks.CreateOnlyHierarchyJumpLink(hierarchyProperty.pptrValue);
-											break;
-										}
-									}
-								}
-							}
-						}	//if obj !null
-					}	//while ! end of stream
-				}	//try
+						//pipeLoc = line.LastIndexOf('|');
+						//transPath = line.Substring(0, pipeLoc);
+						//if (line[pipeLoc + 1] != '@')
+						//{
+						//	localId = int.Parse(line.Substring(pipeLoc + 1));
+						//	rootOrder = 0;
+						//}
+						//else
+						//{
+						//	localId = 0;
+						//	rootOrder = int.Parse(line.Substring(pipeLoc + 2));
+						//}
+
+						//obj = GameObject.Find(transPath);
+						//if (obj != null)
+						//{
+						//	serializedObject = new SerializedObject(obj);
+						//	if (localId != 0)
+						//	{
+						//		serializedObject.SetInspectorMode(InspectorMode.Debug);
+
+						//		searchId = serializedObject.GetLocalIdInFile();
+						//		if (searchId == localId)
+						//		{
+						//			jumpLinks.CreateOnlyHierarchyJumpLink(obj);
+						//		}
+						//		else if (obj.transform.parent != null)
+						//		{
+						//			objName = obj.name;
+						//			foreach (Transform trans in obj.transform.parent)
+						//			{
+						//				if (trans.name == objName && trans.gameObject != obj)
+						//				{
+						//					serializedObject = new SerializedObject(trans.gameObject);
+						//					serializedObject.SetInspectorMode(InspectorMode.Debug);
+						//					searchId = serializedObject.GetLocalIdInFile();
+						//					if (searchId == localId)
+						//					{
+						//						jumpLinks.CreateOnlyHierarchyJumpLink(trans.gameObject);
+						//						break;
+						//					}
+						//				}
+						//			}
+						//		}
+						//		else
+						//		{
+						//			objName = obj.name;
+
+						//			HierarchyProperty hierarchyProperty = new HierarchyProperty(HierarchyType.GameObjects);
+						//			int[] expanded = new int[0];
+						//			while (hierarchyProperty.Next(expanded))
+						//			{
+						//				if (hierarchyProperty.name == objName && hierarchyProperty.pptrValue != obj)
+						//				{
+						//					serializedObject = new SerializedObject(hierarchyProperty.pptrValue);
+						//					serializedObject.SetInspectorMode(InspectorMode.Debug);
+						//					searchId = serializedObject.GetLocalIdInFile();
+						//					if (searchId == localId)
+						//					{
+						//						jumpLinks.CreateOnlyHierarchyJumpLink(hierarchyProperty.pptrValue);
+						//						break;
+						//					}
+						//				}
+						//			}
+						//		}
+						//	}
+						//	else
+						//	{
+						//		//UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene().GetRootGameObjects();
+						//	}
+						//}	//if obj !null
+					}   //while ! end of stream
+				}   //try
 				catch (System.Exception ex)
 				{
-					Debug.LogError("JumpTo Error: Unable to load hierarchy links; error when reading from file\n" + ex.Message);
+					Debug.LogError("JumpTo Error: Unable to load hierarchy links; error when reading from file\n" + ex.ToString());
 				}
 			}
 		}
@@ -520,6 +574,8 @@ namespace JumpTo
 			{
 				SerializedObject serializedObject;
 				int localId = 0;
+				//PrefabType prefabType = PrefabType.None;
+				Transform linkReferenceTransform = null;
 				m_HierarchyLinkPaths = new string[linkReferences.Length];
 				for (int i = 0; i < linkReferences.Length; i++)
 				{
@@ -531,15 +587,11 @@ namespace JumpTo
 					serializedObject = new SerializedObject(linkReferences[i]);
 					serializedObject.SetInspectorMode(InspectorMode.Debug);
 
-					//skip objects that haven't been saved to the scene
-					//TODO: should this even be necessary in the future?
+					linkReferenceTransform = (linkReferences[i] as GameObject).transform;
 					localId = serializedObject.GetLocalIdInFile();
-					if (localId == 0)
-						continue;
-					
-					m_HierarchyLinkPaths[i] =
-						JumpToUtility.GetTransformPath((linkReferences[i] as GameObject).transform)
-							+ "|" + serializedObject.GetLocalIdInFile().ToString();
+					m_HierarchyLinkPaths[i] = localId.ToString() + "|" +
+						JumpToUtility.GetRootOrderPath(linkReferenceTransform) + "|" +
+						JumpToUtility.GetTransformPath(linkReferenceTransform);
 				}
 			}
 		}

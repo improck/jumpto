@@ -1,37 +1,9 @@
 ﻿using UnityEditor;
 using UnityEngine;
-using JumpTo;
+using ImpRock.JumpTo.Editor;
 using SceneStateDetection;
 
 
-//xTODO: make items clickable
-//xTODO: project and hierarchy foldouts
-//xTODO: replace GUILayout.Label with m_LinkLabelStyle.Draw()
-//xTODO: ability to remove items
-//xTODO: context menu
-//xTODO: drag-n-drop to window
-//xTODO: double-click behavior
-//xTODO: serialize links
-//xTODO: create a toolbar
-//xTODO: drag-n-drop from project window
-//xTODO: drag-n-drop from hierarchy window
-//xTODO: multiple selection
-//xTODO: clear all links from gui
-//xTODO: update on scene change
-//xTODO: update on project change
-//xTODO: change the view control look-and-feel
-//xTODO: detect a scene load
-//xTODO: serialize to a file
-//xTODO: move to a dll assembly
-//xTODO: draw a grab bar as the divider, horizontal AND vertical
-//xTODO: left-click hamburger menu for list view control
-//xTODO: assembly resource text, multiple languages
-//xTODO: load images from assembly resources
-//xTODO: save the divider placement to settings
-//xTODO: make some indicator of hierarchy links save state
-//xTODO: bug! hamburger icon is null when window is open on startup
-//xTODO: check out the drag-n-drop bug on jordan's mac
-//xTODO: find the minimum editorwindow size
 //TODO: comment all of this code
 
 
@@ -52,9 +24,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 	[System.NonSerialized] private double m_LastHierarchyRefreshTime = 0.0f;
 	[System.NonSerialized] private SerializationControl m_SerializationControl = null;
 
-	private EditorWindowCachedTitleContentWrapper m_CachedTitleContent = null;
-
-
+	
 	public JumpLinks JumpLinksInstance { get { return m_JumpLinks; } }
 	public JumpToSettings JumpToSettingsInstance { get { return m_Settings; } }
 	public SerializationControl SerializationControlInstance { get { return m_SerializationControl; } }
@@ -154,8 +124,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		m_Toolbar.OnWindowEnable(this);
 		m_View.OnWindowEnable(this);
 
-		m_CachedTitleContent = new EditorWindowCachedTitleContentWrapper(this);
-		GUIContent titleContent = m_CachedTitleContent.TitleContent;
+		GUIContent titleContent = this.titleContent;
 		titleContent.text = "JumpTo";
 		titleContent.image = JumpToResources.Instance.GetImage(ResId.ImageTabIcon);
 	}
@@ -237,8 +206,6 @@ internal sealed class JumpToEditorWindow : EditorWindow
 
 	void OnGUI()
 	{
-		m_CachedTitleContent.TitleContent.image = JumpToResources.Instance.GetImage(ResId.ImageTabIcon);
-
 		//NOTE: it's ridiculous that I have to do this here.
 		if (!m_Initialized)
 			Init();

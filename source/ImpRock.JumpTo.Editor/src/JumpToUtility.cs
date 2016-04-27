@@ -1,48 +1,52 @@
 ﻿using UnityEditor;
 using UnityEngine;
 using System.Reflection;
+using System.Text;
+using System.Collections.Generic;
 
 
-namespace JumpTo
+namespace ImpRock.JumpTo.Editor
 {
 	internal static class JumpToUtility
 	{
-		public static string GetTransformPath(Transform transform)
+		public static string GetRootOrderPath(Transform transform)
 		{
-			string path = string.Empty;
+			SerializedObject so = null;
+			Stack<string> pathStack = new Stack<string>();
 			while (transform != null)
 			{
-				path = "/" + transform.name + path;
+				so = new SerializedObject(transform);
+				pathStack.Push("/" + so.FindProperty("m_RootOrder").intValue.ToString());
+
 				transform = transform.parent;
 			}
 
-			return path;
+			StringBuilder pathBuilder = new StringBuilder();
+			while (pathStack.Count > 0)
+			{
+				pathBuilder.Append(pathStack.Pop());
+			}
+
+			return pathBuilder.ToString();
 		}
 
-		public static void SetWindowTitleContent(this EditorWindow window, Texture2D tabIcon, string text)
+		public static string GetTransformPath(Transform transform)
 		{
-			//technique found at:
-			//	https://code.google.com/p/hounitylibs/source/browse/trunk/HOEditorUtils/HOPanelUtils.cs
+			Stack<string> pathStack = new Stack<string>();
+			while (transform != null)
+			{
+				pathStack.Push("/" + transform.name);
 
-			const BindingFlags bFlags = BindingFlags.Instance | BindingFlags.NonPublic;
-            PropertyInfo cachedTitleContentProperty = typeof(EditorWindow).GetProperty("cachedTitleContent", bFlags);
-            if (cachedTitleContentProperty == null) return;
+				transform = transform.parent;
+			}
 
-			GUIContent guiContent = cachedTitleContentProperty.GetValue(window, null) as GUIContent;
-			guiContent.image = tabIcon;
-			guiContent.text = text;
-		}
+			StringBuilder pathBuilder = new StringBuilder();
+			while (pathStack.Count > 0)
+			{
+				pathBuilder.Append(pathStack.Pop());
+			}
 
-		public static GUIContent GetWindowTitleContent(this EditorWindow window)
-		{
-			//technique found at:
-			//	https://code.google.com/p/hounitylibs/source/browse/trunk/HOEditorUtils/HOPanelUtils.cs
-
-			const BindingFlags bFlags = BindingFlags.Instance | BindingFlags.NonPublic;
-			PropertyInfo cachedTitleContentProperty = typeof(EditorWindow).GetProperty("cachedTitleContent", bFlags);
-			if (cachedTitleContentProperty == null) return null;
-
-			return cachedTitleContentProperty.GetValue(window, null) as GUIContent;
+			return pathBuilder.ToString();
 		}
 	}
 

@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections;
 
 
-namespace JumpTo
+namespace ImpRock.JumpTo.Editor
 {
 	internal abstract class GuiBase : ScriptableObject
 	{

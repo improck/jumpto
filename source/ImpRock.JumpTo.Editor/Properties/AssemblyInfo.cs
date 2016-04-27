@@ -11,7 +11,7 @@ using System.Resources;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Imp Rock; Dean Lackey")]
 [assembly: AssemblyProduct("JumpTo")]
-[assembly: AssemblyCopyright("Copyright © 2014, by Kevin Dean Lackey. All Rights Reserved.")]
+[assembly: AssemblyCopyright("Copyright © 2016, by Kevin Dean Lackey. All Rights Reserved.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -33,6 +33,6 @@ using System.Resources;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.1.0.0")]
+[assembly: AssemblyFileVersion("1.1.0.0")]
 [assembly: NeutralResourcesLanguageAttribute("en-US")]

@@ -7,7 +7,7 @@ using System.IO;
 using System.Resources;
 
 
-namespace JumpTo
+namespace ImpRock.JumpTo.Editor
 {
 	internal static class ResId
 	{
@@ -139,7 +139,7 @@ namespace JumpTo
 
 		private void LoadText(string fileName)
 		{
-			using (Stream resStream = this.GetType().Assembly.GetManifestResourceStream("JumpTo.res.lang." + fileName))
+			using (Stream resStream = this.GetType().Assembly.GetManifestResourceStream("ImpRock.JumpTo.Editor.res.lang." + fileName))
 			{
 				using (StreamReader reader = new StreamReader(resStream))
 				{
@@ -180,7 +180,7 @@ namespace JumpTo
 			int fileNameHash = fileName.GetHashCode();
 			if (!m_ImageResources.ContainsKey(fileNameHash))
 			{
-				using (Stream resStream = this.GetType().Assembly.GetManifestResourceStream("JumpTo.res.image." + fileName))
+				using (Stream resStream = this.GetType().Assembly.GetManifestResourceStream("ImpRock.JumpTo.Editor.res.image." + fileName))
 				{
 					byte[] fileBytes = new byte[resStream.Length];
 					resStream.Read(fileBytes, 0, fileBytes.Length);
