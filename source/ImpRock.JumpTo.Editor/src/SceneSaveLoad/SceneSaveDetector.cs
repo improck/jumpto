@@ -1,7 +1,6 @@
-﻿using UnityEditor;
+﻿
 
-
-namespace SceneStateDetection
+namespace ImpRock.JumpTo.Editor
 {
 	/// <summary>
 	/// Attempts to detect when a scene is saved as an asset in the project.

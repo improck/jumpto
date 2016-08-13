@@ -12,10 +12,13 @@ namespace ImpRock.JumpTo.Editor
 		private GUIContent m_MenuSaveLinks;
 		private string m_TitleText;	//TEMP
 		[SerializeField] private bool m_HierarchyLinksChanged = false;	//TEMP
+
+		public int SceneId { get { return m_JumpLinkContainerKey; } set { m_JumpLinkContainerKey = value; } }
 		
 		
 		public override void OnWindowEnable(EditorWindow window)
 		{
+			//NOTE: set SceneId property before this is called
 			base.OnWindowEnable(window);
 
 			m_LinkContainer.OnLinksChanged += OnHierarchyLinksChanged;
@@ -106,6 +109,7 @@ namespace ImpRock.JumpTo.Editor
 		{
 			GenericMenu menu = null;
 
+			//TODO: make it work with multi-scene
 			if (EditorApplication.currentScene != string.Empty && m_HierarchyLinksChanged)
 			{
 				menu = new GenericMenu();
@@ -151,6 +155,7 @@ namespace ImpRock.JumpTo.Editor
 		private void SaveLinks()
 		{
 			//TODO: detect links to objects not saved in the scene, warn the user
+			//TODO: make it work with multi-scene
 			m_Window.SerializationControlInstance.SaveHierarchyLinks(EditorApplication.currentScene);
 
 			m_ControlTitle.text = m_TitleText;

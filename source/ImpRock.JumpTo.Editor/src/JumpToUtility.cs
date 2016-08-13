@@ -1,5 +1,6 @@
 ﻿using UnityEditor;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Reflection;
 using System.Text;
 using System.Collections.Generic;
@@ -47,6 +48,31 @@ namespace ImpRock.JumpTo.Editor
 			}
 
 			return pathBuilder.ToString();
+		}
+
+		public static int FindSceneContaining(Object linkReference)
+		{
+			Transform linkRoot = (linkReference as GameObject).transform.root;
+
+			int sceneCount = SceneManager.sceneCount;
+			List<GameObject> rootObjects = new List<GameObject>();
+			for (int i = 0; i < sceneCount; i++)
+			{
+				Scene scene = SceneManager.GetSceneAt(i);
+				if (scene.isLoaded)
+				{
+					//NOTE: this clears the list internally
+					scene.GetRootGameObjects(rootObjects);
+
+					foreach (GameObject gameObject in rootObjects)
+					{
+						if (gameObject.transform.root == linkRoot)
+							return scene.GetHashCode();
+					}
+				}
+			}
+
+			return 0;
 		}
 	}
 

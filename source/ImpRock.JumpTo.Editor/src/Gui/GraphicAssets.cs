@@ -44,7 +44,7 @@ namespace ImpRock.JumpTo.Editor
 		public GUIStyle ToolbarPopupStyle { get; private set; }
 		public GUIStyle DragDropInsertionStyle { get; private set; }
 		public GUIStyle DividerHorizontalStyle { get; private set; }
-		public GUIStyle DividerVerticalStyle { get; private set; }
+		//public GUIStyle DividerVerticalStyle { get; private set; }
 
 		//***** COLORS *****
 
@@ -55,6 +55,7 @@ namespace ImpRock.JumpTo.Editor
 
 		public readonly Color DisabledColorModifier = new Color(0.0f, 0.0f, 0.0f, 0.4f);
 		public const float LinkHeight = 16.0f;
+		public const float LinkViewTitleBarHeight = 20.0f;
 
 
 		public void InitGuiStyle()
@@ -86,10 +87,10 @@ namespace ImpRock.JumpTo.Editor
 			DividerHorizontalStyle.normal.background = ToolbarStyle.normal.background;
 			DividerHorizontalStyle.border = new RectOffset(0, 0, 2, 2);
 
-			DividerVerticalStyle = new GUIStyle();
-			DividerVerticalStyle.name = "JumpTo Divider V";
-			DividerVerticalStyle.normal.background = JumpToResources.Instance.GetImage(ResId.ImageDividerVertical);
-			DividerVerticalStyle.border = new RectOffset(0, 0, 2, 2);
+			//DividerVerticalStyle = new GUIStyle();
+			//DividerVerticalStyle.name = "JumpTo Divider V";
+			//DividerVerticalStyle.normal.background = JumpToResources.Instance.GetImage(ResId.ImageDividerVertical);
+			//DividerVerticalStyle.border = new RectOffset(0, 0, 2, 2);
 		}
 
 		public void InitAssets()

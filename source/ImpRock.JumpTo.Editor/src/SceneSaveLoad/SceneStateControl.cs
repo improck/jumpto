@@ -2,7 +2,7 @@
 using UnityEngine;
 
 
-namespace SceneStateDetection
+namespace ImpRock.JumpTo.Editor
 {
 	[System.Serializable]
 	internal sealed class SceneStateControl
@@ -37,6 +37,7 @@ namespace SceneStateDetection
 		
 		public static void SceneWillSave(string sceneAssetPath)
 		{
+			Debug.Log("SceneWillSave");
 			//s_SceneAssetSavePath = sceneAssetPath;
 
 			SceneLoadDetector.TemporarilyDestroyInstance(true);
@@ -52,6 +53,8 @@ namespace SceneStateDetection
 			EditorApplication.delayCall += 
 				delegate()
 				{
+					Debug.Log("Delayed SceneWillSave");
+
 					//string currentScene = EditorApplication.currentScene;
 					//Debug.Log("Delayed Scene Save: " + currentScene + "\n" + AssetDatabase.AssetPathToGUID(currentScene));
 
@@ -66,6 +69,8 @@ namespace SceneStateDetection
 			if (s_Instance == null)
 				return;
 
+			Debug.Log("SceneIsUnloading");
+
 			s_Instance.m_HierarchyChanged = false;
 			EditorApplication.hierarchyWindowChanged += OnHierarchyWindowChanged;
 
@@ -77,6 +82,8 @@ namespace SceneStateDetection
 		{
 			if (s_Instance == null)
 				return;
+
+			Debug.Log("SceneWillLoad");
 
 			EditorApplication.delayCall +=
 				delegate()
@@ -98,15 +105,15 @@ namespace SceneStateDetection
 					//	NOT call the hierarchyWindowChanged event
 					if (s_Instance.m_HierarchyChanged)
 					{
-						//Debug.Log("Hierarchy has changed");
+						Debug.Log("SceneWillLoad: Hierarchy has changed");
 
 						s_Instance.m_HierarchyChanged = false;
 
 						if (OnSceneLoaded != null)
 							OnSceneLoaded(EditorApplication.currentScene);
 					}
-					//else
-					//	Debug.Log("Hierarchy has NOT changed");
+					else
+						Debug.Log("SceneWillLoad: Hierarchy has NOT changed");
 
 					EditorApplication.hierarchyWindowChanged -= OnHierarchyWindowChanged;
 				};

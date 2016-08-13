@@ -1,7 +1,6 @@
 ﻿using UnityEditor;
 using UnityEngine;
 using System.Collections.Generic;
-using System.IO;
 
 
 namespace ImpRock.JumpTo.Editor
@@ -58,27 +57,51 @@ namespace ImpRock.JumpTo.Editor
 	internal sealed class JumpLinks : EditorScriptableObject<JumpLinks>
 	{
 		[SerializeField] private ProjectJumpLinkContainer m_ProjectLinkContainer;
-		[SerializeField] private HierarchyJumpLinkContainer m_HierarchyLinkContainer;
+		//NOTE: scene handle can be used as a unique id, but only while the scene is known to the scene manager
+		[SerializeField] private HierarchyJumpLinkContainerFaketionary m_HierarchyLinkContainers =
+			new HierarchyJumpLinkContainerFaketionary();
 		
 
 		public ProjectJumpLinkContainer ProjectLinks { get { return m_ProjectLinkContainer; } }
-		public HierarchyJumpLinkContainer HierarchyLinks { get { return m_HierarchyLinkContainer; } }
+		public HierarchyJumpLinkContainerFaketionary HierarchyLinks { get { return m_HierarchyLinkContainers; } }
 
 
 		protected override void Initialize()
 		{
 			m_ProjectLinkContainer = ScriptableObject.CreateInstance<ProjectJumpLinkContainer>();
 			m_ProjectLinkContainer.hideFlags = HideFlags.HideAndDontSave;
-			m_HierarchyLinkContainer = ScriptableObject.CreateInstance<HierarchyJumpLinkContainer>();
-			m_HierarchyLinkContainer.hideFlags = HideFlags.HideAndDontSave;
 		}
 
-		public JumpLinkContainer<T> GetJumpLinkContainer<T>() where T : JumpLink
+		//TODO: this is kind of gross!
+		public JumpLinkContainer<T> GetJumpLinkContainer<T>(int key = 0) where T : JumpLink
 		{
 			if (typeof(T) == typeof(ProjectJumpLink))
+			{
 				return m_ProjectLinkContainer as JumpLinkContainer<T>;
+			}
 			else
-				return m_HierarchyLinkContainer as JumpLinkContainer<T>;
+			{
+				return m_HierarchyLinkContainers[key] as JumpLinkContainer<T>;
+			}
+		}
+
+		public HierarchyJumpLinkContainer GetHierarchyJumpLinkContainer(int sceneId)
+		{
+			HierarchyJumpLinkContainer container = null;
+			m_HierarchyLinkContainers.TryGetValue(sceneId, out container);
+			return container;
+		}
+
+		public HierarchyJumpLinkContainer AddHierarchyJumpLinkContainer(int sceneId)
+		{
+			HierarchyJumpLinkContainer container = null;
+			if (!m_HierarchyLinkContainers.TryGetValue(sceneId, out container))
+			{
+				container = ScriptableObject.CreateInstance<HierarchyJumpLinkContainer>();
+				m_HierarchyLinkContainers.Add(sceneId, container);
+			}
+
+			return container;
 		}
 
 		public static bool WouldBeProjectLink(UnityEngine.Object linkReference)
@@ -117,7 +140,11 @@ namespace ImpRock.JumpTo.Editor
 					prefabType == PrefabType.DisconnectedModelPrefabInstance ||
 					prefabType == PrefabType.MissingPrefabInstance)
 				{
-					m_HierarchyLinkContainer.AddLink(linkReference, prefabType);
+					int hashCode = JumpToUtility.FindSceneContaining(linkReference);
+					if (hashCode != 0)
+					{
+						m_HierarchyLinkContainers[hashCode].AddLink(linkReference, prefabType);
+					}
 				}
 				else
 				{
@@ -158,13 +185,20 @@ namespace ImpRock.JumpTo.Editor
 				   prefabType == PrefabType.DisconnectedModelPrefabInstance ||
 				   prefabType == PrefabType.MissingPrefabInstance))
 			{
-				m_HierarchyLinkContainer.AddLink(linkReference, prefabType);
+				int hashCode = JumpToUtility.FindSceneContaining(linkReference);
+				if (hashCode != 0)
+				{
+					m_HierarchyLinkContainers[hashCode].AddLink(linkReference, prefabType);
+				}
 			}
 		}
 
 		public void RefreshHierarchyLinks()
 		{
-			m_HierarchyLinkContainer.RefreshLinks();
+			foreach (KeyValuePair<int, HierarchyJumpLinkContainer> container in m_HierarchyLinkContainers)
+			{
+				container.Value.RefreshLinks();
+			}
 		}
 
 		public void RefreshProjectLinks()

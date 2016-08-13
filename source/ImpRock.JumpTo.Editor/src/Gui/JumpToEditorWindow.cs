@@ -1,7 +1,6 @@
 ﻿using UnityEditor;
 using UnityEngine;
 using ImpRock.JumpTo.Editor;
-using SceneStateDetection;
 
 
 //TODO: comment all of this code
@@ -14,9 +13,10 @@ internal sealed class JumpToEditorWindow : EditorWindow
 
 	[SerializeField] private JumpLinks m_JumpLinks;
 	[SerializeField] private JumpToSettings m_Settings;
-	[SerializeField] private GuiToolbar m_Toolbar;
+	//[SerializeField] private GuiToolbar m_Toolbar;
 	[SerializeField] private GuiJumpLinkListView m_View;
 	[SerializeField] private SceneStateControl m_SceneState;
+	[SerializeField] private SceneStateMonitor m_SceneStateMonitor;
 	//[SerializeField] private bool m_FirstOpen = true;
 
 	[System.NonSerialized] private bool m_Initialized = false;
@@ -69,14 +69,19 @@ internal sealed class JumpToEditorWindow : EditorWindow
 			m_Settings = JumpToSettings.Create();
 		}
 
-		if (m_Toolbar == null)
-		{
-			m_Toolbar = GuiBase.Create<GuiToolbar>();
-		}
+		//if (m_Toolbar == null)
+		//{
+		//	m_Toolbar = GuiBase.Create<GuiToolbar>();
+		//}
 
 		if (m_View == null)
 		{
 			m_View = GuiBase.Create<GuiJumpLinkListView>();
+		}
+
+		if (m_SceneStateMonitor == null)
+		{
+			m_SceneStateMonitor = SceneStateMonitor.Create();
 		}
 
 		if (m_SceneState == null)
@@ -121,7 +126,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		m_JumpLinks.RefreshHierarchyLinks();
 		m_LastHierarchyRefreshTime = EditorApplication.timeSinceStartup;
 
-		m_Toolbar.OnWindowEnable(this);
+		//m_Toolbar.OnWindowEnable(this);
 		m_View.OnWindowEnable(this);
 
 		GUIContent titleContent = this.titleContent;
@@ -213,11 +218,12 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		//position.x & y are the position of the window in Unity, i think
 		//	maybe it's the window position on the desktop
 		//	either way it wasn't the value i expected, so i force (0, 0)
-		m_Position.Set(0.0f, 0.0f, position.width, 17.0f);
-		m_Toolbar.Draw(m_Position);
+		//m_Position.Set(0.0f, 0.0f, position.width, 17.0f);
+		//m_Toolbar.Draw(m_Position);
 
-		m_Position.y = m_Position.height;
-		m_Position.height = position.height - m_Position.height;
+		//m_Position.y = m_Position.height;
+		//m_Position.height = position.height - m_Position.height;
+		m_Position.Set(0.0f, 0.0f, position.width, position.height);
 		m_View.Draw(m_Position);
 	}
 
@@ -381,6 +387,9 @@ internal sealed class JumpToEditorWindow : EditorWindow
 			m_JumpLinks.CreateJumpLink(linkReferences[i]);
 		}
 
+		m_JumpLinks.RefreshProjectLinks();
+		m_JumpLinks.RefreshHierarchyLinks();
+		
 		Repaint();
 	}
 

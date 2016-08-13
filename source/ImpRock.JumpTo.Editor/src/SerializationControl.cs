@@ -1,8 +1,8 @@
 ﻿using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.IO;
-using SceneStateDetection;
 
 
 namespace ImpRock.JumpTo.Editor
@@ -83,8 +83,9 @@ namespace ImpRock.JumpTo.Editor
 		{
 			SetSaveDirectoryPaths();
 
-			if (sceneAssetPath != string.Empty)
-				LoadHierarchyLinks();
+			//TODO: make it work with multi-scene
+			//if (sceneAssetPath != string.Empty)
+			//	LoadHierarchyLinks();
 		}
 
 		//private void OnWindowOpen()
@@ -113,15 +114,19 @@ namespace ImpRock.JumpTo.Editor
 				LoadProjectLinks();
 			}
 
-			if (m_Window.JumpLinksInstance.GetJumpLinkContainer<HierarchyJumpLink>().Links.Count == 0)
-			{
-				EditorApplication.delayCall += 
-					delegate()
+			EditorApplication.delayCall +=
+				delegate ()
+				{
+					int sceneCount = EditorSceneManager.sceneCount;
+					for (int i = 0; i < sceneCount; i++)
 					{
-						LoadHierarchyLinks();
-						m_Window.Repaint();
-					};
-			}
+						Scene scene = EditorSceneManager.GetSceneAt(i);
+						if (scene.isLoaded)
+							LoadHierarchyLinks(scene.GetHashCode(), scene.path);
+					}
+
+					m_Window.Repaint();
+				};
 		}
 
 		public void OnWindowDisable()
@@ -285,19 +290,12 @@ namespace ImpRock.JumpTo.Editor
 			}
 		}
 
-		private void LoadHierarchyLinks()
+		private void LoadHierarchyLinks(int sceneId, string scenePath)
 		{
-			HierarchyJumpLinkContainer links = m_Window.JumpLinksInstance.HierarchyLinks;
+			HierarchyJumpLinkContainer links = m_Window.JumpLinksInstance.AddHierarchyJumpLinkContainer(sceneId);
 			links.RemoveAll();
 
-			//TODO: make compatible with multiple scenes
-
-			string currentScene = EditorApplication.currentScene;
-
-			if (string.IsNullOrEmpty(currentScene))
-				return;
-
-			string sceneGuid = AssetDatabase.AssetPathToGUID(currentScene);
+			string sceneGuid = AssetDatabase.AssetPathToGUID(scenePath);
 			string filePath = m_HierarchySaveDirectory + sceneGuid + SaveFileExtension;
 
 			if (!File.Exists(filePath))
@@ -310,26 +308,21 @@ namespace ImpRock.JumpTo.Editor
 					JumpLinks jumpLinks = m_Window.JumpLinksInstance;
 					GameObject[] unorderedRootObjects = EditorSceneManager.GetActiveScene().GetRootGameObjects();
 					//TODO: do this smarter
+					SerializedObject so = null;
 					GameObject[] rootObjects = new GameObject[unorderedRootObjects.Length];
 					for (int i = 0; i < rootObjects.Length; i++)
 					{
-						SerializedObject so = new SerializedObject(unorderedRootObjects[i].transform);
+						so = new SerializedObject(unorderedRootObjects[i].transform);
 						rootObjects[so.FindProperty("m_RootOrder").intValue] = unorderedRootObjects[i];
 					}
 
 					string line;
-					//string transPath;
-					//string idDescriptor;
-					//string objName;
 					int localId = 0;
 					int rootOrder = 0;
 					char[] delimiterPipe = new char[] { '|' };
 					char[] delimeterForwardSlash = new char[] { '/' };
 					string[] lineSegments;
 					string[] rootOrders;
-					//int searchId = 0;
-					//GameObject obj;
-					//SerializedObject serializedObject;
 					while (!streamReader.EndOfStream)
 					{
 						line = streamReader.ReadLine();
@@ -569,12 +562,12 @@ namespace ImpRock.JumpTo.Editor
 		{
 			m_HierarchyLinkPaths = null;
 
-			Object[] linkReferences = m_Window.JumpLinksInstance.HierarchyLinks.AllLinkReferences;
+			//TODO: make compatible with multiple scenes
+			Object[] linkReferences = m_Window.JumpLinksInstance.HierarchyLinks[0].AllLinkReferences;
 			if (linkReferences != null)
 			{
 				SerializedObject serializedObject;
 				int localId = 0;
-				//PrefabType prefabType = PrefabType.None;
 				Transform linkReferenceTransform = null;
 				m_HierarchyLinkPaths = new string[linkReferences.Length];
 				for (int i = 0; i < linkReferences.Length; i++)

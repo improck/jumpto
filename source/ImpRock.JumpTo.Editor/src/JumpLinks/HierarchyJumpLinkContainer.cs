@@ -75,4 +75,7 @@ namespace ImpRock.JumpTo.Editor
 			}
 		}
 	}
+
+	[System.Serializable]
+	internal sealed class HierarchyJumpLinkContainerFaketionary : Faketionary<int, HierarchyJumpLinkContainer> { }
 }

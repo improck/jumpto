@@ -9,16 +9,20 @@ namespace ImpRock.JumpTo.Editor
 	{
 		[SerializeField] protected Vector2 m_ScrollViewPosition;
 		[SerializeField] protected bool m_HasFocus = false;
+		[SerializeField] protected int m_JumpLinkContainerKey = 0;
 
+		protected Rect m_FoldoutRect;
 		protected Rect m_DrawRect;
 		protected Rect m_ScrollViewRect;
 		protected Rect m_InsertionDrawRect;
 		protected Rect m_ControlRect;
 		protected int m_Grabbed = -1;
 		protected int m_InsertionIndex = -1;
+		protected float m_TotalHeight = 0.0f;
 		protected bool m_ContextClick = false;
 		protected bool m_DragOwner = false;
 		protected bool m_DragInsert = false;
+		protected bool m_Foldout = true;
 		protected Vector2 m_GrabPosition = Vector2.zero;
 
 		protected GUIContent m_ControlTitle;
@@ -41,12 +45,13 @@ namespace ImpRock.JumpTo.Editor
 		public bool IsDragOwner { get { return m_DragOwner; } }
 		public bool HasFocus { get { return m_HasFocus; } set { m_HasFocus = value; } }
 		public bool IsFocusedControl { get { return m_Window == EditorWindow.focusedWindow && m_HasFocus; } }
+		public float TotalHeight { get { return m_TotalHeight; } }
 
 
 		protected abstract void ShowContextMenu();
 		protected abstract void ShowTitleContextMenu();
 		protected abstract void OnDoubleClick();
-
+		
 
 		public override void OnWindowEnable(EditorWindow window)
 		{
@@ -68,20 +73,31 @@ namespace ImpRock.JumpTo.Editor
 			m_ControlRect.y = 7.0f;
 			m_ControlRect.width = 10.0f;
 			m_ControlRect.height = 8.0f;
+
+			m_FoldoutRect.x = 0.0f;
+			m_FoldoutRect.y = 2.0f;
+			m_FoldoutRect.width = 16.0f;
+			m_FoldoutRect.height = 16.0f;
+
+			FindTotalHeight();
 		}
 
 		protected override void OnGui()
 		{
 			HandleTitleHeader();
-			HandleLinksScrollView();
+
+			//TODO: handle drop onto titlebar?
+
+			if (m_Foldout)
+				HandleLinksScrollView();
 		}
 
 		protected void HandleTitleHeader()
 		{
-			m_DrawRect.Set(0.0f, 0.0f, m_Size.x, 22.0f);
+			m_DrawRect.Set(0.0f, 0.0f, m_Size.x, GraphicAssets.LinkViewTitleBarHeight);
 
 			m_ControlRect.x = m_Size.x - (m_ControlRect.width + 6.0f);
-
+			
 			Event currentEvent = Event.current;
 			switch (currentEvent.type)
 			{
@@ -104,12 +120,23 @@ namespace ImpRock.JumpTo.Editor
 				break;
 			case EventType.Repaint:
 				{
-					GraphicAssets.Instance.LinkViewTitleStyle.Draw(m_DrawRect, m_ControlTitle, false, false, false, false);
+					GraphicAssets.Instance.LinkViewTitleStyle.Draw(m_DrawRect, GUIContent.none, false, false, false, false);
 
 					GUI.DrawTexture(m_ControlRect, m_IconHamburger);
 				}
 				break;
 			};
+
+			bool foldout = EditorGUI.Foldout(m_FoldoutRect, m_Foldout, m_ControlTitle, true);
+			if (foldout != m_Foldout && foldout)
+			{
+				m_LinkContainer.RefreshLinksY();
+			}
+
+			m_Foldout = foldout;
+
+			//TODO: only find total height when the list changes
+			FindTotalHeight();
 		}
 
 		protected void HandleLinksScrollView()
@@ -121,16 +148,16 @@ namespace ImpRock.JumpTo.Editor
 			m_DrawRect.width = m_Size.x;
 			m_DrawRect.height = m_Size.y - m_DrawRect.y;
 
-			m_ScrollViewRect.height = links.Count * GraphicAssets.LinkHeight;
+			//m_ScrollViewRect.height = links.Count * GraphicAssets.LinkHeight;
 
 			//if the vertical scrollbar is visible, adjust view rect
 			//	width by the width of the scrollbar (17.0f)
-			if (m_ScrollViewRect.height > m_DrawRect.height)
-				m_ScrollViewRect.width = m_DrawRect.width - 15.0f;
-			else
-				m_ScrollViewRect.width = m_DrawRect.width;
+			//if (m_ScrollViewRect.height > m_DrawRect.height)
+			//	m_ScrollViewRect.width = m_DrawRect.width - 15.0f;
+			//else
+			//	m_ScrollViewRect.width = m_DrawRect.width;
 
-			m_ScrollViewPosition = GUI.BeginScrollView(m_DrawRect, m_ScrollViewPosition, m_ScrollViewRect);
+			//m_ScrollViewPosition = GUI.BeginScrollView(m_DrawRect, m_ScrollViewPosition, m_ScrollViewRect);
 
 			#region Event Switch
 			switch (Event.current.type)
@@ -175,15 +202,15 @@ namespace ImpRock.JumpTo.Editor
 			}
 			#endregion
 
-			GUI.EndScrollView(true);
+			//GUI.EndScrollView(true);
 		}
 
 		protected void OnMouseDown()
 		{
 			Event currentEvent = Event.current;
 
-			if (!m_ScrollViewRect.Contains(currentEvent.mousePosition))
-				return;
+			//if (!m_ScrollViewRect.Contains(currentEvent.mousePosition))
+			//	return;
 
 			if (!m_HasFocus)
 				m_Window.Repaint();
@@ -417,7 +444,7 @@ namespace ImpRock.JumpTo.Editor
 		protected void OnRepaint(List<T> links)
 		{
 			//draw links
-			m_DrawRect.Set(0.0f, 0.0f, m_ScrollViewRect.width, GraphicAssets.LinkHeight);
+			m_DrawRect.Set(0.0f, GraphicAssets.LinkViewTitleBarHeight, m_Size.x, GraphicAssets.LinkHeight);
 
 			GraphicAssets graphicAssets = GraphicAssets.Instance;
 			GUIStyle linkLabelStyle = graphicAssets.LinkLabelStyle;
@@ -433,7 +460,7 @@ namespace ImpRock.JumpTo.Editor
 				linkLabelStyle.onActive.textColor = linkLabelStyle.onNormal.textColor;
 				linkLabelStyle.onFocused.textColor = linkLabelStyle.onNormal.textColor;
 
-				links[i].Area.width = m_ScrollViewRect.width;
+				links[i].Area.width = m_DrawRect.width;
 
 				linkLabelStyle.Draw(m_DrawRect, links[i].LinkLabelContent, false, false, links[i].Selected, links[i].Selected && IsFocusedControl);
 
@@ -493,6 +520,13 @@ namespace ImpRock.JumpTo.Editor
 
 				Selection.objects = selectionAdd.ToArray();
 			}
+		}
+
+		protected void FindTotalHeight()
+		{
+			//toolbar height + (link height * link count)
+			float linksHeight = m_Foldout ? (m_LinkContainer.Links.Count * GraphicAssets.LinkHeight) : 0.0f;
+			m_TotalHeight = GraphicAssets.LinkViewTitleBarHeight + linksHeight;
 		}
 	}
 }

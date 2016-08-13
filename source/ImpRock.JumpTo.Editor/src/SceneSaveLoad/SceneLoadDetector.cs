@@ -2,7 +2,7 @@
 using UnityEngine;
 
 
-namespace SceneStateDetection
+namespace ImpRock.JumpTo.Editor
 {
 	/// <summary>
 	/// As it says, the SceneLoadDetector detects scene loads. Or, more succinctly,

@@ -14,14 +14,15 @@ namespace ImpRock.JumpTo.Editor
 		public static readonly int LabelProjectLinks = "label_projectLinks".GetHashCode();
 		public static readonly int LabelHierarchyLinks = "label_hierarchyLinks".GetHashCode();
 
-		public static readonly int TooltipProjectFirst = "tooltip_projectFirst".GetHashCode();
-		public static readonly int TooltipHierarchyFirst = "tooltip_hierarchyFirst".GetHashCode();
-		public static readonly int TooltipVertical = "tooltip_vertical".GetHashCode();
-		public static readonly int TooltipHorizontal = "tooltip_horizontal".GetHashCode();
+		//public static readonly int TooltipProjectFirst = "tooltip_projectFirst".GetHashCode();
+		//public static readonly int TooltipHierarchyFirst = "tooltip_hierarchyFirst".GetHashCode();
+		//public static readonly int TooltipVertical = "tooltip_vertical".GetHashCode();
+		//public static readonly int TooltipHorizontal = "tooltip_horizontal".GetHashCode();
 
-		public static readonly int MenuProjectView = "menu_projectView".GetHashCode();
-		public static readonly int MenuHierarchyView = "menu_hierarchyView".GetHashCode();
-		public static readonly int MenuBothView = "menu_bothView".GetHashCode();
+		//public static readonly int MenuProjectView = "menu_projectView".GetHashCode();
+		//public static readonly int MenuHierarchyView = "menu_hierarchyView".GetHashCode();
+		//public static readonly int MenuBothView = "menu_bothView".GetHashCode();
+
 		public static readonly int MenuContextPingLink = "menu_contextPingLink".GetHashCode();
 		public static readonly int MenuContextSetAsSelection = "menu_contextSetAsSelection".GetHashCode();
 		public static readonly int MenuContextAddToSelection = "menu_contextAddToSelection".GetHashCode();
@@ -42,9 +43,9 @@ namespace ImpRock.JumpTo.Editor
 		public static readonly int DialogYes = "dialog_yes".GetHashCode();
 		public static readonly int DialogNo = "dialog_no".GetHashCode();
 
-		public static readonly int ImageDividerVertical;
-		public static readonly int ImageHorizontalView;
-		public static readonly int ImageVerticalView;
+		//public static readonly int ImageDividerVertical;
+		//public static readonly int ImageHorizontalView;
+		//public static readonly int ImageVerticalView;
 		public static readonly int ImageHamburger;
 		public static readonly int ImageTabIcon = "tabicon.png".GetHashCode();
 
@@ -52,16 +53,16 @@ namespace ImpRock.JumpTo.Editor
 		{
 			if (EditorGUIUtility.isProSkin)
 			{
-				ImageDividerVertical = "divider_v_pro.png".GetHashCode();
-				ImageHorizontalView = "horizontal_pro.png".GetHashCode();
-				ImageVerticalView = "vertical_pro.png".GetHashCode();
+				//ImageDividerVertical = "divider_v_pro.png".GetHashCode();
+				//ImageHorizontalView = "horizontal_pro.png".GetHashCode();
+				//ImageVerticalView = "vertical_pro.png".GetHashCode();
 				ImageHamburger = "hamburger_pro.png".GetHashCode();
 			}
 			else
 			{
-				ImageDividerVertical = "divider_v.png".GetHashCode();
-				ImageHorizontalView = "horizontal.png".GetHashCode();
-				ImageVerticalView = "vertical.png".GetHashCode();
+				//ImageDividerVertical = "divider_v.png".GetHashCode();
+				//ImageHorizontalView = "horizontal.png".GetHashCode();
+				//ImageVerticalView = "vertical.png".GetHashCode();
 				ImageHamburger = "hamburger.png".GetHashCode();
 			}
 		}

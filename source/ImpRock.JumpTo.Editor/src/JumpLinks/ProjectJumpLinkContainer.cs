@@ -17,7 +17,7 @@ namespace ImpRock.JumpTo.Editor
 
 				UpdateLinkInfo(link, prefabType);
 
-				link.Area.Set(0.0f, m_Links.Count * GraphicAssets.LinkHeight, 100.0f, GraphicAssets.LinkHeight);
+				link.Area.Set(0.0f, GraphicAssets.LinkViewTitleBarHeight + m_Links.Count * GraphicAssets.LinkHeight, 100.0f, GraphicAssets.LinkHeight);
 
 				m_Links.Add(link);
 			}
