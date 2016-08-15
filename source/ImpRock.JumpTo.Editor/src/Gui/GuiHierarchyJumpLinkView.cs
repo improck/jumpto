@@ -1,5 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
+using UnityEditor.SceneManagement;
+using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 
 
@@ -10,8 +12,8 @@ namespace ImpRock.JumpTo.Editor
 		private GUIContent m_MenuFrameLink;
 		private GUIContent m_MenuFrameLinkPlural;
 		private GUIContent m_MenuSaveLinks;
-		private string m_TitleText;	//TEMP
-		[SerializeField] private bool m_HierarchyLinksChanged = false;	//TEMP
+		private string m_TitleSuffix;
+		[SerializeField] private bool m_HierarchyLinksChanged = false;	//TODO: get rid of this
 
 		public int SceneId { get { return m_JumpLinkContainerKey; } set { m_JumpLinkContainerKey = value; } }
 		
@@ -19,6 +21,8 @@ namespace ImpRock.JumpTo.Editor
 		public override void OnWindowEnable(EditorWindow window)
 		{
 			//NOTE: set SceneId property before this is called
+			m_LinkContainer = (window as JumpToEditorWindow).JumpLinksInstance.HierarchyLinks[m_JumpLinkContainerKey];
+			
 			base.OnWindowEnable(window);
 
 			m_LinkContainer.OnLinksChanged += OnHierarchyLinksChanged;
@@ -27,13 +31,27 @@ namespace ImpRock.JumpTo.Editor
 			m_MenuFrameLinkPlural = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextFrameLinkPlural));
 			m_MenuSaveLinks = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextSaveLinks));
 
-			//TEMP
-			m_TitleText = JumpToResources.Instance.GetText(ResId.LabelHierarchyLinks);
+			//HACK: should not be doing this in-place
+			//TODO: monitor scene name changes, too
+			string sceneName = string.Empty;
+			int loadedSceneCount = EditorSceneManager.loadedSceneCount;
+			for (int i = 0; i < loadedSceneCount; i++)
+			{
+				Scene scene = EditorSceneManager.GetSceneAt(i);
+				if (scene.GetHashCode() == m_JumpLinkContainerKey)
+				{
+					sceneName = scene.name;
+					break;
+				}
+			}
 
+			m_TitleSuffix = " " + JumpToResources.Instance.GetText(ResId.LabelHierarchyLinksSuffix);
+
+			//TODO: this doesn't work correctly anymore
 			if (m_HierarchyLinksChanged)
-				m_ControlTitle = new GUIContent(m_TitleText + '*');
+				m_ControlTitle = new GUIContent(sceneName + m_TitleSuffix + '*');
 			else
-				m_ControlTitle = new GUIContent(m_TitleText);
+				m_ControlTitle = new GUIContent(sceneName + m_TitleSuffix);
 		}
 
 		public override void OnWindowDisable(EditorWindow window)
@@ -110,7 +128,9 @@ namespace ImpRock.JumpTo.Editor
 			GenericMenu menu = null;
 
 			//TODO: make it work with multi-scene
-			if (EditorApplication.currentScene != string.Empty && m_HierarchyLinksChanged)
+			//TODO: make sure the scene is still loaded?
+			if (//EditorApplication.currentScene != string.Empty &&
+				m_HierarchyLinksChanged)
 			{
 				menu = new GenericMenu();
 				menu.AddItem(m_MenuSaveLinks, false, SaveLinks);
@@ -154,11 +174,27 @@ namespace ImpRock.JumpTo.Editor
 
 		private void SaveLinks()
 		{
+			//HACK: should not be doing this in-place
+			string assetPath = string.Empty;
+			int loadedSceneCount = EditorSceneManager.loadedSceneCount;
+			for (int i = 0; i < loadedSceneCount; i++)
+			{
+				Scene scene = EditorSceneManager.GetSceneAt(i);
+				if (scene.GetHashCode() == m_JumpLinkContainerKey)
+				{
+					assetPath = scene.path;
+					break;
+				}
+			}
+
+			if (assetPath.Length == 0)
+				return;
+
 			//TODO: detect links to objects not saved in the scene, warn the user
 			//TODO: make it work with multi-scene
-			m_Window.SerializationControlInstance.SaveHierarchyLinks(EditorApplication.currentScene);
+			m_Window.SerializationControlInstance.SaveHierarchyLinks(assetPath);
 
-			m_ControlTitle.text = m_TitleText;
+			m_ControlTitle.text = m_TitleSuffix;
 			m_HierarchyLinksChanged = false;
 		}
 
@@ -169,7 +205,7 @@ namespace ImpRock.JumpTo.Editor
 
 		private void OnHierarchyLinksChanged()
 		{
-			m_ControlTitle.text = m_TitleText + '*';
+			m_ControlTitle.text = m_TitleSuffix + '*';
 			m_HierarchyLinksChanged = true;
 		}
 	}

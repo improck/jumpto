@@ -109,7 +109,7 @@ namespace ImpRock.JumpTo.Editor
 
 			LoadSettings();
 
-			if (m_Window.JumpLinksInstance.GetJumpLinkContainer<ProjectJumpLink>().Links.Count == 0)
+			if (m_Window.JumpLinksInstance.ProjectLinks.Links.Count == 0)
 			{
 				LoadProjectLinks();
 			}
@@ -156,7 +156,7 @@ namespace ImpRock.JumpTo.Editor
 		private void SaveProjectLinks()
 		{
 			string filePath = m_SaveDirectory + ProjectLinksSaveFile + SaveFileExtension;
-			Object[] linkReferences = m_Window.JumpLinksInstance.GetJumpLinkContainer<ProjectJumpLink>().AllLinkReferences;
+			Object[] linkReferences = m_Window.JumpLinksInstance.ProjectLinks.AllLinkReferences;
 			if (linkReferences != null)
 			{
 				using (StreamWriter streamWriter = new StreamWriter(filePath))
@@ -229,7 +229,7 @@ namespace ImpRock.JumpTo.Editor
 				streamWriter.WriteLine(settings.Visibility);
 				streamWriter.WriteLine(settings.ProjectFirst);
 				streamWriter.WriteLine(settings.Vertical);
-				streamWriter.WriteLine(settings.DividerPosition);
+				//streamWriter.WriteLine(settings.DividerPosition);
 			}
 		}
 		
@@ -239,7 +239,7 @@ namespace ImpRock.JumpTo.Editor
 			if (!File.Exists(filePath))
 				return;
 
-			JumpLinkContainer<ProjectJumpLink> links = m_Window.JumpLinksInstance.GetJumpLinkContainer<ProjectJumpLink>();
+			JumpLinkContainer<ProjectJumpLink> links = m_Window.JumpLinksInstance.ProjectLinks;
 			links.RemoveAll();
 
 			using (StreamReader streamReader = new StreamReader(filePath))
@@ -292,14 +292,14 @@ namespace ImpRock.JumpTo.Editor
 
 		private void LoadHierarchyLinks(int sceneId, string scenePath)
 		{
-			HierarchyJumpLinkContainer links = m_Window.JumpLinksInstance.AddHierarchyJumpLinkContainer(sceneId);
-			links.RemoveAll();
-
 			string sceneGuid = AssetDatabase.AssetPathToGUID(scenePath);
 			string filePath = m_HierarchySaveDirectory + sceneGuid + SaveFileExtension;
 
 			if (!File.Exists(filePath))
 				return;
+
+			HierarchyJumpLinkContainer links = m_Window.JumpLinksInstance.AddHierarchyJumpLinkContainer(sceneId);
+			links.RemoveAll();
 
 			using (StreamReader streamReader = new StreamReader(filePath))
 			{
@@ -444,7 +444,7 @@ namespace ImpRock.JumpTo.Editor
 				settings.Visibility= (JumpToSettings.VisibleList)System.Enum.Parse(typeof(JumpToSettings.VisibleList), streamReader.ReadLine());
 				settings.ProjectFirst = bool.Parse(streamReader.ReadLine());
 				settings.Vertical = bool.Parse(streamReader.ReadLine());
-				settings.DividerPosition = float.Parse(streamReader.ReadLine());
+				//settings.DividerPosition = float.Parse(streamReader.ReadLine());
 			}
 		}
 

@@ -7,14 +7,14 @@ namespace ImpRock.JumpTo.Editor
 {
 	internal sealed class GuiJumpLinkListView : GuiBase
 	{
-		[SerializeField] private float m_Divider = 0.5f;
-		[SerializeField] protected Vector2 m_ScrollViewPosition;
+		//[SerializeField] private float m_Divider = 0.5f;
+		[SerializeField] private Vector2 m_ScrollViewPosition;
 		[SerializeField] private GuiProjectJumpLinkView m_ProjectView;
 		[SerializeField] private List<GuiHierarchyJumpLinkView> m_HierarchyViews = new List<GuiHierarchyJumpLinkView>();
 
 		private RectRef m_DrawRect = new RectRef();
-		private Rect m_DividerRect;
-		protected Rect m_ScrollViewRect;
+		//private Rect m_DividerRect;
+		private Rect m_ScrollViewRect;
 
 		private JumpToEditorWindow m_Window;
 
@@ -22,7 +22,7 @@ namespace ImpRock.JumpTo.Editor
 		public const int DividerMin = 122;
 
 		private readonly Vector2 IconSize = new Vector2(16.0f, 16.0f);
-		private readonly int DividerHash = "divider".GetHashCode();
+		//private readonly int DividerHash = "divider".GetHashCode();
 
 
 		public override void OnWindowEnable(EditorWindow window)
@@ -33,7 +33,7 @@ namespace ImpRock.JumpTo.Editor
 			{
 				m_ProjectView = GuiBase.Create<GuiProjectJumpLinkView>();
 			}
-
+			
 			if (m_HierarchyViews.Count == 0)
 			{
 				List<int> sceneIds = m_Window.JumpLinksInstance.HierarchyLinks.Keys;
@@ -45,9 +45,7 @@ namespace ImpRock.JumpTo.Editor
 					m_HierarchyViews.Add(view);
 				}
 			}
-
-			//m_Window.JumpLinksInstance.RefreshLinksY();
-
+			
 			m_ProjectView.OnWindowEnable(window);
 
 			for (int i = 0; i < m_HierarchyViews.Count; i++)
@@ -55,8 +53,11 @@ namespace ImpRock.JumpTo.Editor
 				m_HierarchyViews[i].OnWindowEnable(window);
 			}
 
-			if (m_Window.JumpToSettingsInstance.DividerPosition >= 0.0f)
-				m_Divider = m_Window.JumpToSettingsInstance.DividerPosition;
+			//if (m_Window.JumpToSettingsInstance.DividerPosition >= 0.0f)
+			//	m_Divider = m_Window.JumpToSettingsInstance.DividerPosition;
+
+			m_Window.JumpLinksInstance.OnHierarchyLinkAdded += HierarchyLinkAddedHandler;
+			m_Window.SceneStateMonitorInstance.OnLoadedSceneCountChanged += LoadedSceneCountChangeHandler;
 		}
 
 		protected override void OnGui()
@@ -79,7 +80,7 @@ namespace ImpRock.JumpTo.Editor
 
 			//TODO: maybe only calculate this if the height changes?
 			m_ScrollViewRect.height = m_ProjectView.TotalHeight;
-			for (int i = 0; i > m_HierarchyViews.Count; i++)
+			for (int i = 0; i < m_HierarchyViews.Count; i++)
 			{
 				m_ScrollViewRect.height += m_HierarchyViews[i].TotalHeight;
 			}
@@ -102,11 +103,11 @@ namespace ImpRock.JumpTo.Editor
 			m_DrawRect.height = m_ProjectView.TotalHeight;
 			m_ProjectView.Draw(m_DrawRect);
 
-			//TODO: iterate over all hierarchy views instead of this
-			if (m_HierarchyViews.Count > 0)
+			for (int i = 0; i < m_HierarchyViews.Count; i++)
 			{
-				m_DrawRect.height = m_HierarchyViews[0].TotalHeight;
-				m_HierarchyViews[0].Draw(m_DrawRect);
+				m_DrawRect.y += m_DrawRect.height;
+				m_DrawRect.height = m_HierarchyViews[i].TotalHeight;
+				m_HierarchyViews[i].Draw(m_DrawRect);
 			}
 
 			GUI.EndScrollView(true);
@@ -453,6 +454,25 @@ namespace ImpRock.JumpTo.Editor
 					m_Window.JumpLinksInstance.CreateOnlyProjectJumpLink(objectReferences[i]);
 				}
 			}
+		}
+
+		private void LoadedSceneCountChangeHandler(int oldCount, int currentCount)
+		{
+			//TODO: figure out what scenes were loaded or unloaded, and update the hierarchy views
+		}
+
+		private void HierarchyLinkAddedHandler(int sceneId)
+		{
+			if (m_HierarchyViews.Find(v => v.SceneId == sceneId) != null)
+				return;
+
+			GuiHierarchyJumpLinkView view = GuiBase.Create<GuiHierarchyJumpLinkView>();
+			view.SceneId = sceneId;
+			view.OnWindowEnable(m_Window);
+
+			m_HierarchyViews.Add(view);
+			
+			m_Window.Repaint();
 		}
 
 		//public void RefreshDividerPosition()

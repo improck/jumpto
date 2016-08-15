@@ -14,8 +14,8 @@ internal sealed class JumpToEditorWindow : EditorWindow
 	[SerializeField] private JumpLinks m_JumpLinks;
 	[SerializeField] private JumpToSettings m_Settings;
 	//[SerializeField] private GuiToolbar m_Toolbar;
-	[SerializeField] private GuiJumpLinkListView m_View;
-	[SerializeField] private SceneStateControl m_SceneState;
+	[SerializeField] private GuiJumpLinkListView m_JumpLinkListView;
+	[SerializeField] private SceneStateControl m_SceneStateControl;
 	[SerializeField] private SceneStateMonitor m_SceneStateMonitor;
 	//[SerializeField] private bool m_FirstOpen = true;
 
@@ -27,6 +27,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 	
 	public JumpLinks JumpLinksInstance { get { return m_JumpLinks; } }
 	public JumpToSettings JumpToSettingsInstance { get { return m_Settings; } }
+	public SceneStateMonitor SceneStateMonitorInstance { get { return m_SceneStateMonitor; } }
 	public SerializationControl SerializationControlInstance { get { return m_SerializationControl; } }
 
 
@@ -74,9 +75,9 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		//	m_Toolbar = GuiBase.Create<GuiToolbar>();
 		//}
 
-		if (m_View == null)
+		if (m_JumpLinkListView == null)
 		{
-			m_View = GuiBase.Create<GuiJumpLinkListView>();
+			m_JumpLinkListView = GuiBase.Create<GuiJumpLinkListView>();
 		}
 
 		if (m_SceneStateMonitor == null)
@@ -84,9 +85,9 @@ internal sealed class JumpToEditorWindow : EditorWindow
 			m_SceneStateMonitor = SceneStateMonitor.Create();
 		}
 
-		if (m_SceneState == null)
+		if (m_SceneStateControl == null)
 		{
-			m_SceneState = SceneStateControl.Create();
+			m_SceneStateControl = SceneStateControl.Create();
 		}
 
 		EditorApplication.delayCall += OnPostEnable;
@@ -127,7 +128,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		m_LastHierarchyRefreshTime = EditorApplication.timeSinceStartup;
 
 		//m_Toolbar.OnWindowEnable(this);
-		m_View.OnWindowEnable(this);
+		m_JumpLinkListView.OnWindowEnable(this);
 
 		GUIContent titleContent = this.titleContent;
 		titleContent.text = "JumpTo";
@@ -156,7 +157,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 
 		SceneLoadDetector.TemporarilyDestroyInstance();
 
-		m_View.OnWindowDisable(this);
+		m_JumpLinkListView.OnWindowDisable(this);
 
 		EditorApplication.projectWindowChanged -= OnProjectWindowChange;
 		EditorApplication.hierarchyWindowChanged -= OnHierarchyWindowChange;
@@ -191,7 +192,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		//	streamWriter.WriteLine("called from OnDestroy()");
 		//}
 
-		m_View.OnWindowClose(this);
+		m_JumpLinkListView.OnWindowClose(this);
 
 		//m_FirstOpen = true;
 
@@ -224,7 +225,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		//m_Position.y = m_Position.height;
 		//m_Position.height = position.height - m_Position.height;
 		m_Position.Set(0.0f, 0.0f, position.width, position.height);
-		m_View.Draw(m_Position);
+		m_JumpLinkListView.Draw(m_Position);
 	}
 
 	//apparently OnFocus() gets called before OnEnable()!
@@ -312,21 +313,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 	{
 		//TODO: need to notify the parent HostView's ContainerWindow of a minSize change
 		//	See ContainerWindow.OnResize()
-		if (m_Settings.Visibility == JumpToSettings.VisibleList.ProjectAndHierarchy)
-		{
-			if (m_Settings.Vertical)
-			{
-				this.minSize = new Vector2(139.0f, GuiJumpLinkListView.DividerMin * 2.0f);
-			}
-			else
-			{
-				this.minSize = new Vector2(GuiJumpLinkListView.DividerMin * 2.0f, GuiJumpLinkListView.DividerMin);
-			}
-		}
-		else
-		{
-			this.minSize = new Vector2(139.0f, GuiJumpLinkListView.DividerMin);
-		}
+		this.minSize = new Vector2(139.0f, 228.0f);
 
 		//NOTE: if docked, this makes the window pop out to a new container
 		//	See this.set_position(), and this.CreateNewWindowForEditorWindow()

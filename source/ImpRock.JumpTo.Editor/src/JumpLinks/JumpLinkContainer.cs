@@ -364,7 +364,7 @@ namespace ImpRock.JumpTo.Editor
 		{
 			for (int i = 0; i < m_Links.Count; i++)
 			{
-				m_Links[i].Area.y = GraphicAssets.LinkViewTitleBarHeight + i * GraphicAssets.LinkHeight;
+				m_Links[i].Area.y = i * GraphicAssets.LinkHeight;
 			}
 		}
 

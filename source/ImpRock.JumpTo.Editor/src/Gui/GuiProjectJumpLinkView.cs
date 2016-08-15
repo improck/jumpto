@@ -12,6 +12,8 @@ namespace ImpRock.JumpTo.Editor
 
 		public override void OnWindowEnable(EditorWindow window)
 		{
+			m_LinkContainer = (window as JumpToEditorWindow).JumpLinksInstance.ProjectLinks;
+
 			base.OnWindowEnable(window);
 
 			m_ControlTitle = new GUIContent(JumpToResources.Instance.GetText(ResId.LabelProjectLinks));

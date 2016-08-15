@@ -67,9 +67,7 @@ namespace ImpRock.JumpTo.Editor
 			m_MenuRemoveLinkPlural = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextRemoveLinkPlural));
 
 			m_IconHamburger = JumpToResources.Instance.GetImage(ResId.ImageHamburger);
-
-			m_LinkContainer = m_Window.JumpLinksInstance.GetJumpLinkContainer<T>();
-
+			
 			m_ControlRect.y = 7.0f;
 			m_ControlRect.width = 10.0f;
 			m_ControlRect.height = 8.0f;
@@ -86,10 +84,10 @@ namespace ImpRock.JumpTo.Editor
 		{
 			HandleTitleHeader();
 
-			//TODO: handle drop onto titlebar?
-
 			if (m_Foldout)
-				HandleLinksScrollView();
+			{
+				HandleLinks();
+			}
 		}
 
 		protected void HandleTitleHeader()
@@ -139,7 +137,7 @@ namespace ImpRock.JumpTo.Editor
 			FindTotalHeight();
 		}
 
-		protected void HandleLinksScrollView()
+		protected void HandleLinks()
 		{
 			List<T> links = m_LinkContainer.Links;
 
@@ -148,16 +146,7 @@ namespace ImpRock.JumpTo.Editor
 			m_DrawRect.width = m_Size.x;
 			m_DrawRect.height = m_Size.y - m_DrawRect.y;
 
-			//m_ScrollViewRect.height = links.Count * GraphicAssets.LinkHeight;
-
-			//if the vertical scrollbar is visible, adjust view rect
-			//	width by the width of the scrollbar (17.0f)
-			//if (m_ScrollViewRect.height > m_DrawRect.height)
-			//	m_ScrollViewRect.width = m_DrawRect.width - 15.0f;
-			//else
-			//	m_ScrollViewRect.width = m_DrawRect.width;
-
-			//m_ScrollViewPosition = GUI.BeginScrollView(m_DrawRect, m_ScrollViewPosition, m_ScrollViewRect);
+			GUI.BeginGroup(m_DrawRect);
 
 			#region Event Switch
 			switch (Event.current.type)
@@ -202,7 +191,7 @@ namespace ImpRock.JumpTo.Editor
 			}
 			#endregion
 
-			//GUI.EndScrollView(true);
+			GUI.EndGroup();
 		}
 
 		protected void OnMouseDown()
@@ -444,7 +433,7 @@ namespace ImpRock.JumpTo.Editor
 		protected void OnRepaint(List<T> links)
 		{
 			//draw links
-			m_DrawRect.Set(0.0f, GraphicAssets.LinkViewTitleBarHeight, m_Size.x, GraphicAssets.LinkHeight);
+			m_DrawRect.Set(0.0f, 0.0f, m_Size.x, GraphicAssets.LinkHeight);
 
 			GraphicAssets graphicAssets = GraphicAssets.Instance;
 			GUIStyle linkLabelStyle = graphicAssets.LinkLabelStyle;

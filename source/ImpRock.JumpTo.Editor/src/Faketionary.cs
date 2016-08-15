@@ -43,7 +43,6 @@ namespace ImpRock.JumpTo.Editor
 			{
 				m_Keys.Add(key);
 				m_Values.Add(value);
-				index = m_Keys.Count - 1;
 			}
 			else
 			{

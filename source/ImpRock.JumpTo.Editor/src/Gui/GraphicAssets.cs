@@ -43,7 +43,7 @@ namespace ImpRock.JumpTo.Editor
 		public GUIStyle ToolbarButtonStyle { get; private set; }
 		public GUIStyle ToolbarPopupStyle { get; private set; }
 		public GUIStyle DragDropInsertionStyle { get; private set; }
-		public GUIStyle DividerHorizontalStyle { get; private set; }
+		//public GUIStyle DividerHorizontalStyle { get; private set; }
 		//public GUIStyle DividerVerticalStyle { get; private set; }
 
 		//***** COLORS *****
@@ -82,10 +82,10 @@ namespace ImpRock.JumpTo.Editor
 			DragDropInsertionStyle.imagePosition = ImagePosition.ImageOnly;
 			DragDropInsertionStyle.contentOffset = new Vector2(0.0f, -16.0f);
 
-			DividerHorizontalStyle = new GUIStyle();
-			DividerHorizontalStyle.name = "JumpTo Divider H";
-			DividerHorizontalStyle.normal.background = ToolbarStyle.normal.background;
-			DividerHorizontalStyle.border = new RectOffset(0, 0, 2, 2);
+			//DividerHorizontalStyle = new GUIStyle();
+			//DividerHorizontalStyle.name = "JumpTo Divider H";
+			//DividerHorizontalStyle.normal.background = ToolbarStyle.normal.background;
+			//DividerHorizontalStyle.border = new RectOffset(0, 0, 2, 2);
 
 			//DividerVerticalStyle = new GUIStyle();
 			//DividerVerticalStyle.name = "JumpTo Divider V";

@@ -3,14 +3,7 @@
 ;
 
 label_projectLinks = Project Links
-label_hierarchyLinks = Hierarchy Links
-tooltip_projectFirst = Project First
-tooltip_hierarchyFirst = Hierarchy First
-tooltip_vertical = Vertical Orientation
-tooltip_horizontal = Horizontal Orientation
-menu_projectView = Project
-menu_hierarchyView = Hierarchy
-menu_bothView = Both
+label_hierarchyLinksSuffix = Links
 menu_contextPingLink = Ping
 menu_contextSetAsSelection = Set This as Selection
 menu_contextAddToSelection = Add This to Selection

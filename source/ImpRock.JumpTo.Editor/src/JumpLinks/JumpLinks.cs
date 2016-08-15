@@ -66,23 +66,13 @@ namespace ImpRock.JumpTo.Editor
 		public HierarchyJumpLinkContainerFaketionary HierarchyLinks { get { return m_HierarchyLinkContainers; } }
 
 
+		public event System.Action<int> OnHierarchyLinkAdded;
+
+
 		protected override void Initialize()
 		{
 			m_ProjectLinkContainer = ScriptableObject.CreateInstance<ProjectJumpLinkContainer>();
 			m_ProjectLinkContainer.hideFlags = HideFlags.HideAndDontSave;
-		}
-
-		//TODO: this is kind of gross!
-		public JumpLinkContainer<T> GetJumpLinkContainer<T>(int key = 0) where T : JumpLink
-		{
-			if (typeof(T) == typeof(ProjectJumpLink))
-			{
-				return m_ProjectLinkContainer as JumpLinkContainer<T>;
-			}
-			else
-			{
-				return m_HierarchyLinkContainers[key] as JumpLinkContainer<T>;
-			}
 		}
 
 		public HierarchyJumpLinkContainer GetHierarchyJumpLinkContainer(int sceneId)
@@ -140,10 +130,15 @@ namespace ImpRock.JumpTo.Editor
 					prefabType == PrefabType.DisconnectedModelPrefabInstance ||
 					prefabType == PrefabType.MissingPrefabInstance)
 				{
-					int hashCode = JumpToUtility.FindSceneContaining(linkReference);
-					if (hashCode != 0)
+					int sceneId = JumpToUtility.FindSceneContaining(linkReference);
+					if (sceneId != 0)
 					{
-						m_HierarchyLinkContainers[hashCode].AddLink(linkReference, prefabType);
+						//gets existing, or creates, a link container
+						HierarchyJumpLinkContainer linkContainer = AddHierarchyJumpLinkContainer(sceneId);
+						linkContainer.AddLink(linkReference, prefabType);
+						
+						if (OnHierarchyLinkAdded != null)
+							OnHierarchyLinkAdded(sceneId);
 					}
 				}
 				else
@@ -185,10 +180,15 @@ namespace ImpRock.JumpTo.Editor
 				   prefabType == PrefabType.DisconnectedModelPrefabInstance ||
 				   prefabType == PrefabType.MissingPrefabInstance))
 			{
-				int hashCode = JumpToUtility.FindSceneContaining(linkReference);
-				if (hashCode != 0)
+				int sceneId = JumpToUtility.FindSceneContaining(linkReference);
+				if (sceneId != 0)
 				{
-					m_HierarchyLinkContainers[hashCode].AddLink(linkReference, prefabType);
+					//gets existing, or creates, a link container
+					HierarchyJumpLinkContainer linkContainer = AddHierarchyJumpLinkContainer(sceneId);
+					linkContainer.AddLink(linkReference, prefabType);
+
+					if (OnHierarchyLinkAdded != null)
+						OnHierarchyLinkAdded(sceneId);
 				}
 			}
 		}
