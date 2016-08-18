@@ -3,7 +3,7 @@
 namespace ImpRock.JumpTo.Editor
 {
 	/// <summary>
-	/// Attempts to detect when a scene is saved as an asset in the project.
+	/// Attempts to detect when scenes are saved as assets in the project.
 	/// </summary>
 	internal sealed class SceneSaveDetector : UnityEditor.AssetModificationProcessor
 	{
@@ -11,16 +11,13 @@ namespace ImpRock.JumpTo.Editor
 		{
 			//UnityEngine.Debug.Log("OnWillSaveAssets(): " + assetPaths.Length);
 			
-			//linear search for a scene asset within the paths
+			//linear search for scenes asset within the paths
 			for (int i = 0; i < assetPaths.Length; i++)
 			{
 				if (assetPaths[i].EndsWith(".unity"))
 				{
-					//signal that a scene is about to be saved, then
-					//	stop searching since you can only have one
-					//	scene open at a time (for now)
+					//signal that a scene is about to be saved
 					SceneStateControl.SceneWillSave(assetPaths[i]);
-					break;
 				}
 			}
 

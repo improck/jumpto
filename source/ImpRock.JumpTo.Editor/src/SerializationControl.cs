@@ -12,7 +12,6 @@ namespace ImpRock.JumpTo.Editor
 	{
 		private string m_SaveDirectory = string.Empty;
 		private string m_HierarchySaveDirectory = string.Empty;
-		private string[] m_HierarchyLinkPaths = null;
 		private JumpToEditorWindow m_Window = null;
 
 
@@ -114,6 +113,7 @@ namespace ImpRock.JumpTo.Editor
 				LoadProjectLinks();
 			}
 
+			//TODO: see if this can use the SceneStateMonitor instead of doing this in place
 			EditorApplication.delayCall +=
 				delegate ()
 				{
@@ -122,7 +122,7 @@ namespace ImpRock.JumpTo.Editor
 					{
 						Scene scene = EditorSceneManager.GetSceneAt(i);
 						if (scene.isLoaded)
-							LoadHierarchyLinks(scene.GetHashCode(), scene.path);
+							LoadHierarchyLinks(scene.GetHashCode(), scene);
 					}
 
 					m_Window.Repaint();
@@ -187,24 +187,24 @@ namespace ImpRock.JumpTo.Editor
 			}
 		}
 
-		public void SaveHierarchyLinks(string sceneAssetPath)
+		public void SaveHierarchyLinks(int sceneId)
 		{
-			//TODO: move this when/if unity leaves hooks for scene save events
-			GetHierarchyLinkPaths();
+			string[] linkPaths = GetHierarchyLinkPaths(sceneId);
 
+			string sceneAssetPath = SceneStateMonitor.Instance.GetSceneState(sceneId).Path;
 			string sceneGuid = AssetDatabase.AssetPathToGUID(sceneAssetPath);
 			string filePath = m_HierarchySaveDirectory + sceneGuid + SaveFileExtension;
-			if (m_HierarchyLinkPaths != null)
+			if (linkPaths != null)
 			{
 				using (StreamWriter streamWriter = new StreamWriter(filePath))
 				{
 					try
 					{
-						for (int i = 0; i < m_HierarchyLinkPaths.Length; i++)
+						for (int i = 0; i < linkPaths.Length; i++)
 						{
-							if (m_HierarchyLinkPaths[i] != null &&
-								m_HierarchyLinkPaths[i].Length > 0)
-								streamWriter.WriteLine(m_HierarchyLinkPaths[i]);
+							if (linkPaths[i] != null &&
+								linkPaths[i].Length > 0)
+								streamWriter.WriteLine(linkPaths[i]);
 						}
 					}
 					catch (System.Exception ex)
@@ -290,9 +290,9 @@ namespace ImpRock.JumpTo.Editor
 			}
 		}
 
-		private void LoadHierarchyLinks(int sceneId, string scenePath)
+		private void LoadHierarchyLinks(int sceneId, Scene scene)
 		{
-			string sceneGuid = AssetDatabase.AssetPathToGUID(scenePath);
+			string sceneGuid = AssetDatabase.AssetPathToGUID(scene.path);
 			string filePath = m_HierarchySaveDirectory + sceneGuid + SaveFileExtension;
 
 			if (!File.Exists(filePath))
@@ -306,7 +306,7 @@ namespace ImpRock.JumpTo.Editor
 				try
 				{
 					JumpLinks jumpLinks = m_Window.JumpLinksInstance;
-					GameObject[] unorderedRootObjects = EditorSceneManager.GetActiveScene().GetRootGameObjects();
+					GameObject[] unorderedRootObjects = scene.GetRootGameObjects();
 					//TODO: do this smarter
 					SerializedObject so = null;
 					GameObject[] rootObjects = new GameObject[unorderedRootObjects.Length];
@@ -558,35 +558,31 @@ namespace ImpRock.JumpTo.Editor
 			return deleted;
 		}
 
-		private void GetHierarchyLinkPaths()
+		private string[] GetHierarchyLinkPaths(int sceneId)
 		{
-			m_HierarchyLinkPaths = null;
-
-			//TODO: make compatible with multiple scenes
-			Object[] linkReferences = m_Window.JumpLinksInstance.HierarchyLinks[0].AllLinkReferences;
+			Object[] linkReferences = m_Window.JumpLinksInstance.HierarchyLinks[sceneId].AllLinkReferences;
 			if (linkReferences != null)
 			{
 				SerializedObject serializedObject;
 				int localId = 0;
 				Transform linkReferenceTransform = null;
-				m_HierarchyLinkPaths = new string[linkReferences.Length];
+				string[] linkPaths = new string[linkReferences.Length];
 				for (int i = 0; i < linkReferences.Length; i++)
 				{
-					//NOTE: can't use instanceId because they change each time the scene is loaded!
-					//		instead we have to store the transform path. it's not very reliable,
-					//		though, so we also get the "local id in file."
-					//instanceId = linkReferences[i].GetInstanceID();
-
 					serializedObject = new SerializedObject(linkReferences[i]);
 					serializedObject.SetInspectorMode(InspectorMode.Debug);
 
 					linkReferenceTransform = (linkReferences[i] as GameObject).transform;
 					localId = serializedObject.GetLocalIdInFile();
-					m_HierarchyLinkPaths[i] = localId.ToString() + "|" +
+					linkPaths[i] = localId.ToString() + "|" +
 						JumpToUtility.GetRootOrderPath(linkReferenceTransform) + "|" +
 						JumpToUtility.GetTransformPath(linkReferenceTransform);
 				}
+
+				return linkPaths;
 			}
+
+			return null;
 		}
 	}
 }

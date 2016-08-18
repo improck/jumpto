@@ -14,14 +14,15 @@ namespace ImpRock.JumpTo.Editor
 		private GUIContent m_MenuSaveLinks;
 		private string m_TitleSuffix;
 		[SerializeField] private bool m_HierarchyLinksChanged = false;	//TODO: get rid of this
+		[SerializeField] private int m_SceneId = 0;
 
-		public int SceneId { get { return m_JumpLinkContainerKey; } set { m_JumpLinkContainerKey = value; } }
+		public int SceneId { get { return m_SceneId; } set { m_SceneId = value; } }
 		
 		
 		public override void OnWindowEnable(EditorWindow window)
 		{
 			//NOTE: set SceneId property before this is called
-			m_LinkContainer = (window as JumpToEditorWindow).JumpLinksInstance.HierarchyLinks[m_JumpLinkContainerKey];
+			m_LinkContainer = (window as JumpToEditorWindow).JumpLinksInstance.HierarchyLinks[m_SceneId];
 			
 			base.OnWindowEnable(window);
 
@@ -38,7 +39,7 @@ namespace ImpRock.JumpTo.Editor
 			for (int i = 0; i < loadedSceneCount; i++)
 			{
 				Scene scene = EditorSceneManager.GetSceneAt(i);
-				if (scene.GetHashCode() == m_JumpLinkContainerKey)
+				if (scene.GetHashCode() == m_SceneId)
 				{
 					sceneName = scene.name;
 					break;
@@ -127,10 +128,9 @@ namespace ImpRock.JumpTo.Editor
 		{
 			GenericMenu menu = null;
 
-			//TODO: make it work with multi-scene
+			//TODO: show this when links state has changed, too
 			//TODO: make sure the scene is still loaded?
-			if (//EditorApplication.currentScene != string.Empty &&
-				m_HierarchyLinksChanged)
+			if (SceneStateMonitor.Instance.GetSceneState(m_SceneId).IsDirty)
 			{
 				menu = new GenericMenu();
 				menu.AddItem(m_MenuSaveLinks, false, SaveLinks);
@@ -174,25 +174,8 @@ namespace ImpRock.JumpTo.Editor
 
 		private void SaveLinks()
 		{
-			//HACK: should not be doing this in-place
-			string assetPath = string.Empty;
-			int loadedSceneCount = EditorSceneManager.loadedSceneCount;
-			for (int i = 0; i < loadedSceneCount; i++)
-			{
-				Scene scene = EditorSceneManager.GetSceneAt(i);
-				if (scene.GetHashCode() == m_JumpLinkContainerKey)
-				{
-					assetPath = scene.path;
-					break;
-				}
-			}
-
-			if (assetPath.Length == 0)
-				return;
-
 			//TODO: detect links to objects not saved in the scene, warn the user
-			//TODO: make it work with multi-scene
-			m_Window.SerializationControlInstance.SaveHierarchyLinks(assetPath);
+			m_Window.SerializationControlInstance.SaveHierarchyLinks(m_SceneId);
 
 			m_ControlTitle.text = m_TitleSuffix;
 			m_HierarchyLinksChanged = false;
@@ -200,12 +183,14 @@ namespace ImpRock.JumpTo.Editor
 
 		private bool ValidateSceneView()
 		{
-			return SceneView.lastActiveSceneView != null || SceneView.currentDrawingSceneView != null;
+			System.Collections.ArrayList sceneViews = SceneView.sceneViews;
+			return sceneViews != null && sceneViews.Count > 0;
 		}
 
 		private void OnHierarchyLinksChanged()
 		{
-			m_ControlTitle.text = m_TitleSuffix + '*';
+			//TODO
+			//m_ControlTitle.text = sceneName + m_TitleSuffix + '*';
 			m_HierarchyLinksChanged = true;
 		}
 	}

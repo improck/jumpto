@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace ImpRock.JumpTo.Editor
 {
+	//TODO: merge this with SceneStateMonitor!
 	[System.Serializable]
 	internal sealed class SceneStateControl
 	{

@@ -9,8 +9,7 @@ namespace ImpRock.JumpTo.Editor
 	{
 		[SerializeField] protected Vector2 m_ScrollViewPosition;
 		[SerializeField] protected bool m_HasFocus = false;
-		[SerializeField] protected int m_JumpLinkContainerKey = 0;
-
+		
 		protected Rect m_FoldoutRect;
 		protected Rect m_DrawRect;
 		protected Rect m_ScrollViewRect;

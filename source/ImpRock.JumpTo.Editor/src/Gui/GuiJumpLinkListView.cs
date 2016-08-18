@@ -7,33 +7,27 @@ namespace ImpRock.JumpTo.Editor
 {
 	internal sealed class GuiJumpLinkListView : GuiBase
 	{
-		//[SerializeField] private float m_Divider = 0.5f;
 		[SerializeField] private Vector2 m_ScrollViewPosition;
 		[SerializeField] private GuiProjectJumpLinkView m_ProjectView;
 		[SerializeField] private List<GuiHierarchyJumpLinkView> m_HierarchyViews = new List<GuiHierarchyJumpLinkView>();
 
 		private RectRef m_DrawRect = new RectRef();
-		//private Rect m_DividerRect;
 		private Rect m_ScrollViewRect;
 
 		private JumpToEditorWindow m_Window;
 
-		private const float DividerHalfThickness = 3.0f;
-		public const int DividerMin = 122;
-
 		private readonly Vector2 IconSize = new Vector2(16.0f, 16.0f);
-		//private readonly int DividerHash = "divider".GetHashCode();
-
+		
 
 		public override void OnWindowEnable(EditorWindow window)
 		{
 			m_Window = window as JumpToEditorWindow;
 
-			if (m_ProjectView == null)
+			if (m_ProjectView == null && m_Window.JumpLinksInstance.ProjectLinks.Links.Count > 0)
 			{
 				m_ProjectView = GuiBase.Create<GuiProjectJumpLinkView>();
 			}
-			
+
 			if (m_HierarchyViews.Count == 0)
 			{
 				List<int> sceneIds = m_Window.JumpLinksInstance.HierarchyLinks.Keys;
@@ -46,18 +40,17 @@ namespace ImpRock.JumpTo.Editor
 				}
 			}
 			
-			m_ProjectView.OnWindowEnable(window);
+			if (m_ProjectView != null)
+				m_ProjectView.OnWindowEnable(window);
 
 			for (int i = 0; i < m_HierarchyViews.Count; i++)
 			{
 				m_HierarchyViews[i].OnWindowEnable(window);
 			}
 
-			//if (m_Window.JumpToSettingsInstance.DividerPosition >= 0.0f)
-			//	m_Divider = m_Window.JumpToSettingsInstance.DividerPosition;
-
-			m_Window.JumpLinksInstance.OnHierarchyLinkAdded += HierarchyLinkAddedHandler;
-			m_Window.SceneStateMonitorInstance.OnLoadedSceneCountChanged += LoadedSceneCountChangeHandler;
+			JumpLinks.OnHierarchyLinkAdded += HierarchyLinkAddedHandler;
+			JumpLinks.OnProjectLinkAdded += ProjectLinkAddedHandler;
+			SceneStateMonitor.OnLoadedSceneCountChanged += LoadedSceneCountChangeHandler;
 		}
 
 		protected override void OnGui()
@@ -67,19 +60,10 @@ namespace ImpRock.JumpTo.Editor
 			Vector2 iconSizeBak = EditorGUIUtility.GetIconSize();
 			EditorGUIUtility.SetIconSize(IconSize);
 
-			Color bgColorBak = GUI.backgroundColor;
-
-			//float adjWidth = m_Size.x;
-			//float adjHeight = m_Size.y;
-
-			//RefreshDividerPosition();
-
-			//adjHeight = Mathf.Floor(m_Size.y * m_Divider);
-			//m_DrawRect.Set(0.0f, 0.0f, m_Size.x, adjHeight - DividerHalfThickness);
 			m_DrawRect.Set(0.0f, 0.0f, m_Size.x, m_Size.y);
 
 			//TODO: maybe only calculate this if the height changes?
-			m_ScrollViewRect.height = m_ProjectView.TotalHeight;
+			m_ScrollViewRect.height = m_ProjectView != null ? m_ProjectView.TotalHeight : 0.0f;
 			for (int i = 0; i < m_HierarchyViews.Count; i++)
 			{
 				m_ScrollViewRect.height += m_HierarchyViews[i].TotalHeight;
@@ -93,15 +77,13 @@ namespace ImpRock.JumpTo.Editor
 			//else
 			//	m_ScrollViewRect.width = m_DrawRect.width;
 
-			//m_DividerRect.x = 0.0f;
-			//m_DividerRect.y = m_DrawRect.height;
-			//m_DividerRect.width = m_Size.x;
-			//m_DividerRect.height = DividerHalfThickness * 2.0f;
-
 			m_ScrollViewPosition = GUI.BeginScrollView(m_DrawRect, m_ScrollViewPosition, m_ScrollViewRect);
 
-			m_DrawRect.height = m_ProjectView.TotalHeight;
-			m_ProjectView.Draw(m_DrawRect);
+			if (m_ProjectView != null)
+			{
+				m_DrawRect.height = m_ProjectView.TotalHeight;
+				m_ProjectView.Draw(m_DrawRect);
+			}
 
 			for (int i = 0; i < m_HierarchyViews.Count; i++)
 			{
@@ -112,174 +94,8 @@ namespace ImpRock.JumpTo.Editor
 
 			GUI.EndScrollView(true);
 
-			//TODO: draw ALL hierarchy views
-			//for (int i = 0; i < m_HierarchyViews.Count; i++)
-			//{
-			//	//TODO: update draw rect
-			//	m_HierarchyViews[i].Draw(m_DrawRect);
-			//}
-
-			//OnDividerGui();
-
-			//switch (m_Window.JumpToSettingsInstance.Visibility)
-			//{
-			//case JumpToSettings.VisibleList.ProjectAndHierarchy:
-			//	{
-			//		float adjWidth = m_Size.x;
-			//		float adjHeight = m_Size.y;
-
-			//		RefreshDividerPosition();
-
-			//		//draw the top/left box
-			//		if (m_Window.JumpToSettingsInstance.Vertical)
-			//		{
-			//			adjHeight = Mathf.Floor(m_Size.y * m_Divider);
-			//			m_DrawRect.Set(0.0f, 0.0f, m_Size.x, adjHeight - DividerHalfThickness);
-
-			//			m_DividerRect.x = 0.0f;
-			//			m_DividerRect.y = m_DrawRect.height;
-			//			m_DividerRect.width = m_Size.x;
-			//			m_DividerRect.height = DividerHalfThickness * 2.0f;
-			//		}
-			//		else
-			//		{
-			//			adjWidth = Mathf.Floor(m_Size.x * m_Divider);
-			//			m_DrawRect.Set(0.0f, 0.0f, adjWidth - DividerHalfThickness, m_Size.y);
-
-			//			m_DividerRect.x = m_DrawRect.width; ;
-			//			m_DividerRect.y = 0.0f;
-			//			m_DividerRect.width = DividerHalfThickness * 2.0f;
-			//			m_DividerRect.height = m_Size.y;
-			//		}
-
-			//		if (m_Window.JumpToSettingsInstance.ProjectFirst)
-			//		{
-			//			m_ProjectView.Draw(m_DrawRect);
-			//			if (m_ProjectView.HasFocus)
-			//				m_HierarchyView.HasFocus = false;
-			//		}
-			//		else
-			//		{
-			//			m_HierarchyView.Draw(m_DrawRect);
-			//			if (m_HierarchyView.HasFocus)
-			//				m_ProjectView.HasFocus = false;
-			//		}
-
-			//		//draw the bottom/right box
-			//		if (m_Window.JumpToSettingsInstance.Vertical)
-			//		{
-			//			m_DrawRect.Set(0.0f, adjHeight + DividerHalfThickness, m_Size.x, (m_Size.y - adjHeight) - DividerHalfThickness);
-			//		}
-			//		else
-			//		{
-			//			m_DrawRect.Set(adjWidth + DividerHalfThickness, 0.0f, (m_Size.x - adjWidth) - DividerHalfThickness, m_Size.y);
-			//		}
-
-			//		if (m_Window.JumpToSettingsInstance.ProjectFirst)
-			//		{
-			//			m_HierarchyView.Draw(m_DrawRect);
-			//			if (m_HierarchyView.HasFocus)
-			//				m_ProjectView.HasFocus = false;
-			//		}
-			//		else
-			//		{
-			//			m_ProjectView.Draw(m_DrawRect);
-			//			if (m_ProjectView.HasFocus)
-			//				m_HierarchyView.HasFocus = false;
-			//		}
-
-			//		OnDividerGui();
-			//	}
-			//	break;
-			//case JumpToSettings.VisibleList.ProjectOnly:
-			//	{
-			//		m_DrawRect.Set(0.0f, 0.0f, m_Size.x, m_Size.y - 1.0f);
-
-			//		m_ProjectView.HasFocus = true;
-			//		m_HierarchyView.HasFocus = false;
-			//		m_ProjectView.Draw(m_DrawRect);
-			//	}
-			//	break;
-			//case JumpToSettings.VisibleList.HierarchyOnly:
-			//	{
-			//		m_DrawRect.Set(0.0f, 0.0f, m_Size.x, m_Size.y - 1.0f);
-
-			//		m_ProjectView.HasFocus = false;
-			//		m_HierarchyView.HasFocus = true;
-			//		m_HierarchyView.Draw(m_DrawRect);
-			//	}
-			//	break;
-			//}
-
-			GUI.backgroundColor = bgColorBak;
-
 			EditorGUIUtility.SetIconSize(iconSizeBak);
 		}
-
-		//private void OnDividerGui()
-		//{
-		//	int controlId = GUIUtility.GetControlID(DividerHash, FocusType.Passive, m_DividerRect);
-
-		//	if (m_Window.JumpToSettingsInstance.Vertical)
-		//		EditorGUIUtility.AddCursorRect(m_DividerRect, MouseCursor.SplitResizeUpDown, controlId);
-		//	else
-		//		EditorGUIUtility.AddCursorRect(m_DividerRect, MouseCursor.SplitResizeLeftRight, controlId);
-
-		//	Event current = Event.current;
-		//	switch (current.GetTypeForControl(controlId))
-		//	{
-		//	case EventType.MouseDown:
-		//		{
-		//			if (current.button == 0 && m_DividerRect.Contains(current.mousePosition))
-		//			{
-		//				GUIUtility.hotControl = controlId;
-		//				current.Use();
-		//			}
-		//		}
-		//		break;
-		//	case EventType.MouseUp:
-		//		{
-		//			if (GUIUtility.hotControl == controlId)
-		//			{
-		//				GUIUtility.hotControl = 0;
-		//				current.Use();
-
-		//				m_Window.JumpToSettingsInstance.DividerPosition = m_Divider;
-		//			}
-		//		}
-		//		break;
-		//	case EventType.MouseDrag:
-		//		{
-		//			if (GUIUtility.hotControl == controlId && current.button == 0)
-		//			{
-		//				if (m_Window.JumpToSettingsInstance.Vertical)
-		//				{
-		//					m_Divider = Mathf.Clamp((int)current.mousePosition.y, DividerMin, (int)m_Size.y - DividerMin) / m_Size.y;
-		//				}
-		//				else
-		//				{
-		//					m_Divider = Mathf.Clamp((int)current.mousePosition.x, DividerMin, (int)m_Size.x - DividerMin) / m_Size.x;
-		//				}
-
-		//				current.Use();
-		//			}
-		//		}
-		//		break;
-		//	case EventType.Repaint:
-		//		{
-		//			GraphicAssets.Instance.DividerHorizontalStyle.Draw(m_DividerRect, false, false, false, false);
-		//			if (m_Window.JumpToSettingsInstance.Vertical)
-		//			{
-		//				GraphicAssets.Instance.DividerHorizontalStyle.Draw(m_DividerRect, false, false, false, false);
-		//			}
-		//			else
-		//			{
-		//				GraphicAssets.Instance.DividerVerticalStyle.Draw(m_DividerRect, false, false, false, false);
-		//			}
-		//		}
-		//		break;
-		//	}
-		//}
 
 		private void HandleDragAndDrop()
 		{
@@ -290,7 +106,7 @@ namespace ImpRock.JumpTo.Editor
 			case EventType.DragUpdated:
 				{
 					//TODO: revisit drag owner concept
-					if (m_ProjectView.IsDragOwner)
+					if (m_ProjectView != null && m_ProjectView.IsDragOwner)
 					{
 						break;
 					}
@@ -366,7 +182,7 @@ namespace ImpRock.JumpTo.Editor
 			case EventType.DragPerform:
 				{
 					//TODO: revisit drag owner concept
-					if (m_ProjectView.IsDragOwner)
+					if (m_ProjectView != null && m_ProjectView.IsDragOwner)
 					{
 						break;
 					}
@@ -475,16 +291,12 @@ namespace ImpRock.JumpTo.Editor
 			m_Window.Repaint();
 		}
 
-		//public void RefreshDividerPosition()
-		//{
-		//	if (m_Window.JumpToSettingsInstance.Vertical)
-		//	{
-		//		m_Divider = Mathf.Clamp(m_Divider * (int)m_Size.y, DividerMin, (int)m_Size.y - DividerMin) / m_Size.y;
-		//	}
-		//	else
-		//	{
-		//		m_Divider = Mathf.Clamp(m_Divider * (int)m_Size.x, DividerMin, (int)m_Size.x - DividerMin) / m_Size.x;
-		//	}
-		//}
+		private void ProjectLinkAddedHandler()
+		{
+			if (m_ProjectView != null)
+				return;
+
+			m_ProjectView = GuiBase.Create<GuiProjectJumpLinkView>();
+		}
 	}
 }

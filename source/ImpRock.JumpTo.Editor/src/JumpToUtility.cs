@@ -118,27 +118,27 @@ namespace ImpRock.JumpTo.Editor
 
 	//tip found at:
 	//	https://code.google.com/p/hounitylibs/source/browse/trunk/HOEditorUtils/HOPanelUtils.cs
-	public class EditorWindowCachedTitleContentWrapper
-	{
-		private EditorWindow m_Window = null;
-		private PropertyInfo m_CachedTitleContentProperty = null;
+	//public class EditorWindowCachedTitleContentWrapper
+	//{
+	//	private EditorWindow m_Window = null;
+	//	private PropertyInfo m_CachedTitleContentProperty = null;
 
 
-		public GUIContent TitleContent
-		{
-			get
-			{
-				return m_CachedTitleContentProperty.GetValue(m_Window, null) as GUIContent;
-			}
-		}
+	//	public GUIContent TitleContent
+	//	{
+	//		get
+	//		{
+	//			return m_CachedTitleContentProperty.GetValue(m_Window, null) as GUIContent;
+	//		}
+	//	}
 
 
-		public EditorWindowCachedTitleContentWrapper(EditorWindow window)
-		{
-			m_Window = window;
+	//	public EditorWindowCachedTitleContentWrapper(EditorWindow window)
+	//	{
+	//		m_Window = window;
 
-			m_CachedTitleContentProperty =
-				typeof(EditorWindow).GetProperty("cachedTitleContent", BindingFlags.Instance | BindingFlags.NonPublic);
-		}
-	}
+	//		m_CachedTitleContentProperty =
+	//			typeof(EditorWindow).GetProperty("cachedTitleContent", BindingFlags.Instance | BindingFlags.NonPublic);
+	//	}
+	//}
 }

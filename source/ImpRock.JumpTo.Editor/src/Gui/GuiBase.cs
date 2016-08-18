@@ -1,6 +1,5 @@
 ﻿using UnityEditor;
 using UnityEngine;
-using System.Collections;
 
 
 namespace ImpRock.JumpTo.Editor
@@ -16,11 +15,16 @@ namespace ImpRock.JumpTo.Editor
 
 		protected abstract void OnGui();
 
+		protected virtual void OnCreate() { }
+		protected virtual void OnDestroy() { }
+
 		public virtual void OnSerialize() { }
 		public virtual void OnDeserialize() { }
 
-		//position -	The area within the parent control
-		//				in which to draw this control
+		/// <summary>
+		/// Reset internal draw position to (0,0), m_Size to position size
+		/// </summary>
+		/// <param name="position">Width & height determine size</param>
 		public void Draw(RectRef position)
 		{
 			//make all gui things within OnGui() relative
@@ -38,6 +42,8 @@ namespace ImpRock.JumpTo.Editor
 		{
 			T instance = ScriptableObject.CreateInstance<T>();
 			instance.hideFlags = HideFlags.HideAndDontSave;
+
+			instance.OnCreate();
 
 			return instance;
 		}

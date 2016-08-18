@@ -66,7 +66,8 @@ namespace ImpRock.JumpTo.Editor
 		public HierarchyJumpLinkContainerFaketionary HierarchyLinks { get { return m_HierarchyLinkContainers; } }
 
 
-		public event System.Action<int> OnHierarchyLinkAdded;
+		public static event System.Action OnProjectLinkAdded;
+		public static event System.Action<int> OnHierarchyLinkAdded;
 
 
 		protected override void Initialize()
@@ -88,10 +89,16 @@ namespace ImpRock.JumpTo.Editor
 			if (!m_HierarchyLinkContainers.TryGetValue(sceneId, out container))
 			{
 				container = ScriptableObject.CreateInstance<HierarchyJumpLinkContainer>();
+				container.hideFlags = HideFlags.HideAndDontSave;
 				m_HierarchyLinkContainers.Add(sceneId, container);
 			}
 
 			return container;
+		}
+
+		public void RemoveHierarchyJumpLinkContainer(int sceneId)
+		{
+			m_HierarchyLinkContainers.Remove(sceneId);
 		}
 
 		public static bool WouldBeProjectLink(UnityEngine.Object linkReference)
@@ -144,11 +151,17 @@ namespace ImpRock.JumpTo.Editor
 				else
 				{
 					m_ProjectLinkContainer.AddLink(linkReference, prefabType);
+
+					if (OnProjectLinkAdded != null)
+						OnProjectLinkAdded();
 				}
 			}
 			else if (!(linkReference is Component))
 			{
 				m_ProjectLinkContainer.AddLink(linkReference, PrefabType.None);
+
+				if (OnProjectLinkAdded != null)
+					OnProjectLinkAdded();
 			}
 		}
 
@@ -163,6 +176,9 @@ namespace ImpRock.JumpTo.Editor
 				prefabType == PrefabType.Prefab)
 			{
 				m_ProjectLinkContainer.AddLink(linkReference, prefabType);
+
+				if (OnProjectLinkAdded != null)
+					OnProjectLinkAdded();
 			}
 		}
 
