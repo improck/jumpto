@@ -135,43 +135,8 @@ namespace ImpRock.JumpTo.Editor
 							//reject component links
 							if (DragAndDrop.objectReferences[0] is Component)
 								DragAndDrop.visualMode = DragAndDropVisualMode.Rejected;
-
-							//TODO: component links??
-
-							switch (m_Window.JumpToSettingsInstance.Visibility)
-							{
-							case JumpToSettings.VisibleList.ProjectAndHierarchy:
-								{
-									DragAndDrop.visualMode = DragAndDropVisualMode.Link;
-								}
-								break;
-							case JumpToSettings.VisibleList.HierarchyOnly:
-								{
-									UnityEngine.Object[] objectReferences = DragAndDrop.objectReferences;
-									for (int i = 0; i < objectReferences.Length; i++)
-									{
-										if (JumpLinks.WouldBeHierarchyLink(objectReferences[i]))
-										{
-											DragAndDrop.visualMode = DragAndDropVisualMode.Link;
-											break;
-										}
-									}
-								}
-								break;
-							case JumpToSettings.VisibleList.ProjectOnly:
-								{
-									UnityEngine.Object[] objectReferences = DragAndDrop.objectReferences;
-									for (int i = 0; i < objectReferences.Length; i++)
-									{
-										if (JumpLinks.WouldBeProjectLink(objectReferences[i]))
-										{
-											DragAndDrop.visualMode = DragAndDropVisualMode.Link;
-											break;
-										}
-									}
-								}
-								break;
-							}	//switch on visibility
+							else
+								DragAndDrop.visualMode = DragAndDropVisualMode.Link;
 						}
 					}
 
@@ -204,25 +169,8 @@ namespace ImpRock.JumpTo.Editor
 
 					DragAndDrop.AcceptDrag();
 
-					switch (m_Window.JumpToSettingsInstance.Visibility)
-					{
-					case JumpToSettings.VisibleList.ProjectAndHierarchy:
-						{
-							OnDropProjectAndHierarchy();
-						}
-						break;
-					case JumpToSettings.VisibleList.HierarchyOnly:
-						{
-							OnDropHierarchyOnly();
-						}
-						break;
-					case JumpToSettings.VisibleList.ProjectOnly:
-						{
-							OnDropProjectOnly();
-						}
-						break;
-					}
-
+					OnDropProjectAndHierarchy();
+					
 					currentEvent.Use();
 
 					//reset drag & drop data
@@ -248,30 +196,6 @@ namespace ImpRock.JumpTo.Editor
 			}
 		}
 
-		private void OnDropHierarchyOnly()
-		{
-			UnityEngine.Object[] objectReferences = DragAndDrop.objectReferences;
-			if (objectReferences.Length > 0)
-			{
-				for (int i = 0; i < objectReferences.Length; i++)
-				{
-					m_Window.JumpLinksInstance.CreateOnlyHierarchyJumpLink(objectReferences[i]);
-				}
-			}
-		}
-
-		private void OnDropProjectOnly()
-		{
-			UnityEngine.Object[] objectReferences = DragAndDrop.objectReferences;
-			if (objectReferences.Length > 0)
-			{
-				for (int i = 0; i < objectReferences.Length; i++)
-				{
-					m_Window.JumpLinksInstance.CreateOnlyProjectJumpLink(objectReferences[i]);
-				}
-			}
-		}
-
 		private void LoadedSceneCountChangeHandler(int oldCount, int currentCount)
 		{
 			//TODO: figure out what scenes were loaded or unloaded, and update the hierarchy views
@@ -279,24 +203,24 @@ namespace ImpRock.JumpTo.Editor
 
 		private void HierarchyLinkAddedHandler(int sceneId)
 		{
-			if (m_HierarchyViews.Find(v => v.SceneId == sceneId) != null)
-				return;
+			if (m_HierarchyViews.Find(v => v.SceneId == sceneId) == null)
+			{
+				GuiHierarchyJumpLinkView view = GuiBase.Create<GuiHierarchyJumpLinkView>();
+				view.SceneId = sceneId;
+				view.OnWindowEnable(m_Window);
 
-			GuiHierarchyJumpLinkView view = GuiBase.Create<GuiHierarchyJumpLinkView>();
-			view.SceneId = sceneId;
-			view.OnWindowEnable(m_Window);
+				m_HierarchyViews.Add(view);
 
-			m_HierarchyViews.Add(view);
-			
-			m_Window.Repaint();
+				m_Window.Repaint();
+			}
 		}
 
 		private void ProjectLinkAddedHandler()
 		{
-			if (m_ProjectView != null)
-				return;
-
-			m_ProjectView = GuiBase.Create<GuiProjectJumpLinkView>();
+			if (m_ProjectView == null)
+			{
+				m_ProjectView = GuiBase.Create<GuiProjectJumpLinkView>();
+			}
 		}
 	}
 }

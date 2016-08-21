@@ -42,7 +42,6 @@ namespace ImpRock.JumpTo.Editor
 		{
 			if (CreateSaveDirectories())
 			{
-				SaveSettings();
 				SaveProjectLinks();
 
 				//TODO: objects that are new in the scene have not been
@@ -105,9 +104,7 @@ namespace ImpRock.JumpTo.Editor
 		public void OnWindowEnable()
 		{
 			SetSaveDirectoryPaths();
-
-			LoadSettings();
-
+			
 			if (m_Window.JumpLinksInstance.ProjectLinks.Links.Count == 0)
 			{
 				LoadProjectLinks();
@@ -133,7 +130,6 @@ namespace ImpRock.JumpTo.Editor
 		{
 			if (CreateSaveDirectories())
 			{
-				SaveSettings();
 				SaveProjectLinks();
 			}
 		}
@@ -142,7 +138,6 @@ namespace ImpRock.JumpTo.Editor
 		{
 			if (CreateSaveDirectories())
 			{
-				SaveSettings();
 				SaveProjectLinks();
 
 				//if (EditorApplication.currentScene != string.Empty)
@@ -216,20 +211,6 @@ namespace ImpRock.JumpTo.Editor
 			else
 			{
 				DeleteSaveFile(filePath);
-			}
-		}
-
-		private void SaveSettings()
-		{
-			string filePath = m_SaveDirectory + SettingsSaveFile + SaveFileExtension;
-			using (StreamWriter streamWriter = new StreamWriter(filePath))
-			{
-				JumpToSettings settings = m_Window.JumpToSettingsInstance;
-
-				streamWriter.WriteLine(settings.Visibility);
-				streamWriter.WriteLine(settings.ProjectFirst);
-				streamWriter.WriteLine(settings.Vertical);
-				//streamWriter.WriteLine(settings.DividerPosition);
 			}
 		}
 		
@@ -307,7 +288,7 @@ namespace ImpRock.JumpTo.Editor
 				{
 					JumpLinks jumpLinks = m_Window.JumpLinksInstance;
 					GameObject[] unorderedRootObjects = scene.GetRootGameObjects();
-					//TODO: do this smarter
+					
 					SerializedObject so = null;
 					GameObject[] rootObjects = new GameObject[unorderedRootObjects.Length];
 					for (int i = 0; i < rootObjects.Length; i++)
@@ -331,11 +312,16 @@ namespace ImpRock.JumpTo.Editor
 
 						lineSegments = line.Split(delimiterPipe, System.StringSplitOptions.RemoveEmptyEntries);
 
+						//TODO: prefer to find an object by its localId
 						localId = int.Parse(lineSegments[0]);
 
 						//find the root transform of the object
 						rootOrders = lineSegments[1].Split(new[] { '/' }, System.StringSplitOptions.RemoveEmptyEntries);
 						rootOrder = int.Parse(rootOrders[0]);
+						//TODO: this has a serious potential to break
+						//		saved scene is loaded, prefabs get reordered, a prefab dropped in
+						//		and linked, links are saved, scene is unloaded but not saved. the
+						//		prefab link's address is now wrong!
 						Transform traversal = rootObjects[rootOrder].transform;
 						for (int i = 1; i < rootOrders.Length; i++)
 						{
@@ -346,83 +332,6 @@ namespace ImpRock.JumpTo.Editor
 						{
 							jumpLinks.CreateOnlyHierarchyJumpLink(traversal.gameObject);
 						}
-						else if (localId != 0)
-						{
-							//TODO: fall back to the old school
-							//lineSegments[2] is the transform path
-						}
-
-						//pipeLoc = line.LastIndexOf('|');
-						//transPath = line.Substring(0, pipeLoc);
-						//if (line[pipeLoc + 1] != '@')
-						//{
-						//	localId = int.Parse(line.Substring(pipeLoc + 1));
-						//	rootOrder = 0;
-						//}
-						//else
-						//{
-						//	localId = 0;
-						//	rootOrder = int.Parse(line.Substring(pipeLoc + 2));
-						//}
-
-						//obj = GameObject.Find(transPath);
-						//if (obj != null)
-						//{
-						//	serializedObject = new SerializedObject(obj);
-						//	if (localId != 0)
-						//	{
-						//		serializedObject.SetInspectorMode(InspectorMode.Debug);
-
-						//		searchId = serializedObject.GetLocalIdInFile();
-						//		if (searchId == localId)
-						//		{
-						//			jumpLinks.CreateOnlyHierarchyJumpLink(obj);
-						//		}
-						//		else if (obj.transform.parent != null)
-						//		{
-						//			objName = obj.name;
-						//			foreach (Transform trans in obj.transform.parent)
-						//			{
-						//				if (trans.name == objName && trans.gameObject != obj)
-						//				{
-						//					serializedObject = new SerializedObject(trans.gameObject);
-						//					serializedObject.SetInspectorMode(InspectorMode.Debug);
-						//					searchId = serializedObject.GetLocalIdInFile();
-						//					if (searchId == localId)
-						//					{
-						//						jumpLinks.CreateOnlyHierarchyJumpLink(trans.gameObject);
-						//						break;
-						//					}
-						//				}
-						//			}
-						//		}
-						//		else
-						//		{
-						//			objName = obj.name;
-
-						//			HierarchyProperty hierarchyProperty = new HierarchyProperty(HierarchyType.GameObjects);
-						//			int[] expanded = new int[0];
-						//			while (hierarchyProperty.Next(expanded))
-						//			{
-						//				if (hierarchyProperty.name == objName && hierarchyProperty.pptrValue != obj)
-						//				{
-						//					serializedObject = new SerializedObject(hierarchyProperty.pptrValue);
-						//					serializedObject.SetInspectorMode(InspectorMode.Debug);
-						//					searchId = serializedObject.GetLocalIdInFile();
-						//					if (searchId == localId)
-						//					{
-						//						jumpLinks.CreateOnlyHierarchyJumpLink(hierarchyProperty.pptrValue);
-						//						break;
-						//					}
-						//				}
-						//			}
-						//		}
-						//	}
-						//	else
-						//	{
-						//		//UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene().GetRootGameObjects();
-						//	}
-						//}	//if obj !null
 					}   //while ! end of stream
 				}   //try
 				catch (System.Exception ex)
@@ -431,23 +340,7 @@ namespace ImpRock.JumpTo.Editor
 				}
 			}
 		}
-
-		private void LoadSettings()
-		{
-			string filePath = m_SaveDirectory + SettingsSaveFile + SaveFileExtension;
-			if (!File.Exists(filePath))
-				return;
-
-			using (StreamReader streamReader = new StreamReader(filePath))
-			{
-				JumpToSettings settings = m_Window.JumpToSettingsInstance;
-				settings.Visibility= (JumpToSettings.VisibleList)System.Enum.Parse(typeof(JumpToSettings.VisibleList), streamReader.ReadLine());
-				settings.ProjectFirst = bool.Parse(streamReader.ReadLine());
-				settings.Vertical = bool.Parse(streamReader.ReadLine());
-				//settings.DividerPosition = float.Parse(streamReader.ReadLine());
-			}
-		}
-
+		
 		private void SetSaveDirectoryPaths()
 		{
 			m_SaveDirectory = Path.GetFullPath(Application.dataPath) + Path.DirectorySeparatorChar + ".." + Path.DirectorySeparatorChar + "JumpTo" + Path.DirectorySeparatorChar;

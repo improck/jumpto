@@ -13,11 +13,9 @@ internal sealed class JumpToEditorWindow : EditorWindow
 
 	[SerializeField] private JumpLinks m_JumpLinks;
 	[SerializeField] private JumpToSettings m_Settings;
-	//[SerializeField] private GuiToolbar m_Toolbar;
 	[SerializeField] private GuiJumpLinkListView m_JumpLinkListView;
 	[SerializeField] private SceneStateControl m_SceneStateControl;
 	[SerializeField] private SceneStateMonitor m_SceneStateMonitor;
-	//[SerializeField] private bool m_FirstOpen = true;
 
 	[System.NonSerialized] private bool m_Initialized = false;
 	[System.NonSerialized] private RectRef m_Position = new RectRef();
