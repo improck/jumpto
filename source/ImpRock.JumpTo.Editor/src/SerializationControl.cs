@@ -3,6 +3,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.IO;
+using System.Collections.Generic;
 
 
 namespace ImpRock.JumpTo.Editor
@@ -287,52 +288,117 @@ namespace ImpRock.JumpTo.Editor
 				try
 				{
 					JumpLinks jumpLinks = m_Window.JumpLinksInstance;
+
+					//"unordered" because it's not guaranteed that these objects
+					//	are in the same order as they are in the scene
 					GameObject[] unorderedRootObjects = scene.GetRootGameObjects();
-					
-					SerializedObject so = null;
-					GameObject[] rootObjects = new GameObject[unorderedRootObjects.Length];
-					for (int i = 0; i < rootObjects.Length; i++)
+
+					if (unorderedRootObjects.Length > 0)
 					{
-						so = new SerializedObject(unorderedRootObjects[i].transform);
-						rootObjects[so.FindProperty("m_RootOrder").intValue] = unorderedRootObjects[i];
-					}
+						GameObject[] rootObjects = new GameObject[unorderedRootObjects.Length];
 
-					string line;
-					int localId = 0;
-					int rootOrder = 0;
-					char[] delimiterPipe = new char[] { '|' };
-					char[] delimeterForwardSlash = new char[] { '/' };
-					string[] lineSegments;
-					string[] rootOrders;
-					while (!streamReader.EndOfStream)
-					{
-						line = streamReader.ReadLine();
-						if (line == null || line.Length == 0)
-							continue;
-
-						lineSegments = line.Split(delimiterPipe, System.StringSplitOptions.RemoveEmptyEntries);
-
-						//TODO: prefer to find an object by its localId
-						localId = int.Parse(lineSegments[0]);
-
-						//find the root transform of the object
-						rootOrders = lineSegments[1].Split(new[] { '/' }, System.StringSplitOptions.RemoveEmptyEntries);
-						rootOrder = int.Parse(rootOrders[0]);
-						//TODO: this has a serious potential to break
-						//		saved scene is loaded, prefabs get reordered, a prefab dropped in
-						//		and linked, links are saved, scene is unloaded but not saved. the
-						//		prefab link's address is now wrong!
-						Transform traversal = rootObjects[rootOrder].transform;
-						for (int i = 1; i < rootOrders.Length; i++)
+						//put the root objects in order
+						SerializedObject so = null;
+						for (int i = 0; i < rootObjects.Length; i++)
 						{
-							traversal = traversal.GetChild(int.Parse(rootOrders[i]));
+							so = new SerializedObject(unorderedRootObjects[i].transform);
+							rootObjects[so.FindProperty("m_RootOrder").intValue] = unorderedRootObjects[i];
 						}
 
-						if (traversal != null)
+						Dictionary<int, GameObject> localIdToGameObjects = new Dictionary<int, GameObject>();
+						Dictionary<int, GameObject> localIdToPrefabs = new Dictionary<int, GameObject>();
+						JumpToUtility.GetAllLocalIds(rootObjects, localIdToGameObjects, localIdToPrefabs);
+
+						string line;
+						string transformPath;
+						int prefabTypeId = 0;
+						int localId = 0;
+						//int rootOrder = 0;
+						char[] delimiterPipe = new char[] { '|' };
+						char[] delimeterForwardSlash = new char[] { '/' };
+						string[] lineSegments;
+						//string[] rootOrders;
+						string[] transformNames;
+						while (!streamReader.EndOfStream)
 						{
-							jumpLinks.CreateOnlyHierarchyJumpLink(traversal.gameObject);
-						}
-					}   //while ! end of stream
+							line = streamReader.ReadLine();
+							if (line == null || line.Length == 0)
+								continue;
+
+							lineSegments = line.Split(delimiterPipe, System.StringSplitOptions.None);
+
+							if (lineSegments.Length == 0)
+								continue;
+
+							if (!int.TryParse(lineSegments[0], out prefabTypeId))
+								continue;
+							
+							if (!int.TryParse(lineSegments[1], out localId))
+								continue;
+
+							//the localId should NEVER be zero
+							if (localId == 0)
+								continue;
+
+							//TODO: this "could" generate an exception
+							PrefabType prefabType = (PrefabType)prefabTypeId;
+
+							//try to find the object based solely on its localId
+							if (prefabType != PrefabType.ModelPrefabInstance &&
+								prefabType != PrefabType.PrefabInstance)
+							{
+								GameObject gameObject = null;
+								if (localIdToGameObjects.TryGetValue(localId, out gameObject))
+									jumpLinks.CreateOnlyHierarchyJumpLink(gameObject);
+
+								//TODO: what if it's not found?
+								continue;
+							}
+							else
+							{
+								//NOTE: searching for children within prefabs is not reliable because they are not currently 
+								//		uniquely addressed within a scene. if a prefab is renamed and moved after its link is
+								//		saved, it may not be correctly relinked on load. if a prefab is moved within a scene,
+								//		it may not be correctly relinked on load. blame Unity for this.
+
+								//get the root node for the prefab instance
+								GameObject gameObject = null;
+								if (localIdToPrefabs.TryGetValue(localId, out gameObject))
+								{
+									//get names of the path nodes
+									transformNames = lineSegments[3].Split(delimeterForwardSlash, System.StringSplitOptions.RemoveEmptyEntries);
+
+									//check for corrupt path
+									if (transformNames.Length == 0)
+										continue;
+
+									if (transformNames.Length == 1)
+									{
+										jumpLinks.CreateOnlyHierarchyJumpLink(gameObject);
+									}
+									else
+									{
+										//TODO: the path is built with invalid assumptions
+										//		does not work for nested prefabs
+										transformPath = transformNames[1];
+										for (int i = 2; i < transformNames.Length; i++)
+										{
+											transformPath += "/" + transformNames[i];
+										}
+
+										Transform transform = gameObject.transform.Find(transformPath);
+										if (transform != null)
+										{
+											jumpLinks.CreateOnlyHierarchyJumpLink(transform.gameObject);
+										}
+									}
+								}
+							}
+						}   //while ! end of stream
+
+						localIdToGameObjects.Clear();
+						localIdToPrefabs.Clear();
+					}	//if root objects exist
 				}   //try
 				catch (System.Exception ex)
 				{
@@ -458,18 +524,31 @@ namespace ImpRock.JumpTo.Editor
 			{
 				SerializedObject serializedObject;
 				int localId = 0;
+				Object linkReferenceObject = null;
 				Transform linkReferenceTransform = null;
 				string[] linkPaths = new string[linkReferences.Length];
 				for (int i = 0; i < linkReferences.Length; i++)
 				{
-					serializedObject = new SerializedObject(linkReferences[i]);
+					linkReferenceObject = linkReferences[i];
+					linkReferenceTransform = (linkReferenceObject as GameObject).transform;
+
+					string paths = "|" +
+							JumpToUtility.GetRootOrderPath(linkReferenceTransform) + "|" +
+							JumpToUtility.GetTransformPath(linkReferenceTransform);
+
+					PrefabType prefabType = PrefabUtility.GetPrefabType(linkReferenceObject);
+					
+					if (prefabType == PrefabType.ModelPrefabInstance ||
+						prefabType == PrefabType.PrefabInstance)
+					{
+						linkReferenceObject = PrefabUtility.GetPrefabObject(linkReferenceObject);
+					}
+
+					serializedObject = new SerializedObject(linkReferenceObject);
 					serializedObject.SetInspectorMode(InspectorMode.Debug);
 
-					linkReferenceTransform = (linkReferences[i] as GameObject).transform;
 					localId = serializedObject.GetLocalIdInFile();
-					linkPaths[i] = localId.ToString() + "|" +
-						JumpToUtility.GetRootOrderPath(linkReferenceTransform) + "|" +
-						JumpToUtility.GetTransformPath(linkReferenceTransform);
+					linkPaths[i] = (int)prefabType + "|" + localId.ToString() + paths;
 				}
 
 				return linkPaths;

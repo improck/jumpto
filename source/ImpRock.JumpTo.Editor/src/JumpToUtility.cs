@@ -50,6 +50,62 @@ namespace ImpRock.JumpTo.Editor
 			return pathBuilder.ToString();
 		}
 
+		public static void GetAllLocalIds(GameObject[] orderedRootObjects,
+			Dictionary<int, GameObject> idToGameObjects, Dictionary<int, GameObject> idToPrefabs)
+		{
+			idToGameObjects.Clear();
+			idToPrefabs.Clear();
+
+			if (orderedRootObjects == null || orderedRootObjects.Length == 0)
+				return;
+			
+			HierarchyProperty hierarchyProperty = new HierarchyProperty(HierarchyType.GameObjects);
+			//int[] expanded = new int[0];
+			if (!hierarchyProperty.Find(orderedRootObjects[0].GetInstanceID(), null))
+				return;
+			
+			SerializedObject serializedObject = new SerializedObject(hierarchyProperty.pptrValue);
+			serializedObject.SetInspectorMode(InspectorMode.Debug);
+			int localId = serializedObject.GetLocalIdInFile();
+			PrefabType prefabType = PrefabUtility.GetPrefabType(hierarchyProperty.pptrValue);
+			if (prefabType != PrefabType.ModelPrefabInstance &&
+				prefabType != PrefabType.PrefabInstance)
+			{
+				idToGameObjects.Add(localId, hierarchyProperty.pptrValue as GameObject);
+			}
+			else
+			{
+				idToPrefabs.Add(localId, hierarchyProperty.pptrValue as GameObject);
+			}
+
+			while (hierarchyProperty.Next(null))
+			{
+				prefabType = PrefabUtility.GetPrefabType(hierarchyProperty.pptrValue);
+				if (prefabType != PrefabType.ModelPrefabInstance &&
+					prefabType != PrefabType.PrefabInstance)
+				{
+					serializedObject = new SerializedObject(hierarchyProperty.pptrValue);
+					serializedObject.SetInspectorMode(InspectorMode.Debug);
+					localId = serializedObject.GetLocalIdInFile();
+					idToGameObjects.Add(localId, hierarchyProperty.pptrValue as GameObject);
+				}
+				else
+				{
+					Object prefabObject = PrefabUtility.GetPrefabObject(hierarchyProperty.pptrValue);
+					serializedObject = new SerializedObject(prefabObject);
+					serializedObject.SetInspectorMode(InspectorMode.Debug);
+					localId = serializedObject.GetLocalIdInFile();
+
+					if (!idToPrefabs.ContainsKey(localId))
+					{
+						//NOTE: assuming here that the first one it runs into is the root of
+						//		a prefab that hasn't been added yet.
+						idToPrefabs.Add(localId, hierarchyProperty.pptrValue as GameObject);
+					}
+				}
+			}
+		}
+
 		public static int FindSceneContaining(Object linkReference)
 		{
 			Transform linkRoot = (linkReference as GameObject).transform.root;
