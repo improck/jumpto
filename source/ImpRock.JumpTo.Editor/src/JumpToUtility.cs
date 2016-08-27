@@ -10,11 +10,12 @@ namespace ImpRock.JumpTo.Editor
 {
 	internal static class JumpToUtility
 	{
-		public static string GetRootOrderPath(Transform transform)
+		public static string GetRootOrderPath(Transform transform, Transform root = null)
 		{
 			SerializedObject so = null;
 			Stack<string> pathStack = new Stack<string>();
-			while (transform != null)
+			Transform rootParent = root != null ? root.parent : null;
+			while (transform != null && transform != rootParent)
 			{
 				so = new SerializedObject(transform);
 				pathStack.Push("/" + so.FindProperty("m_RootOrder").intValue.ToString());
@@ -31,10 +32,11 @@ namespace ImpRock.JumpTo.Editor
 			return pathBuilder.ToString();
 		}
 
-		public static string GetTransformPath(Transform transform)
+		public static string GetTransformPath(Transform transform, Transform root = null)
 		{
 			Stack<string> pathStack = new Stack<string>();
-			while (transform != null)
+			Transform rootParent = root != null ? root.parent : null;
+			while (transform != null && transform != rootParent)
 			{
 				pathStack.Push("/" + transform.name);
 

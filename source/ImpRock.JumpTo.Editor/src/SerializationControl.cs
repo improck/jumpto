@@ -11,6 +11,10 @@ namespace ImpRock.JumpTo.Editor
 	//TODO: all auto-saving of hierarchy links is disabled. not enough info from unity editor to make it work.
 	internal sealed class SerializationControl
 	{
+		private static System.Version s_Version = null;
+
+		public System.Version Version { get { return s_Version; } }
+
 		private string m_SaveDirectory = string.Empty;
 		private string m_HierarchySaveDirectory = string.Empty;
 		private JumpToEditorWindow m_Window = null;
@@ -19,6 +23,12 @@ namespace ImpRock.JumpTo.Editor
 		private const string ProjectLinksSaveFile = "projectlinks";
 		private const string SettingsSaveFile = "settings";
 		private const string SaveFileExtension = ".jumpto";
+
+
+		static SerializationControl()
+		{
+			s_Version = typeof(SerializationControl).Assembly.GetName().Version;
+		}
 
 
 		public void Initialize(JumpToEditorWindow window)
@@ -159,6 +169,8 @@ namespace ImpRock.JumpTo.Editor
 				{
 					try
 					{
+						streamWriter.WriteLine(Version.ToString());
+
 						int instanceId;
 						string line;
 						for (int i = 0; i < linkReferences.Length; i++)
@@ -196,6 +208,7 @@ namespace ImpRock.JumpTo.Editor
 				{
 					try
 					{
+						streamWriter.WriteLine(Version.ToString());
 						for (int i = 0; i < linkPaths.Length; i++)
 						{
 							if (linkPaths[i] != null &&
@@ -221,48 +234,27 @@ namespace ImpRock.JumpTo.Editor
 			if (!File.Exists(filePath))
 				return;
 
-			JumpLinkContainer<ProjectJumpLink> links = m_Window.JumpLinksInstance.ProjectLinks;
+			ProjectJumpLinkContainer links = m_Window.JumpLinksInstance.ProjectLinks;
 			links.RemoveAll();
 
 			using (StreamReader streamReader = new StreamReader(filePath))
 			{
 				try
 				{
-					int instanceId;
-					string line;
-					string path;
-					while (!streamReader.EndOfStream)
-					{
-						JumpLinks jumpLinks = m_Window.JumpLinksInstance;
+					if (streamReader.EndOfStream)
+						return;
+					
+					string fileVersion = streamReader.ReadLine();
 
-						line = streamReader.ReadLine();
-						if (line.Length == 32)
-						{
-							path = AssetDatabase.GUIDToAssetPath(line);
-							if (!string.IsNullOrEmpty(path))
-							{
-								Object obj = AssetDatabase.LoadMainAssetAtPath(path);
-								if (obj != null)
-									jumpLinks.CreateOnlyProjectJumpLink(obj);
-							}
-						}
-						else if (line.Length > 33 && line[32] == '|')
-						{
-							instanceId = int.Parse(line.Substring(33));
-							path = AssetDatabase.GUIDToAssetPath(line.Substring(0, 32));
-							if (!string.IsNullOrEmpty(path))
-							{
-								Object[] objs = AssetDatabase.LoadAllAssetsAtPath(path);
-								if (objs != null)
-								{
-									for (int j = 0; j < objs.Length; j++)
-									{
-										if (objs[j].GetInstanceID() == instanceId)
-											jumpLinks.CreateOnlyProjectJumpLink(objs[j]);
-									}
-								}
-							}
-						}
+					System.Action<StreamReader> loader = FindProjectLinkLoader(fileVersion);
+
+					if (loader != null)
+					{
+						loader(streamReader);
+					}
+					else
+					{
+						Debug.LogError("JumpTo Error: Unable to load project links; file version mismatch");
 					}
 				}
 				catch (System.Exception ex)
@@ -287,119 +279,22 @@ namespace ImpRock.JumpTo.Editor
 			{
 				try
 				{
-					JumpLinks jumpLinks = m_Window.JumpLinksInstance;
+					if (streamReader.EndOfStream)
+						return;
 
-					//"unordered" because it's not guaranteed that these objects
-					//	are in the same order as they are in the scene
-					GameObject[] unorderedRootObjects = scene.GetRootGameObjects();
+					string fileVersion = streamReader.ReadLine();
 
-					if (unorderedRootObjects.Length > 0)
+					System.Action<StreamReader, Scene> loader = FindHierarchyLinkLoader(fileVersion);
+
+					if (loader != null)
 					{
-						GameObject[] rootObjects = new GameObject[unorderedRootObjects.Length];
-
-						//put the root objects in order
-						SerializedObject so = null;
-						for (int i = 0; i < rootObjects.Length; i++)
-						{
-							so = new SerializedObject(unorderedRootObjects[i].transform);
-							rootObjects[so.FindProperty("m_RootOrder").intValue] = unorderedRootObjects[i];
-						}
-
-						Dictionary<int, GameObject> localIdToGameObjects = new Dictionary<int, GameObject>();
-						Dictionary<int, GameObject> localIdToPrefabs = new Dictionary<int, GameObject>();
-						JumpToUtility.GetAllLocalIds(rootObjects, localIdToGameObjects, localIdToPrefabs);
-
-						string line;
-						string transformPath;
-						int prefabTypeId = 0;
-						int localId = 0;
-						//int rootOrder = 0;
-						char[] delimiterPipe = new char[] { '|' };
-						char[] delimeterForwardSlash = new char[] { '/' };
-						string[] lineSegments;
-						//string[] rootOrders;
-						string[] transformNames;
-						while (!streamReader.EndOfStream)
-						{
-							line = streamReader.ReadLine();
-							if (line == null || line.Length == 0)
-								continue;
-
-							lineSegments = line.Split(delimiterPipe, System.StringSplitOptions.None);
-
-							if (lineSegments.Length == 0)
-								continue;
-
-							if (!int.TryParse(lineSegments[0], out prefabTypeId))
-								continue;
-							
-							if (!int.TryParse(lineSegments[1], out localId))
-								continue;
-
-							//the localId should NEVER be zero
-							if (localId == 0)
-								continue;
-
-							//TODO: this "could" generate an exception
-							PrefabType prefabType = (PrefabType)prefabTypeId;
-
-							//try to find the object based solely on its localId
-							if (prefabType != PrefabType.ModelPrefabInstance &&
-								prefabType != PrefabType.PrefabInstance)
-							{
-								GameObject gameObject = null;
-								if (localIdToGameObjects.TryGetValue(localId, out gameObject))
-									jumpLinks.CreateOnlyHierarchyJumpLink(gameObject);
-
-								//TODO: what if it's not found?
-								continue;
-							}
-							else
-							{
-								//NOTE: searching for children within prefabs is not reliable because they are not currently 
-								//		uniquely addressed within a scene. if a prefab is renamed and moved after its link is
-								//		saved, it may not be correctly relinked on load. if a prefab is moved within a scene,
-								//		it may not be correctly relinked on load. blame Unity for this.
-
-								//get the root node for the prefab instance
-								GameObject gameObject = null;
-								if (localIdToPrefabs.TryGetValue(localId, out gameObject))
-								{
-									//get names of the path nodes
-									transformNames = lineSegments[3].Split(delimeterForwardSlash, System.StringSplitOptions.RemoveEmptyEntries);
-
-									//check for corrupt path
-									if (transformNames.Length == 0)
-										continue;
-
-									if (transformNames.Length == 1)
-									{
-										jumpLinks.CreateOnlyHierarchyJumpLink(gameObject);
-									}
-									else
-									{
-										//TODO: the path is built with invalid assumptions
-										//		does not work for nested prefabs
-										transformPath = transformNames[1];
-										for (int i = 2; i < transformNames.Length; i++)
-										{
-											transformPath += "/" + transformNames[i];
-										}
-
-										Transform transform = gameObject.transform.Find(transformPath);
-										if (transform != null)
-										{
-											jumpLinks.CreateOnlyHierarchyJumpLink(transform.gameObject);
-										}
-									}
-								}
-							}
-						}   //while ! end of stream
-
-						localIdToGameObjects.Clear();
-						localIdToPrefabs.Clear();
-					}	//if root objects exist
-				}   //try
+						loader(streamReader, scene);
+					}
+					else
+					{
+						Debug.LogError("JumpTo Error: Unable to load hierarchy links; file version mismatch");
+					}
+				}
 				catch (System.Exception ex)
 				{
 					Debug.LogError("JumpTo Error: Unable to load hierarchy links; error when reading from file\n" + ex.ToString());
@@ -532,16 +427,24 @@ namespace ImpRock.JumpTo.Editor
 					linkReferenceObject = linkReferences[i];
 					linkReferenceTransform = (linkReferenceObject as GameObject).transform;
 
-					string paths = "|" +
-							JumpToUtility.GetRootOrderPath(linkReferenceTransform) + "|" +
-							JumpToUtility.GetTransformPath(linkReferenceTransform);
+					string paths = "|";
 
 					PrefabType prefabType = PrefabUtility.GetPrefabType(linkReferenceObject);
-					
+
 					if (prefabType == PrefabType.ModelPrefabInstance ||
 						prefabType == PrefabType.PrefabInstance)
 					{
 						linkReferenceObject = PrefabUtility.GetPrefabObject(linkReferenceObject);
+
+						//we only want the path up to the prefab instance's root
+						GameObject prefabRoot = PrefabUtility.FindPrefabRoot(linkReferenceTransform.gameObject);
+						paths += JumpToUtility.GetRootOrderPath(linkReferenceTransform, prefabRoot.transform) + "|" +
+							JumpToUtility.GetTransformPath(linkReferenceTransform, prefabRoot.transform);
+					}
+					else
+					{
+						paths += JumpToUtility.GetRootOrderPath(linkReferenceTransform) + "|" +
+							JumpToUtility.GetTransformPath(linkReferenceTransform);
 					}
 
 					serializedObject = new SerializedObject(linkReferenceObject);
@@ -556,6 +459,197 @@ namespace ImpRock.JumpTo.Editor
 
 			return null;
 		}
+
+		private System.Action<StreamReader> FindProjectLinkLoader(string fileVersion)
+		{
+			System.Version version = new System.Version(fileVersion);
+
+			if (version.Major == 2)
+			{
+				return ProjectLinkLoader_2_x_x_x;
+			}
+
+			return null;
+		}
+
+		private System.Action<StreamReader, Scene> FindHierarchyLinkLoader(string fileVersion)
+		{
+			System.Version version = new System.Version(fileVersion);
+
+			if (version.Major == 2)
+			{
+				return HierarchyLinkLoader_2_x_x_x;
+			}
+
+			return null;
+		}
+
+		private void ProjectLinkLoader_2_x_x_x(StreamReader streamReader)
+		{
+			//Line format
+			//	assetguid
+			//	assetguid|instanceId
+			//
+			//	assetguid = GUID of asset in the DB
+			//	instanceId = instance ID of child within the asset
+
+			JumpLinks jumpLinks = m_Window.JumpLinksInstance;
+
+			int instanceId;
+			string line;
+			string path;
+			while (!streamReader.EndOfStream)
+			{
+				line = streamReader.ReadLine();
+				if (line.Length == 32)
+				{
+					path = AssetDatabase.GUIDToAssetPath(line);
+					if (!string.IsNullOrEmpty(path))
+					{
+						Object obj = AssetDatabase.LoadMainAssetAtPath(path);
+						if (obj != null)
+							jumpLinks.CreateOnlyProjectJumpLink(obj);
+					}
+				}
+				else if (line.Length > 33 && line[32] == '|')
+				{
+					instanceId = int.Parse(line.Substring(33));
+					path = AssetDatabase.GUIDToAssetPath(line.Substring(0, 32));
+					if (!string.IsNullOrEmpty(path))
+					{
+						Object[] objs = AssetDatabase.LoadAllAssetsAtPath(path);
+						if (objs != null)
+						{
+							for (int j = 0; j < objs.Length; j++)
+							{
+								if (objs[j].GetInstanceID() == instanceId)
+									jumpLinks.CreateOnlyProjectJumpLink(objs[j]);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		private void HierarchyLinkLoader_2_x_x_x(StreamReader streamReader, Scene scene)
+		{
+			//Line format
+			//	prefabtype|localId|rootorderpath|transformpath
+			//
+			//	prefabtype = PrefabType int
+			//	localId = LocalIdentfierInFile OR prefab object ID
+			//	rootorderpath = child index path to the object from root OR from prefab root
+			//	transformpath = name path to the object from root OR from prefab root
+
+			JumpLinks jumpLinks = m_Window.JumpLinksInstance;
+
+			//"unordered" because it's not guaranteed that these objects
+			//	are in the same order as they are in the scene
+			GameObject[] unorderedRootObjects = scene.GetRootGameObjects();
+
+			if (unorderedRootObjects.Length > 0)
+			{
+				GameObject[] rootObjects = new GameObject[unorderedRootObjects.Length];
+
+				//put the root objects in order
+				SerializedObject so = null;
+				for (int i = 0; i < rootObjects.Length; i++)
+				{
+					so = new SerializedObject(unorderedRootObjects[i].transform);
+					rootObjects[so.FindProperty("m_RootOrder").intValue] = unorderedRootObjects[i];
+				}
+
+				Dictionary<int, GameObject> localIdToGameObjects = new Dictionary<int, GameObject>();
+				Dictionary<int, GameObject> localIdToPrefabs = new Dictionary<int, GameObject>();
+				JumpToUtility.GetAllLocalIds(rootObjects, localIdToGameObjects, localIdToPrefabs);
+
+				string line;
+				string transformPath;
+				int prefabTypeId = 0;
+				int localId = 0;
+				char[] delimiterPipe = new char[] { '|' };
+				char[] delimeterForwardSlash = new char[] { '/' };
+				string[] lineSegments;
+				string[] transformNames;
+				while (!streamReader.EndOfStream)
+				{
+					line = streamReader.ReadLine();
+					if (line == null || line.Length == 0)
+						continue;
+
+					lineSegments = line.Split(delimiterPipe, System.StringSplitOptions.None);
+
+					if (lineSegments.Length == 0)
+						continue;
+
+					if (!int.TryParse(lineSegments[0], out prefabTypeId))
+						continue;
+
+					if (!int.TryParse(lineSegments[1], out localId))
+						continue;
+
+					//the localId should NEVER be zero
+					if (localId == 0)
+						continue;
+
+					//TODO: this "could" generate an exception
+					PrefabType prefabType = (PrefabType)prefabTypeId;
+
+					//try to find the object based solely on its localId
+					if (prefabType != PrefabType.ModelPrefabInstance &&
+						prefabType != PrefabType.PrefabInstance)
+					{
+						GameObject gameObject = null;
+						if (localIdToGameObjects.TryGetValue(localId, out gameObject))
+							jumpLinks.CreateOnlyHierarchyJumpLink(gameObject);
+
+						//TODO: what if it's not found?
+						continue;
+					}
+					else
+					{
+						//NOTE: searching for children within prefabs is not reliable because they are not currently 
+						//		uniquely addressed within a scene. if a prefab is renamed and moved after its link is
+						//		saved, it may not be correctly relinked on load. if a prefab is moved within a scene,
+						//		it may not be correctly relinked on load. blame Unity for this.
+
+						//get the root node for the prefab instance
+						GameObject gameObject = null;
+						if (localIdToPrefabs.TryGetValue(localId, out gameObject))
+						{
+							//get names of the path nodes
+							transformNames = lineSegments[3].Split(delimeterForwardSlash, System.StringSplitOptions.RemoveEmptyEntries);
+
+							//check for corrupt path
+							if (transformNames.Length == 0)
+								continue;
+
+							if (transformNames.Length == 1)
+							{
+								jumpLinks.CreateOnlyHierarchyJumpLink(gameObject);
+							}
+							else
+							{
+								transformPath = transformNames[1];
+								for (int i = 2; i < transformNames.Length; i++)
+								{
+									transformPath += "/" + transformNames[i];
+								}
+
+								Transform transform = gameObject.transform.Find(transformPath);
+								if (transform != null)
+								{
+									jumpLinks.CreateOnlyHierarchyJumpLink(transform.gameObject);
+								}
+							}
+						}
+					}
+				}   //while ! end of stream
+
+				localIdToGameObjects.Clear();
+				localIdToPrefabs.Clear();
+			}   //if root objects exist
+		}   //HierarchyLinkLoader_2000
 	}
 }
 
