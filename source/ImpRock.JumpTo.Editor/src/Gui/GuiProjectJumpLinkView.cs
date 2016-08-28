@@ -21,7 +21,7 @@ namespace ImpRock.JumpTo.Editor
 			m_MenuOpenLinkPlural = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextOpenLinkPlural));
 		}
 
-		protected override void ShowContextMenu()
+		protected override void ShowLinkContextMenu()
 		{
 			GenericMenu menu = new GenericMenu();
 

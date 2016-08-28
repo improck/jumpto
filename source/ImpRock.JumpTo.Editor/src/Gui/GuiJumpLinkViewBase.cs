@@ -7,7 +7,6 @@ namespace ImpRock.JumpTo.Editor
 {
 	internal abstract class GuiJumpLinkViewBase<T> : GuiBase where T : JumpLink
 	{
-		[SerializeField] protected Vector2 m_ScrollViewPosition;
 		[SerializeField] protected bool m_HasFocus = false;
 		
 		protected Rect m_FoldoutRect;
@@ -47,7 +46,7 @@ namespace ImpRock.JumpTo.Editor
 		public float TotalHeight { get { return m_TotalHeight; } }
 
 
-		protected abstract void ShowContextMenu();
+		protected abstract void ShowLinkContextMenu();
 		protected abstract void ShowTitleContextMenu();
 		protected abstract void OnDoubleClick();
 		
@@ -313,7 +312,7 @@ namespace ImpRock.JumpTo.Editor
 
 				if (currentEvent.button == 1 && m_ContextClick)
 				{
-					ShowContextMenu();
+					ShowLinkContextMenu();
 
 					currentEvent.Use();
 				}

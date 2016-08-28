@@ -62,7 +62,6 @@ namespace ImpRock.JumpTo.Editor
 				return;
 			
 			HierarchyProperty hierarchyProperty = new HierarchyProperty(HierarchyType.GameObjects);
-			//int[] expanded = new int[0];
 			if (!hierarchyProperty.Find(orderedRootObjects[0].GetInstanceID(), null))
 				return;
 			
@@ -80,7 +79,7 @@ namespace ImpRock.JumpTo.Editor
 				idToPrefabs.Add(localId, hierarchyProperty.pptrValue as GameObject);
 			}
 
-			while (hierarchyProperty.Next(null))
+			while (hierarchyProperty.Next(null) && hierarchyProperty.pptrValue != null)
 			{
 				prefabType = PrefabUtility.GetPrefabType(hierarchyProperty.pptrValue);
 				if (prefabType != PrefabType.ModelPrefabInstance &&

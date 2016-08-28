@@ -13,12 +13,14 @@ namespace ImpRock.JumpTo.Editor
 		private GUIContent m_MenuFrameLinkPlural;
 		private GUIContent m_MenuSaveLinks;
 		private string m_TitleSuffix;
-		[SerializeField] private bool m_HierarchyLinksChanged = false;	//TODO: get rid of this
+		private SceneState m_SceneState = null;
+		
+		[SerializeField] private bool m_IsDirty = false;
 		[SerializeField] private int m_SceneId = 0;
 
 		public int SceneId { get { return m_SceneId; } set { m_SceneId = value; } }
 		
-		
+
 		public override void OnWindowEnable(EditorWindow window)
 		{
 			//NOTE: set SceneId property before this is called
@@ -28,36 +30,26 @@ namespace ImpRock.JumpTo.Editor
 
 			m_LinkContainer.OnLinksChanged += OnHierarchyLinksChanged;
 
+			m_ControlTitle = new GUIContent();
 			m_MenuFrameLink = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextFrameLink));
 			m_MenuFrameLinkPlural = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextFrameLinkPlural));
 			m_MenuSaveLinks = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextSaveLinks));
 
-			//HACK: should not be doing this in-place
-			//TODO: monitor scene name changes, too
-			string sceneName = string.Empty;
-			int loadedSceneCount = EditorSceneManager.loadedSceneCount;
-			for (int i = 0; i < loadedSceneCount; i++)
-			{
-				Scene scene = EditorSceneManager.GetSceneAt(i);
-				if (scene.GetHashCode() == m_SceneId)
-				{
-					sceneName = scene.name;
-					break;
-				}
-			}
-
 			m_TitleSuffix = " " + JumpToResources.Instance.GetText(ResId.LabelHierarchyLinksSuffix);
 
-			//TODO: this doesn't work correctly anymore
-			if (m_HierarchyLinksChanged)
-				m_ControlTitle = new GUIContent(sceneName + m_TitleSuffix + '*');
-			else
-				m_ControlTitle = new GUIContent(sceneName + m_TitleSuffix);
+			SetupSceneState();
 		}
 
 		public override void OnWindowDisable(EditorWindow window)
 		{
 			m_LinkContainer.OnLinksChanged -= OnHierarchyLinksChanged;
+		}
+
+		protected override void OnDestroy()
+		{
+			base.OnDestroy();
+
+			//TODO: unsubscribe
 		}
 
 		protected override Color DetermineNormalTextColor(HierarchyJumpLink link)
@@ -76,7 +68,7 @@ namespace ImpRock.JumpTo.Editor
 				return GraphicAssets.Instance.SelectedLinkTextColors[(int)link.ReferenceType];
 		}
 
-		protected override void ShowContextMenu()
+		protected override void ShowLinkContextMenu()
 		{
 			GenericMenu menu = new GenericMenu();
 
@@ -128,9 +120,8 @@ namespace ImpRock.JumpTo.Editor
 		{
 			GenericMenu menu = null;
 
-			//TODO: show this when links state has changed, too
 			//TODO: make sure the scene is still loaded?
-			if (SceneStateMonitor.Instance.GetSceneState(m_SceneId).IsDirty)
+			if (m_IsDirty)
 			{
 				menu = new GenericMenu();
 				menu.AddItem(m_MenuSaveLinks, false, SaveLinks);
@@ -151,6 +142,46 @@ namespace ImpRock.JumpTo.Editor
 		protected override void OnDoubleClick()
 		{
 			FrameLink();
+		}
+
+		private void SetupSceneState()
+		{
+			if (m_SceneState != null)
+			{
+				m_SceneState.OnNameChange -= OnSceneNameChanged;
+				m_SceneState.OnIsDirtyChange -= OnSceneIsDirtyChanged;
+
+				m_SceneState = null;
+			}
+
+			if (m_SceneId != 0)
+			{
+				m_SceneState = SceneStateMonitor.Instance.GetSceneState(m_SceneId);
+				if (m_SceneState != null)
+				{
+					RefreshControlTitle();
+
+					m_SceneState.OnNameChange += OnSceneNameChanged;
+					m_SceneState.OnIsDirtyChange += OnSceneIsDirtyChanged;
+				}
+				else
+				{
+					Debug.LogError("JumpTo: Attempted to create a link view for an invalid scene (ID: " + m_SceneId + ").");
+				}
+			}
+			else
+			{
+				Debug.LogError("JumpTo: Attempted to create a link view for scene ID 0, which is invalid.");
+			}
+		}
+
+		private void RefreshControlTitle()
+		{
+			string title = (m_SceneState.Name.Length != 0 ? m_SceneState.Name : "(Untitled)") + m_TitleSuffix;
+			if (m_IsDirty)
+				title += '*';
+
+			m_ControlTitle.text = title;
 		}
 
 		private void FrameLink()
@@ -176,9 +207,6 @@ namespace ImpRock.JumpTo.Editor
 		{
 			//TODO: detect links to objects not saved in the scene, warn the user
 			m_Window.SerializationControlInstance.SaveHierarchyLinks(m_SceneId);
-
-			m_ControlTitle.text = m_TitleSuffix;
-			m_HierarchyLinksChanged = false;
 		}
 
 		private bool ValidateSceneView()
@@ -189,9 +217,19 @@ namespace ImpRock.JumpTo.Editor
 
 		private void OnHierarchyLinksChanged()
 		{
-			//TODO
-			//m_ControlTitle.text = sceneName + m_TitleSuffix + '*';
-			m_HierarchyLinksChanged = true;
+			m_IsDirty = true;
+			RefreshControlTitle();
+		}
+
+		private void OnSceneNameChanged(int sceneId, string sceneName)
+		{
+			RefreshControlTitle();
+		}
+
+		private void OnSceneIsDirtyChanged(int sceneId, bool isDirty)
+		{
+			m_IsDirty = m_IsDirty || isDirty;
+			RefreshControlTitle();
 		}
 	}
 }

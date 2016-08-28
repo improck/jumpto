@@ -12,7 +12,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 
 
 	[SerializeField] private JumpLinks m_JumpLinks;
-	[SerializeField] private JumpToSettings m_Settings;
+	//[SerializeField] private JumpToSettings m_Settings;
 	[SerializeField] private GuiJumpLinkListView m_JumpLinkListView;
 	[SerializeField] private SceneStateControl m_SceneStateControl;
 	[SerializeField] private SceneStateMonitor m_SceneStateMonitor;
@@ -24,7 +24,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 
 	
 	public JumpLinks JumpLinksInstance { get { return m_JumpLinks; } }
-	public JumpToSettings JumpToSettingsInstance { get { return m_Settings; } }
+	//public JumpToSettings JumpToSettingsInstance { get { return m_Settings; } }
 	public SceneStateMonitor SceneStateMonitorInstance { get { return m_SceneStateMonitor; } }
 	public SerializationControl SerializationControlInstance { get { return m_SerializationControl; } }
 
@@ -58,15 +58,22 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		JumpToResources.Instance.LoadResources();
 		GraphicAssets.Instance.InitAssets();
 
+		if (m_SceneStateMonitor == null)
+		{
+			m_SceneStateMonitor = SceneStateMonitor.Create();
+		}
+
+		m_SceneStateMonitor.InitializeSceneStates();
+
 		if (m_JumpLinks == null)
 		{
 			m_JumpLinks = JumpLinks.Create();
 		}
 
-		if (m_Settings == null)
-		{
-			m_Settings = JumpToSettings.Create();
-		}
+		//if (m_Settings == null)
+		//{
+		//	m_Settings = JumpToSettings.Create();
+		//}
 
 		//if (m_Toolbar == null)
 		//{
@@ -77,12 +84,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		{
 			m_JumpLinkListView = GuiBase.Create<GuiJumpLinkListView>();
 		}
-
-		if (m_SceneStateMonitor == null)
-		{
-			m_SceneStateMonitor = SceneStateMonitor.Create();
-		}
-
+		
 		if (m_SceneStateControl == null)
 		{
 			m_SceneStateControl = SceneStateControl.Create();
@@ -98,6 +100,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 
 		EditorApplication.projectWindowChanged += OnProjectWindowChange;
 		EditorApplication.hierarchyWindowChanged += OnHierarchyWindowChange;
+		//TODO: replace with SceneStateMonitor
 		SceneStateControl.OnSceneLoaded += OnSceneLoaded;
 
 		//NOTE: this DOES NOT WORK because closing unity will serialize the
@@ -281,6 +284,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		if (EditorApplication.isPlaying)
 			return;
 
+		//TODO: i don't remember why i needed this
 		if (EditorApplication.timeSinceStartup - m_LastHierarchyRefreshTime >= 0.2f)
 		{
 			m_LastHierarchyRefreshTime = EditorApplication.timeSinceStartup;

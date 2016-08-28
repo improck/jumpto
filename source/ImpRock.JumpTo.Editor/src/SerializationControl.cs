@@ -38,7 +38,8 @@ namespace ImpRock.JumpTo.Editor
 			SceneStateControl.OnSceneWillSave += OnSceneWillSave;
 			//SceneStateControl.OnSceneWillLoad += OnSceneWillLoad;
 			//SceneStateControl.OnSceneSaved += OnSceneSaved;
-			SceneStateControl.OnSceneLoaded += OnSceneLoaded;
+			//SceneStateControl.OnSceneLoaded += OnSceneLoaded;
+			SceneStateMonitor.OnSceneOpened += OnSceneOpened;
 		}
 
 		public void Uninitialize()
@@ -46,7 +47,8 @@ namespace ImpRock.JumpTo.Editor
 			SceneStateControl.OnSceneWillSave -= OnSceneWillSave;
 			//SceneStateControl.OnSceneWillLoad -= OnSceneWillLoad;
 			//SceneStateControl.OnSceneSaved -= OnSceneSaved;
-			SceneStateControl.OnSceneLoaded -= OnSceneLoaded;
+			//SceneStateControl.OnSceneLoaded -= OnSceneLoaded;
+			SceneStateMonitor.OnSceneOpened -= OnSceneOpened;
 		}
 
 		private void OnSceneWillSave(string sceneAssetPath)
@@ -88,13 +90,34 @@ namespace ImpRock.JumpTo.Editor
 		//	}
 		//}
 
-		private void OnSceneLoaded(string sceneAssetPath)
+		private void OnSceneOpened(SceneState sceneState)
+		{
+			sceneState.OnIsLoadedChange += OnSceneLoadedChange;
+			sceneState.OnClose += OnSceneClosed;
+		}
+
+		private void OnSceneLoadedChange(int sceneId, bool isLoaded)
 		{
 			SetSaveDirectoryPaths();
 
-			//TODO: make it work with multi-scene
-			//if (sceneAssetPath != string.Empty)
-			//	LoadHierarchyLinks();
+			Debug.Log("Scene load change: " + isLoaded);
+
+			if (isLoaded)
+			{
+				SceneState sceneState = SceneStateMonitor.Instance.GetSceneState(sceneId);
+				LoadHierarchyLinks(sceneId, sceneState.Scene);
+			}
+			else
+			{
+				//TODO: handle scene unload (???)
+			}
+		}
+
+		private void OnSceneClosed(int sceneId)
+		{
+			SceneState sceneState = SceneStateMonitor.Instance.GetSceneState(sceneId);
+			sceneState.OnClose -= OnSceneClosed;
+			sceneState.OnIsLoadedChange -= OnSceneLoadedChange;
 		}
 
 		//private void OnWindowOpen()
@@ -120,21 +143,15 @@ namespace ImpRock.JumpTo.Editor
 			{
 				LoadProjectLinks();
 			}
+			
+			foreach (SceneState sceneState in SceneStateMonitor.Instance.GetSceneStates())
+			{
+				HierarchyJumpLinkContainer links =
+					m_Window.JumpLinksInstance.GetHierarchyJumpLinkContainer(sceneState.SceneId);
 
-			//TODO: see if this can use the SceneStateMonitor instead of doing this in place
-			EditorApplication.delayCall +=
-				delegate ()
-				{
-					int sceneCount = EditorSceneManager.sceneCount;
-					for (int i = 0; i < sceneCount; i++)
-					{
-						Scene scene = EditorSceneManager.GetSceneAt(i);
-						if (scene.isLoaded)
-							LoadHierarchyLinks(scene.GetHashCode(), scene);
-					}
-
-					m_Window.Repaint();
-				};
+				if ((links == null || links.Links.Count == 0) && sceneState.IsLoaded)
+					LoadHierarchyLinks(sceneState.SceneId, sceneState.Scene);
+			}
 		}
 
 		public void OnWindowDisable()
@@ -209,6 +226,7 @@ namespace ImpRock.JumpTo.Editor
 					try
 					{
 						streamWriter.WriteLine(Version.ToString());
+
 						for (int i = 0; i < linkPaths.Length; i++)
 						{
 							if (linkPaths[i] != null &&
@@ -297,7 +315,7 @@ namespace ImpRock.JumpTo.Editor
 				}
 				catch (System.Exception ex)
 				{
-					Debug.LogError("JumpTo Error: Unable to load hierarchy links; error when reading from file\n" + ex.ToString());
+					Debug.LogError("JumpTo Error: Unable to load hierarchy links; error when reading from file (" + scene.name + ")\n" + ex.ToString());
 				}
 			}
 		}

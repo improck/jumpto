@@ -53,6 +53,23 @@ namespace ImpRock.JumpTo.Editor
 			SceneStateMonitor.OnLoadedSceneCountChanged += LoadedSceneCountChangeHandler;
 		}
 
+		public override void OnWindowDisable(EditorWindow window)
+		{
+			base.OnWindowDisable(window);
+
+			if (m_ProjectView != null)
+				m_ProjectView.OnWindowDisable(window);
+
+			for (int i = 0; i < m_HierarchyViews.Count; i++)
+			{
+				m_HierarchyViews[i].OnWindowDisable(window);
+			}
+
+			JumpLinks.OnHierarchyLinkAdded -= HierarchyLinkAddedHandler;
+			JumpLinks.OnProjectLinkAdded -= ProjectLinkAddedHandler;
+			SceneStateMonitor.OnLoadedSceneCountChanged -= LoadedSceneCountChangeHandler;
+		}
+
 		protected override void OnGui()
 		{
 			HandleDragAndDrop();
@@ -68,16 +85,13 @@ namespace ImpRock.JumpTo.Editor
 			{
 				m_ScrollViewRect.height += m_HierarchyViews[i].TotalHeight;
 			}
+			
+			m_ScrollViewPosition = GUI.BeginScrollView(m_DrawRect, m_ScrollViewPosition, m_ScrollViewRect);
 
-			//TODO: adjust rect for scrollbar
 			//if the vertical scrollbar is visible, adjust view rect
 			//	width by the width of the scrollbar (17.0f)
-			//if (m_ScrollViewRect.height > m_DrawRect.height)
-			//	m_ScrollViewRect.width = m_DrawRect.width - 15.0f;
-			//else
-			//	m_ScrollViewRect.width = m_DrawRect.width;
-
-			m_ScrollViewPosition = GUI.BeginScrollView(m_DrawRect, m_ScrollViewPosition, m_ScrollViewRect);
+			if (m_ScrollViewRect.height > m_DrawRect.height)
+				m_DrawRect.width = m_DrawRect.width - 15.0f;
 
 			if (m_ProjectView != null)
 			{

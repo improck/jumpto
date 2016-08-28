@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
+using System.Collections;
 using System.Collections.Generic;
 
 
@@ -9,12 +10,12 @@ namespace ImpRock.JumpTo.Editor
 {
 	internal sealed class SceneState
 	{
-		public int SceneId;
-		public string Name;
-		public string Path;
-		public int RootCount;
-		public bool IsDirty;
-		public bool IsLoaded;
+		public int SceneId = 0;
+		public string Name = string.Empty;
+		public string Path = string.Empty;
+		public int RootCount = 0;
+		public bool IsDirty = false;
+		public bool IsLoaded = false;
 		public Scene Scene;
 		
 		
@@ -104,7 +105,7 @@ namespace ImpRock.JumpTo.Editor
 
 		public static event System.Action<int, int> OnSceneCountChanged;
 		public static event System.Action<int, int> OnLoadedSceneCountChanged;
-		public static event System.Action<SceneState> OnSceneOpen;
+		public static event System.Action<SceneState> OnSceneOpened;
 
 
 		private static void Initialize()
@@ -120,21 +121,31 @@ namespace ImpRock.JumpTo.Editor
 
 			return sceneState;
 		}
+
+		public SceneState[] GetSceneStates()
+		{
+			SceneState[] sceneStates = new SceneState[m_SceneStates.Count];
+			m_SceneStates.Values.CopyTo(sceneStates, 0);
+			return sceneStates;
+		}
+
+		public void InitializeSceneStates()
+		{
+			m_SceneCount = EditorSceneManager.sceneCount;
+			m_LoadedSceneCount = EditorSceneManager.loadedSceneCount;
+
+			for (int i = 0; i < m_SceneCount; i++)
+			{
+				Scene scene = EditorSceneManager.GetSceneAt(i);
+				m_SceneStates[scene.GetHashCode()] = new SceneState(scene);
+			}
+		}
 		
 		private void InternalInitialize()
 		{
 			EditorApplication.delayCall +=
 				delegate ()
 				{
-					m_SceneCount = EditorSceneManager.sceneCount;
-					m_LoadedSceneCount = EditorSceneManager.loadedSceneCount;
-					
-					for (int i = 0; i < m_SceneCount; i++)
-					{
-						Scene scene = EditorSceneManager.GetSceneAt(i);
-						m_SceneStates[scene.GetHashCode()] = new SceneState(scene);
-					}
-
 					EditorApplication.hierarchyWindowChanged += OnHierarchyWindowChanged;
 				};
 		}
@@ -158,7 +169,7 @@ namespace ImpRock.JumpTo.Editor
 					{
 						SceneState sceneState = new SceneState(scene);
 						m_SceneStates[allSceneIds[i]] = sceneState;
-						OnSceneOpen?.Invoke(sceneState);
+						OnSceneOpened?.Invoke(sceneState);
 						Debug.Log("SceneStateMonitor: scene open " + sceneState.Name);
 					}
 				}
@@ -184,6 +195,7 @@ namespace ImpRock.JumpTo.Editor
 			if (m_LoadedSceneCount != sceneCount)
 			{
 				OnLoadedSceneCountChanged?.Invoke(m_LoadedSceneCount, sceneCount);
+				Debug.Log("SceneStateMonitor: loaded scene count changed " + m_LoadedSceneCount + " -> " + sceneCount);
 
 				m_LoadedSceneCount = sceneCount;
 			}
