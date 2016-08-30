@@ -40,16 +40,14 @@ namespace ImpRock.JumpTo.Editor
 			SetupSceneState();
 		}
 
-		public override void OnWindowDisable(EditorWindow window)
-		{
-			m_LinkContainer.OnLinksChanged -= OnHierarchyLinksChanged;
-		}
-
 		protected override void OnDestroy()
 		{
 			base.OnDestroy();
 
-			//TODO: unsubscribe
+			m_LinkContainer.OnLinksChanged -= OnHierarchyLinksChanged;
+			m_SceneState.OnNameChange -= OnSceneNameChanged;
+			m_SceneState.OnIsDirtyChange -= OnSceneIsDirtyChanged;
+			m_SceneState.OnIsLoadedChange -= OnSceneIsLoadedChanged;
 		}
 
 		protected override Color DetermineNormalTextColor(HierarchyJumpLink link)
@@ -150,6 +148,7 @@ namespace ImpRock.JumpTo.Editor
 			{
 				m_SceneState.OnNameChange -= OnSceneNameChanged;
 				m_SceneState.OnIsDirtyChange -= OnSceneIsDirtyChanged;
+				m_SceneState.OnIsLoadedChange -= OnSceneIsLoadedChanged;
 
 				m_SceneState = null;
 			}
@@ -163,6 +162,7 @@ namespace ImpRock.JumpTo.Editor
 
 					m_SceneState.OnNameChange += OnSceneNameChanged;
 					m_SceneState.OnIsDirtyChange += OnSceneIsDirtyChanged;
+					m_SceneState.OnIsLoadedChange += OnSceneIsLoadedChanged;
 				}
 				else
 				{
@@ -206,7 +206,8 @@ namespace ImpRock.JumpTo.Editor
 		private void SaveLinks()
 		{
 			//TODO: detect links to objects not saved in the scene, warn the user
-			m_Window.SerializationControlInstance.SaveHierarchyLinks(m_SceneId);
+			m_IsDirty = !m_Window.SerializationControlInstance.SaveHierarchyLinks(m_SceneId);
+			RefreshControlTitle();
 		}
 
 		private bool ValidateSceneView()
@@ -217,8 +218,16 @@ namespace ImpRock.JumpTo.Editor
 
 		private void OnHierarchyLinksChanged()
 		{
-			m_IsDirty = true;
-			RefreshControlTitle();
+			if (m_LinkContainer.Links.Count > 0)
+			{
+				m_IsDirty = true;
+				RefreshControlTitle();
+			}
+			else
+			{
+				m_Window.SerializationControlInstance.SaveHierarchyLinks(m_SceneId);
+				m_MarkedForClose = true;
+			}
 		}
 
 		private void OnSceneNameChanged(int sceneId, string sceneName)
@@ -231,6 +240,16 @@ namespace ImpRock.JumpTo.Editor
 			m_IsDirty = m_IsDirty || isDirty;
 			RefreshControlTitle();
 		}
+
+		private void OnSceneIsLoadedChanged(int sceneId, bool isLoaded)
+		{
+			if (!isLoaded)
+			{
+				m_MarkedForClose = true;
+
+				if (m_IsDirty)
+					m_Window.SerializationControlInstance.SaveHierarchyLinks(m_SceneId);
+			}
+		}
 	}
 }
-

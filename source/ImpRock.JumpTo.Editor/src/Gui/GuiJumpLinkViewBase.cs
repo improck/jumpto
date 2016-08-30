@@ -21,6 +21,7 @@ namespace ImpRock.JumpTo.Editor
 		protected bool m_DragOwner = false;
 		protected bool m_DragInsert = false;
 		protected bool m_Foldout = true;
+		protected bool m_MarkedForClose = false;
 		protected Vector2 m_GrabPosition = Vector2.zero;
 
 		protected GUIContent m_ControlTitle;
@@ -43,8 +44,9 @@ namespace ImpRock.JumpTo.Editor
 		public bool IsDragOwner { get { return m_DragOwner; } }
 		public bool HasFocus { get { return m_HasFocus; } set { m_HasFocus = value; } }
 		public bool IsFocusedControl { get { return m_Window == EditorWindow.focusedWindow && m_HasFocus; } }
+		public bool MarkedForClose { get { return m_MarkedForClose; } }
 		public float TotalHeight { get { return m_TotalHeight; } }
-
+		
 
 		protected abstract void ShowLinkContextMenu();
 		protected abstract void ShowTitleContextMenu();

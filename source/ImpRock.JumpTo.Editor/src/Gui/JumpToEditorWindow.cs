@@ -101,7 +101,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		EditorApplication.projectWindowChanged += OnProjectWindowChange;
 		EditorApplication.hierarchyWindowChanged += OnHierarchyWindowChange;
 		//TODO: replace with SceneStateMonitor
-		SceneStateControl.OnSceneLoaded += OnSceneLoaded;
+		//SceneStateControl.OnSceneLoaded += OnSceneLoaded;
 
 		//NOTE: this DOES NOT WORK because closing unity will serialize the
 		//		jumpto window if it's open. that means that when unity is
@@ -162,7 +162,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 
 		EditorApplication.projectWindowChanged -= OnProjectWindowChange;
 		EditorApplication.hierarchyWindowChanged -= OnHierarchyWindowChange;
-		SceneStateControl.OnSceneLoaded -= OnSceneLoaded;
+		//SceneStateControl.OnSceneLoaded -= OnSceneLoaded;
 
 		m_Initialized = false;
 
@@ -295,10 +295,10 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		}
 	}
 
-	private void OnSceneLoaded(string sceneAssetPath)
-	{
-		Repaint();
-	}
+	//private void OnSceneLoaded(string sceneAssetPath)
+	//{
+	//	Repaint();
+	//}
 
 	private void OnPlayModeStateChanged()
 	{

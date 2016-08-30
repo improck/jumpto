@@ -40,6 +40,12 @@ namespace ImpRock.JumpTo.Editor
 			//SceneStateControl.OnSceneSaved += OnSceneSaved;
 			//SceneStateControl.OnSceneLoaded += OnSceneLoaded;
 			SceneStateMonitor.OnSceneOpened += OnSceneOpened;
+
+			foreach (SceneState sceneState in SceneStateMonitor.Instance.GetSceneStates())
+			{
+				sceneState.OnIsLoadedChange += OnSceneLoadedChange;
+				sceneState.OnClose += OnSceneClosed;
+			}
 		}
 
 		public void Uninitialize()
@@ -49,6 +55,12 @@ namespace ImpRock.JumpTo.Editor
 			//SceneStateControl.OnSceneSaved -= OnSceneSaved;
 			//SceneStateControl.OnSceneLoaded -= OnSceneLoaded;
 			SceneStateMonitor.OnSceneOpened -= OnSceneOpened;
+
+			foreach (SceneState sceneState in SceneStateMonitor.Instance.GetSceneStates())
+			{
+				sceneState.OnIsLoadedChange -= OnSceneLoadedChange;
+				sceneState.OnClose -= OnSceneClosed;
+			}
 		}
 
 		private void OnSceneWillSave(string sceneAssetPath)
@@ -94,8 +106,14 @@ namespace ImpRock.JumpTo.Editor
 		{
 			sceneState.OnIsLoadedChange += OnSceneLoadedChange;
 			sceneState.OnClose += OnSceneClosed;
-		}
 
+			if (sceneState.IsLoaded)
+			{
+				SetSaveDirectoryPaths();
+				LoadHierarchyLinks(sceneState.SceneId, sceneState.Scene);
+			}
+		}
+		
 		private void OnSceneLoadedChange(int sceneId, bool isLoaded)
 		{
 			SetSaveDirectoryPaths();
@@ -176,8 +194,10 @@ namespace ImpRock.JumpTo.Editor
 			}
 		}
 
-		private void SaveProjectLinks()
+		public bool SaveProjectLinks()
 		{
+			bool success = true;
+
 			string filePath = m_SaveDirectory + ProjectLinksSaveFile + SaveFileExtension;
 			Object[] linkReferences = m_Window.JumpLinksInstance.ProjectLinks.AllLinkReferences;
 			if (linkReferences != null)
@@ -199,9 +219,13 @@ namespace ImpRock.JumpTo.Editor
 
 							streamWriter.WriteLine(line);
 						}
+
+						streamWriter.Close();
 					}
 					catch (System.Exception ex)
 					{
+						streamWriter.Close();
+						success = false;
 						Debug.LogError("JumpTo Error: Unable to save project links; error when writing to file\n" + ex.Message);
 					}
 				}
@@ -210,10 +234,14 @@ namespace ImpRock.JumpTo.Editor
 			{
 				DeleteSaveFile(filePath);
 			}
+
+			return success;
 		}
 
-		public void SaveHierarchyLinks(int sceneId)
+		public bool SaveHierarchyLinks(int sceneId)
 		{
+			bool success = true;
+
 			string[] linkPaths = GetHierarchyLinkPaths(sceneId);
 
 			string sceneAssetPath = SceneStateMonitor.Instance.GetSceneState(sceneId).Path;
@@ -233,9 +261,13 @@ namespace ImpRock.JumpTo.Editor
 								linkPaths[i].Length > 0)
 								streamWriter.WriteLine(linkPaths[i]);
 						}
+
+						streamWriter.Close();
 					}
 					catch (System.Exception ex)
 					{
+						streamWriter.Close();
+						success = false;
 						Debug.LogError("JumpTo Error: Unable to save hierarchy links; error when writing to file\n" + ex.Message);
 					}
 				}
@@ -244,6 +276,8 @@ namespace ImpRock.JumpTo.Editor
 			{
 				DeleteSaveFile(filePath);
 			}
+
+			return success;
 		}
 		
 		private void LoadProjectLinks()

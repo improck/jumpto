@@ -72,6 +72,22 @@ namespace ImpRock.JumpTo.Editor
 
 		protected override void OnGui()
 		{
+			if (m_ProjectView != null &&
+				m_ProjectView.MarkedForClose)
+			{
+				DestroyImmediate(m_ProjectView);
+				m_ProjectView = null;
+			}
+
+			for (int i = m_HierarchyViews.Count - 1; i >= 0; i--)
+			{
+				if (m_HierarchyViews[i].MarkedForClose)
+				{
+					DestroyImmediate(m_HierarchyViews[i]);
+					m_HierarchyViews.RemoveAt(i);
+				}
+			}
+
 			HandleDragAndDrop();
 
 			Vector2 iconSizeBak = EditorGUIUtility.GetIconSize();
@@ -80,11 +96,13 @@ namespace ImpRock.JumpTo.Editor
 			m_DrawRect.Set(0.0f, 0.0f, m_Size.x, m_Size.y);
 
 			//TODO: maybe only calculate this if the height changes?
-			m_ScrollViewRect.height = m_ProjectView != null ? m_ProjectView.TotalHeight : 0.0f;
+			float totalHeight = m_ProjectView != null ? m_ProjectView.TotalHeight : 0.0f;
 			for (int i = 0; i < m_HierarchyViews.Count; i++)
 			{
-				m_ScrollViewRect.height += m_HierarchyViews[i].TotalHeight;
+				totalHeight += m_HierarchyViews[i].TotalHeight;
 			}
+
+			m_ScrollViewRect.height = totalHeight;
 			
 			m_ScrollViewPosition = GUI.BeginScrollView(m_DrawRect, m_ScrollViewPosition, m_ScrollViewRect);
 
@@ -93,12 +111,18 @@ namespace ImpRock.JumpTo.Editor
 			if (m_ScrollViewRect.height > m_DrawRect.height)
 				m_DrawRect.width = m_DrawRect.width - 15.0f;
 
+			//draw the project view
 			if (m_ProjectView != null)
 			{
 				m_DrawRect.height = m_ProjectView.TotalHeight;
 				m_ProjectView.Draw(m_DrawRect);
 			}
+			else
+			{
+				m_DrawRect.height = 0.0f;
+			}
 
+			//draw all hierarchy views
 			for (int i = 0; i < m_HierarchyViews.Count; i++)
 			{
 				m_DrawRect.y += m_DrawRect.height;
@@ -234,6 +258,9 @@ namespace ImpRock.JumpTo.Editor
 			if (m_ProjectView == null)
 			{
 				m_ProjectView = GuiBase.Create<GuiProjectJumpLinkView>();
+				m_ProjectView.OnWindowEnable(m_Window);
+
+				m_Window.Repaint();
 			}
 		}
 	}

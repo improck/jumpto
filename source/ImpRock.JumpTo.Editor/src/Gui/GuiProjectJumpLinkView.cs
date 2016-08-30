@@ -16,9 +16,16 @@ namespace ImpRock.JumpTo.Editor
 
 			base.OnWindowEnable(window);
 
+			m_LinkContainer.OnLinksChanged += OnProjectsLinksChanged;
+
 			m_ControlTitle = new GUIContent(JumpToResources.Instance.GetText(ResId.LabelProjectLinks));
 			m_MenuOpenLink = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextOpenLink));
 			m_MenuOpenLinkPlural = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextOpenLinkPlural));
+		}
+
+		public override void OnWindowDisable(EditorWindow window)
+		{
+			m_LinkContainer.OnLinksChanged -= OnProjectsLinksChanged;
 		}
 
 		protected override void ShowLinkContextMenu()
@@ -83,6 +90,16 @@ namespace ImpRock.JumpTo.Editor
 			ProjectJumpLink activeSelection = m_LinkContainer.ActiveSelectedObject;
 			if (activeSelection != null)
 				AssetDatabase.OpenAsset(activeSelection.LinkReference);
+		}
+
+		private void OnProjectsLinksChanged()
+		{
+			if (m_LinkContainer.Links.Count == 0)
+			{
+				m_Window.SerializationControlInstance.SaveProjectLinks();
+
+				m_MarkedForClose = true;
+			}
 		}
 	}
 }
