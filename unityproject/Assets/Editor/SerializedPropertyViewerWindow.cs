@@ -16,6 +16,15 @@ public class SerializedPropertyViewerWindow : EditorWindow
 		window.ShowUtility();
 	}
 
+	public static void ShowAndInspectObject(Object reference)
+	{
+		SerializedPropertyViewerWindow window = EditorWindow.GetWindow<SerializedPropertyViewerWindow>(true, "Serialized Properties");
+
+		window.PushAndInspectObject(reference);
+
+		window.ShowUtility();
+	}
+
 
 	private class SerializedPropertyInfo
 	{
@@ -34,13 +43,13 @@ public class SerializedPropertyViewerWindow : EditorWindow
 	private PropertyInfo m_InspectorModeInfo = null;
 	private int m_StackIndex = 0;
 
-
-	void OnEnable()
+	
+	private void OnEnable()
 	{
 		m_InspectorModeInfo = typeof(SerializedObject).GetProperty("inspectorMode", BindingFlags.NonPublic | BindingFlags.Instance);
 	}
 
-	void OnGUI()
+	private void OnGUI()
 	{
 		if (m_Inspected != null)
 		{
@@ -146,7 +155,7 @@ public class SerializedPropertyViewerWindow : EditorWindow
 		}
 	}
 
-	void OnSelectionChange()
+	private void OnSelectionChange()
 	{
 		m_StackIndex = 0;
 		m_ObjectStack.Clear();
@@ -171,6 +180,22 @@ public class SerializedPropertyViewerWindow : EditorWindow
 		}
 
 		Refresh();
+	}
+
+	private void PushAndInspectObject(Object toInspect)
+	{
+		if (toInspect == null)
+			return;
+
+		m_StackIndex++;
+
+		if (m_ObjectStack.Count > 0 && m_StackIndex < m_ObjectStack.Count - 1)
+		{
+			m_ObjectStack.RemoveRange(m_StackIndex, m_ObjectStack.Count - m_StackIndex);
+		}
+
+		m_ObjectStack.Add(toInspect);
+		Inspect(toInspect);
 	}
 
 	private void Refresh()

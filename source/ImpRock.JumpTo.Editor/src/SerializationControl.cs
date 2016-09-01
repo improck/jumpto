@@ -63,16 +63,17 @@ namespace ImpRock.JumpTo.Editor
 			}
 		}
 
+		//this is getting called from SceneSaveDetector
 		private void OnSceneWillSave(string sceneAssetPath)
 		{
 			if (CreateSaveDirectories())
 			{
 				SaveProjectLinks();
 
-				//TODO: objects that are new in the scene have not been
-				//		assigned a localidinfile at this point, so they
-				//		will not save.
-				//GetHierarchyLinkPaths();
+				//TODO: save hierarchy links
+				//objects that are new in the scene have not been
+				//	assigned a localidinfile at this point, so they
+				//	will not save.
 			}
 		}
 
@@ -80,11 +81,8 @@ namespace ImpRock.JumpTo.Editor
 		//	this happens when the scene has changed, the user loads
 		//	a new scene and chooses save from the popup. this only
 		//	gets called after the delayCall, so the scene is already
-		//	unloaded.
-		//	can't just save hi links from OnSceneWillSave because
-		//	there may not yet be an asset file. need to temp store
-		//	the hi links data that will be saved in OnSceneWillSave
-		//	then actually write it in OnSceneSaved.
+		//	unloaded. can't just save hi links from OnSceneWillSave
+		//	because there may not yet be an asset file.
 		//private void OnSceneSaved(string sceneAssetPath)
 		//{
 		//	if (CreateSaveDirectories())

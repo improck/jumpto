@@ -247,8 +247,9 @@ namespace ImpRock.JumpTo.Editor
 			{
 				m_MarkedForClose = true;
 
-				if (m_IsDirty)
-					m_Window.SerializationControlInstance.SaveHierarchyLinks(m_SceneId);
+				//NOTE: can't save here because the scene is already gone
+				//if (m_IsDirty)
+				//	m_Window.SerializationControlInstance.SaveHierarchyLinks(m_SceneId);
 			}
 		}
 	}

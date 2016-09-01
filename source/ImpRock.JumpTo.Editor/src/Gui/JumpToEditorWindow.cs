@@ -99,7 +99,9 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		}
 
 		EditorApplication.projectWindowChanged += OnProjectWindowChange;
-		EditorApplication.hierarchyWindowChanged += OnHierarchyWindowChange;
+		//HACK: need to make sure this is the last delegate called on hierarchy change
+		EditorApplication.delayCall += () =>
+			{ EditorApplication.hierarchyWindowChanged += OnHierarchyWindowChange; };
 		//TODO: replace with SceneStateMonitor
 		//SceneStateControl.OnSceneLoaded += OnSceneLoaded;
 
