@@ -50,7 +50,6 @@ namespace ImpRock.JumpTo.Editor
 
 			JumpLinks.OnHierarchyLinkAdded += HierarchyLinkAddedHandler;
 			JumpLinks.OnProjectLinkAdded += ProjectLinkAddedHandler;
-			SceneStateMonitor.OnLoadedSceneCountChanged += LoadedSceneCountChangeHandler;
 		}
 
 		public override void OnWindowDisable(EditorWindow window)
@@ -67,7 +66,6 @@ namespace ImpRock.JumpTo.Editor
 
 			JumpLinks.OnHierarchyLinkAdded -= HierarchyLinkAddedHandler;
 			JumpLinks.OnProjectLinkAdded -= ProjectLinkAddedHandler;
-			SceneStateMonitor.OnLoadedSceneCountChanged -= LoadedSceneCountChangeHandler;
 		}
 
 		protected override void OnGui()
@@ -231,12 +229,10 @@ namespace ImpRock.JumpTo.Editor
 				{
 					m_Window.JumpLinksInstance.CreateJumpLink(objectReferences[i]);
 				}
-			}
-		}
 
-		private void LoadedSceneCountChangeHandler(int oldCount, int currentCount)
-		{
-			//TODO: figure out what scenes were loaded or unloaded, and update the hierarchy views
+				m_Window.JumpLinksInstance.RefreshHierarchyLinks();
+				m_Window.JumpLinksInstance.RefreshAllLinkSelections();
+			}
 		}
 
 		private void HierarchyLinkAddedHandler(int sceneId)

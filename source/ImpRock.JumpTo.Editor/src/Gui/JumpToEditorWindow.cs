@@ -14,7 +14,6 @@ internal sealed class JumpToEditorWindow : EditorWindow
 	[SerializeField] private JumpLinks m_JumpLinks;
 	//[SerializeField] private JumpToSettings m_Settings;
 	[SerializeField] private GuiJumpLinkListView m_JumpLinkListView;
-	[SerializeField] private SceneStateControl m_SceneStateControl;
 	[SerializeField] private SceneStateMonitor m_SceneStateMonitor;
 
 	[System.NonSerialized] private bool m_Initialized = false;
@@ -48,12 +47,9 @@ internal sealed class JumpToEditorWindow : EditorWindow
 
 	//called when window is first open
 	//called after deserialization due to a compile
-	void OnEnable()
+	private void OnEnable()
 	{
 		s_InstanceCount++;
-
-		//this.title = GetInstanceID().ToString();
-		//Debug.Log("OnEnable(): " + GetInstanceID() + " " + s_InstanceCount);
 
 		JumpToResources.Instance.LoadResources();
 		GraphicAssets.Instance.InitAssets();
@@ -85,11 +81,6 @@ internal sealed class JumpToEditorWindow : EditorWindow
 			m_JumpLinkListView = GuiBase.Create<GuiJumpLinkListView>();
 		}
 		
-		if (m_SceneStateControl == null)
-		{
-			m_SceneStateControl = SceneStateControl.Create();
-		}
-
 		EditorApplication.delayCall += OnPostEnable;
 
 		if (m_SerializationControl == null)
@@ -99,12 +90,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		}
 
 		EditorApplication.projectWindowChanged += OnProjectWindowChange;
-		//HACK: need to make sure this is the last delegate called on hierarchy change
-		EditorApplication.delayCall += () =>
-			{ EditorApplication.hierarchyWindowChanged += OnHierarchyWindowChange; };
-		//TODO: replace with SceneStateMonitor
-		//SceneStateControl.OnSceneLoaded += OnSceneLoaded;
-
+		
 		//NOTE: this DOES NOT WORK because closing unity will serialize the
 		//		jumpto window if it's open. that means that when unity is
 		//		restarted, the m_FirstOpen flag gets deserialized to equal
@@ -138,19 +124,23 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		titleContent.image = JumpToResources.Instance.GetImage(ResId.ImageTabIcon);
 	}
 
-	void OnPostEnable()
+	private void OnPostEnable()
 	{
-		if (!EditorApplication.isPlayingOrWillChangePlaymode)
-			SceneLoadDetector.EnsureExistence();
-		else
-		{
-			EditorApplication.playmodeStateChanged += OnPlayModeStateChanged;
-		}
+		//if (!EditorApplication.isPlayingOrWillChangePlaymode)
+		//{
+		//	//SceneLoadDetector.EnsureExistence();
+		//}
+		//else
+		//{
+		//	EditorApplication.playmodeStateChanged += OnPlayModeStateChanged;
+		//}
+
+		EditorApplication.hierarchyWindowChanged += OnHierarchyWindowChange;
 	}
-	
+
 	//called before window closes
 	//called before serialization due to a compile
-	void OnDisable()
+	private void OnDisable()
 	{
 		//NOTE: nobody's using it right now
 		//if (OnWillDisable != null)
@@ -158,7 +148,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 
 		m_SerializationControl.OnWindowDisable();
 
-		SceneLoadDetector.TemporarilyDestroyInstance();
+		//SceneLoadDetector.TemporarilyDestroyInstance();
 
 		m_JumpLinkListView.OnWindowDisable(this);
 
@@ -167,18 +157,11 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		//SceneStateControl.OnSceneLoaded -= OnSceneLoaded;
 
 		m_Initialized = false;
-
-		//Debug.Log("OnDisable(): " + GetInstanceID() + " " + s_InstanceCount);
 	}
-
-	//void OnLostFocus()
-	//{
-	//	Debug.Log("OnLostFocus(): " + GetInstanceID() + " " + s_InstanceCount);
-	//}
 
 	//NOT called when unity editor is closed
 	//called when window is closed
-	void OnDestroy()
+	private void OnDestroy()
 	{
 		s_InstanceCount--;
 		//Debug.Log("OnDestroy(): " + GetInstanceID() + " " + s_InstanceCount);
@@ -199,7 +182,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 
 		//m_FirstOpen = true;
 
-		SceneLoadDetector.PermanentlyDestroyInstance();
+		//SceneLoadDetector.PermanentlyDestroyInstance();
 
 		m_SerializationControl.Uninitialize();
 		//GraphicAssets.DestroyInstance();
@@ -213,7 +196,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		GraphicAssets.Instance.InitGuiStyle();
 	}
 
-	void OnGUI()
+	private void OnGUI()
 	{
 		//NOTE: it's ridiculous that I have to do this here.
 		if (!m_Initialized)
@@ -222,25 +205,12 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		//position.x & y are the position of the window in Unity, i think
 		//	maybe it's the window position on the desktop
 		//	either way it wasn't the value i expected, so i force (0, 0)
-		//m_Position.Set(0.0f, 0.0f, position.width, 17.0f);
-		//m_Toolbar.Draw(m_Position);
-
-		//m_Position.y = m_Position.height;
-		//m_Position.height = position.height - m_Position.height;
 		m_Position.Set(0.0f, 0.0f, position.width, position.height);
 		m_JumpLinkListView.Draw(m_Position);
 	}
 
-	//apparently OnFocus() gets called before OnEnable()!
-	//void OnFocus()
-	//{
-	//	Debug.Log("OnFocus(): " + GetInstanceID());
-	//}
-
-	void OnBecameVisible()
+	private void OnBecameVisible()
 	{
-		//Debug.Log("OnBecameVisible()");
-
 		if (m_JumpLinks != null)
 		{
 			m_JumpLinks.RefreshHierarchyLinks();
@@ -248,35 +218,8 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		}
 	}
 
-	//void ModifierKeysChanged()
-	//{
-	//	Debug.Log("ModifierKeysChanged()");
-	//}
-
-	//***** Only called if window is visible *****
-	//void OnHierarchyChange()
-	//{
-	//	Debug.Log("Hierarchy changed");
-	//	m_JumpLinks.RefreshHierarchyLinks();
-	//	Repaint();
-	//}
-
-	//void OnProjectChange()
-	//{
-	//	Debug.Log("Project changed");
-	//	m_JumpLinks.RefreshProjectLinks();
-	//	Repaint();
-	//}
-
-	//void OnDidOpenScene()
-	//{
-	//	Debug.Log("OnDidOpenScene(): " + EditorApplication.currentScene);
-	//}
-	//********************************************
-
 	private void OnProjectWindowChange()
 	{
-		//Debug.Log("Project Window Changed");
 		m_JumpLinks.RefreshProjectLinks();
 		Repaint();
 	}
@@ -286,32 +229,32 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		if (EditorApplication.isPlaying)
 			return;
 
-		//TODO: i don't remember why i needed this
+		//TODO: remember why i needed this
 		if (EditorApplication.timeSinceStartup - m_LastHierarchyRefreshTime >= 0.2f)
 		{
 			m_LastHierarchyRefreshTime = EditorApplication.timeSinceStartup;
 
-			//Debug.Log("Hierarchy Window Changed");
 			m_JumpLinks.RefreshHierarchyLinks();
 			Repaint();
 		}
 	}
 
-	//private void OnSceneLoaded(string sceneAssetPath)
-	//{
-	//	Repaint();
-	//}
-
-	private void OnPlayModeStateChanged()
+	private void OnSelectionChange()
 	{
-		//attempting to detect stops
-		if (!EditorApplication.isPlaying &&
-			!EditorApplication.isPaused)
-		{
-			SceneLoadDetector.EnsureExistence();
-			EditorApplication.playmodeStateChanged -= OnPlayModeStateChanged;
-		}
+		m_JumpLinks.RefreshAllLinkSelections();
+		Repaint();
 	}
+	
+	//private void OnPlayModeStateChanged()
+	//{
+	//	//attempting to detect stops
+	//	if (!EditorApplication.isPlaying &&
+	//		!EditorApplication.isPaused)
+	//	{
+	//		//SceneLoadDetector.EnsureExistence();
+	//		EditorApplication.playmodeStateChanged -= OnPlayModeStateChanged;
+	//	}
+	//}
 
 	public void RefreshMinSize()
 	{

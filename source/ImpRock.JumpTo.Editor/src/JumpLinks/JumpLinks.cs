@@ -209,6 +209,16 @@ namespace ImpRock.JumpTo.Editor
 			}
 		}
 
+		public void RefreshAllLinkSelections()
+		{
+			foreach (KeyValuePair<int, HierarchyJumpLinkContainer> container in m_HierarchyLinkContainers)
+			{
+				container.Value.RefreshLinkSelections();
+			}
+
+			m_ProjectLinkContainer.RefreshLinkSelections();
+		}
+
 		public void RefreshHierarchyLinks()
 		{
 			foreach (KeyValuePair<int, HierarchyJumpLinkContainer> container in m_HierarchyLinkContainers)

@@ -107,7 +107,7 @@ namespace ImpRock.JumpTo.Editor
 				s_Instance = CreateInstance<SceneLoadDetector>();
 				s_Instance.hideFlags = HideFlags.HideInHierarchy;
 
-				SceneStateControl.SceneWillLoad();
+				SceneStateMonitor.SceneDataWillLoad();
 			}
 		}
 
@@ -123,7 +123,7 @@ namespace ImpRock.JumpTo.Editor
 		void OnDisable()
 		{
 			if (m_KeepAlive)
-				SceneStateControl.SceneIsUnloading();
+				SceneStateMonitor.SceneDataIsUnloading();
 		}
 
 		/// <summary>

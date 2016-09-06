@@ -17,7 +17,7 @@ namespace ImpRock.JumpTo.Editor
 				if (assetPaths[i].EndsWith(".unity"))
 				{
 					//signal that a scene is about to be saved
-					SceneStateControl.SceneWillSave(assetPaths[i]);
+					SceneStateMonitor.SceneWillSave(assetPaths[i]);
 				}
 			}
 

@@ -67,7 +67,6 @@
     <Compile Include="src\SceneSaveLoad\SceneLoadDetector.cs" />
     <Compile Include="src\SceneSaveLoad\SceneStateMonitor.cs" />
     <Compile Include="src\SceneSaveLoad\SceneSaveDetector.cs" />
-    <Compile Include="src\SceneSaveLoad\SceneStateControl.cs" />
     <Compile Include="src\EditorScriptableObject.cs" />
     <Compile Include="src\SerializationControl.cs" />
   </ItemGroup>

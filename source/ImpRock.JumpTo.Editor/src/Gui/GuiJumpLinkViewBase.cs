@@ -11,7 +11,7 @@ namespace ImpRock.JumpTo.Editor
 		
 		protected Rect m_FoldoutRect;
 		protected Rect m_DrawRect;
-		protected Rect m_ScrollViewRect;
+		protected Rect m_LinksAreaRect;
 		protected Rect m_InsertionDrawRect;
 		protected Rect m_ControlRect;
 		protected int m_Grabbed = -1;
@@ -82,6 +82,9 @@ namespace ImpRock.JumpTo.Editor
 
 		protected override void OnGui()
 		{
+			m_LinksAreaRect.width = m_Size.x;
+			m_LinksAreaRect.height = m_TotalHeight - GraphicAssets.LinkViewTitleBarHeight;
+
 			HandleTitleHeader();
 
 			if (m_Foldout)
@@ -215,44 +218,43 @@ namespace ImpRock.JumpTo.Editor
 					//if links are currently selected
 					if (m_LinkContainer.HasSelection)
 					{
-						//and the click was not on a link (below last link)
-						if (hit == -1)
-						{
-							//clear selection
-							m_LinkContainer.LinkSelectionClear();
-							m_Window.Repaint();
-						}
-						//or the click was on a link and the control/command key was down
-						else if (currentEvent.control ||
-							(Application.platform == RuntimePlatform.OSXEditor && currentEvent.command))
+						//the click was on a link and the control/command key was down
+						if (currentEvent.control || (Application.platform == RuntimePlatform.OSXEditor && currentEvent.command))
 						{
 							//toggle clicked link selection state
 							if (!m_LinkContainer[hit].Selected)
 								m_LinkContainer.LinkSelectionAdd(hit);
 							else
 								m_LinkContainer.LinkSelectionRemove(hit);
-
-							m_Window.Repaint();
 						}
 						//or the click was on a link and the shift key was down
 						else if (currentEvent.shift)
 						{
 							m_LinkContainer.LinkSelectionSetRange(m_LinkContainer.ActiveSelection, hit);
-							m_Window.Repaint();
 						}
 						//or the clicked link was not already selected
 						else if (!m_LinkContainer[hit].Selected)
 						{
 							//set the selection to the clicked link
 							m_LinkContainer.LinkSelectionSet(hit);
-							m_Window.Repaint();
 						}
 					}
 					else if (hit > -1)
 					{
-						//set the selection to the clicked link
-						m_LinkContainer.LinkSelectionSet(hit);
-						m_Window.Repaint();
+						//the click was on a link and the control/command key was down
+						if (currentEvent.control || (Application.platform == RuntimePlatform.OSXEditor && currentEvent.command))
+						{
+							//toggle clicked link selection state
+							if (!m_LinkContainer[hit].Selected)
+								m_LinkContainer.LinkSelectionAdd(hit);
+							else
+								m_LinkContainer.LinkSelectionRemove(hit);
+						}
+						else
+						{
+							//set the selection to the clicked link
+							m_LinkContainer.LinkSelectionSet(hit);
+						}
 					}
 
 					m_Grabbed = hit;
@@ -287,14 +289,12 @@ namespace ImpRock.JumpTo.Editor
 						else
 						{
 							m_LinkContainer.LinkSelectionSet(hit);
-							m_Window.Repaint();
 						}
 					}
 					//no links are selected, if a link was clicked
 					else if (hit > -1)
 					{
 						m_LinkContainer.LinkSelectionSet(hit);
-						m_Window.Repaint();
 					}
 
 					m_ContextClick = true;
@@ -308,17 +308,28 @@ namespace ImpRock.JumpTo.Editor
 		{
 			Event currentEvent = Event.current;
 
-			if (m_LinkContainer.HasSelection)
+			int selectionCount = m_LinkContainer.SelectionCount;
+			if (selectionCount > 0)
 			{
-				m_Grabbed = -1;
-
-				if (currentEvent.button == 1 && m_ContextClick)
+				if (currentEvent.button == 0)
+				{
+					if (!m_DragOwner &&
+						!currentEvent.shift &&
+						!currentEvent.control &&
+						!(Application.platform == RuntimePlatform.OSXEditor && currentEvent.command))
+					{
+						m_LinkContainer.LinkSelectionSet(m_Grabbed);
+						currentEvent.Use();
+					}
+				}
+				else if (currentEvent.button == 1 && m_ContextClick)
 				{
 					ShowLinkContextMenu();
 
 					currentEvent.Use();
 				}
 
+				m_Grabbed = -1;
 				m_ContextClick = false;
 			}
 		}
@@ -326,7 +337,7 @@ namespace ImpRock.JumpTo.Editor
 		protected void OnMouseDrag(List<T> links)
 		{
 			Event currentEvent = Event.current;
-			if (m_ScrollViewRect.Contains(currentEvent.mousePosition))
+			if (m_LinksAreaRect.Contains(currentEvent.mousePosition))
 			{
 				if (m_Grabbed > -1 && Vector2.Distance(m_GrabPosition, currentEvent.mousePosition) > 4.0f)
 				//NOTE: this was preventing a drag to other windows when there was only one link in the list
@@ -351,9 +362,8 @@ namespace ImpRock.JumpTo.Editor
 			if (m_DragOwner)
 			{
 				Event currentEvent = Event.current;
-				//Debug.Log(currentEvent.type + ", project view");
-
-				if (m_ScrollViewRect.Contains(currentEvent.mousePosition))
+				
+				if (m_LinksAreaRect.Contains(currentEvent.mousePosition))
 				{
 					DragAndDrop.visualMode = DragAndDropVisualMode.Move;
 
@@ -392,7 +402,7 @@ namespace ImpRock.JumpTo.Editor
 		protected void OnDragPerform()
 		{
 			Event currentEvent = Event.current;
-			if (m_DragOwner && m_ScrollViewRect.Contains(currentEvent.mousePosition))
+			if (m_DragOwner && m_LinksAreaRect.Contains(currentEvent.mousePosition))
 			{
 				DragAndDrop.AcceptDrag();
 

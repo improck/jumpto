@@ -271,14 +271,38 @@ namespace ImpRock.JumpTo.Editor
 				OnLinksChanged();
 		}
 
-		public void LinkSelectionSet(int index)
+		public void RefreshLinkSelections()
 		{
 			for (int i = 0; i < m_Links.Count; i++)
 			{
-				m_Links[i].Selected = i == index;
+				m_Links[i].Selected = false;
 			}
 
+			Object[] selectedObjects = Selection.objects;
+			T link = null;
+			for (int i = 0; i < selectedObjects.Length; i++)
+			{
+				link = m_Links.Find(l => l.LinkReference == selectedObjects[i]);
+				if (link != null)
+				{
+					link.Selected = true;
+				}
+			}
+		}
+
+		public void LinkSelectionSet(int index)
+		{
+			//for (int i = 0; i < m_Links.Count; i++)
+			//{
+			//	m_Links[i].Selected = i == index;
+			//}
+
 			m_ActiveSelection = Mathf.Clamp(index, -1, m_Links.Count - 1);
+
+			if (m_ActiveSelection > -1)
+			{
+				Selection.activeObject = m_Links[m_ActiveSelection].LinkReference;
+			}
 		}
 
 		public void LinkSelectionSetRange(int from, int to)
@@ -290,24 +314,31 @@ namespace ImpRock.JumpTo.Editor
 				from = temp;
 			}
 
-			for (int i = 0; i < from; i++)
+			Object[] totalSelectedObjects = new Object[(to - from) + 1];
+
+			//for (int i = 0; i < from; i++)
+			//{
+			//	m_Links[i].Selected = false;
+			//}
+
+			for (int i = from, j = 0; i <= to; i++, j++)
 			{
-				m_Links[i].Selected = false;
+				//m_Links[i].Selected = true;
+				totalSelectedObjects[j] = m_Links[i].LinkReference;
 			}
 
-			for (int i = from; i <= to; i++)
-			{
-				m_Links[i].Selected = true;
-			}
+			//for (int i = to + 1; i < m_Links.Count; i++)
+			//{
+			//	m_Links[i].Selected = false;
+			//}
 
-			for (int i = to + 1; i < m_Links.Count; i++)
-			{
-				m_Links[i].Selected = false;
-			}
+			Selection.objects = totalSelectedObjects;
 		}
 
 		public void LinkSelectionInvert()
 		{
+			//TODO: modify Selection.objects?
+
 			for (int i = 0; i < m_Links.Count; i++)
 			{
 				m_Links[i].Selected = !m_Links[i].Selected;
@@ -318,8 +349,17 @@ namespace ImpRock.JumpTo.Editor
 		{
 			if (index >= 0 && index < m_Links.Count)
 			{
-				m_Links[index].Selected = true;
+				//m_Links[index].Selected = true;
 				m_ActiveSelection = index;
+
+				if (!Selection.Contains(m_Links[m_ActiveSelection]))
+				{
+					Object[] selectedObjects = Selection.objects;
+					Object[] totalSelectedObjects = new Object[selectedObjects.Length + 1];
+					selectedObjects.CopyTo(totalSelectedObjects, 0);
+					totalSelectedObjects[selectedObjects.Length] = m_Links[m_ActiveSelection].LinkReference;
+					Selection.objects = totalSelectedObjects;
+				}
 			}
 		}
 
@@ -327,19 +367,38 @@ namespace ImpRock.JumpTo.Editor
 		{
 			if (index >= 0 && index < m_Links.Count)
 			{
-				m_Links[index].Selected = false;
+				//m_Links[index].Selected = false;
 				m_ActiveSelection = index;
+
+				if (Selection.Contains(m_Links[m_ActiveSelection].LinkReference))
+				{
+					Object linkReference = m_Links[m_ActiveSelection].LinkReference;
+					Object[] selectedObjects = Selection.objects;
+					Object[] totalSelectedObjects = new Object[selectedObjects.Length - 1];
+					for (int i = 0, j = 0; i < selectedObjects.Length; i++)
+					{
+						if (selectedObjects[i] != linkReference)
+						{
+							totalSelectedObjects[j] = selectedObjects[i];
+							j++;
+						}
+					}
+
+					Selection.objects = totalSelectedObjects;
+				}
 			}
 		}
 
 		public void LinkSelectionClear()
 		{
-			for (int i = 0; i < m_Links.Count; i++)
-			{
-				m_Links[i].Selected = false;
-			}
+			//for (int i = 0; i < m_Links.Count; i++)
+			//{
+			//	m_Links[i].Selected = false;
+			//}
 
 			m_ActiveSelection = -1;
+
+			Selection.objects = new Object[0];
 		}
 
 		public void RefreshLinks()

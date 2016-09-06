@@ -35,10 +35,10 @@ namespace ImpRock.JumpTo.Editor
 		{
 			m_Window = window;
 
-			SceneStateControl.OnSceneWillSave += OnSceneWillSave;
-			//SceneStateControl.OnSceneWillLoad += OnSceneWillLoad;
-			//SceneStateControl.OnSceneSaved += OnSceneSaved;
-			//SceneStateControl.OnSceneLoaded += OnSceneLoaded;
+			SceneStateMonitor.OnSceneWillSave += OnSceneWillSave;
+			//SceneStateMonitor.OnSceneWillLoad += OnSceneWillLoad;
+			//SceneStateMonitor.OnSceneSaved += OnSceneSaved;
+			//SceneStateMonitor.OnSceneLoaded += OnSceneLoaded;
 			SceneStateMonitor.OnSceneOpened += OnSceneOpened;
 
 			foreach (SceneState sceneState in SceneStateMonitor.Instance.GetSceneStates())
@@ -50,10 +50,10 @@ namespace ImpRock.JumpTo.Editor
 
 		public void Uninitialize()
 		{
-			SceneStateControl.OnSceneWillSave -= OnSceneWillSave;
-			//SceneStateControl.OnSceneWillLoad -= OnSceneWillLoad;
-			//SceneStateControl.OnSceneSaved -= OnSceneSaved;
-			//SceneStateControl.OnSceneLoaded -= OnSceneLoaded;
+			SceneStateMonitor.OnSceneWillSave -= OnSceneWillSave;
+			//SceneStateMonitor.OnSceneWillLoad -= OnSceneWillLoad;
+			//SceneStateMonitor.OnSceneSaved -= OnSceneSaved;
+			//SceneStateMonitor.OnSceneLoaded -= OnSceneLoaded;
 			SceneStateMonitor.OnSceneOpened -= OnSceneOpened;
 
 			foreach (SceneState sceneState in SceneStateMonitor.Instance.GetSceneStates())
@@ -63,7 +63,10 @@ namespace ImpRock.JumpTo.Editor
 			}
 		}
 
-		//this is getting called from SceneSaveDetector
+		/// <summary>
+		/// Called from SceneStateMonitor via SceneSaveDetector
+		/// </summary>
+		/// <param name="sceneAssetPath"></param>
 		private void OnSceneWillSave(string sceneAssetPath)
 		{
 			if (CreateSaveDirectories())

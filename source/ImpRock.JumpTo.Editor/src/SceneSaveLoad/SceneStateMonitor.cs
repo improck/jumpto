@@ -73,8 +73,7 @@ namespace ImpRock.JumpTo.Editor
 		}
 	}
 
-
-	[InitializeOnLoad]
+	
 	[System.Serializable]
 	internal sealed class SceneStateMonitor
 	{
@@ -98,6 +97,7 @@ namespace ImpRock.JumpTo.Editor
 
 		[SerializeField] private int m_SceneCount = 0;
 		[SerializeField] private int m_LoadedSceneCount = 0;
+		[SerializeField] private bool m_HierarchyChanged = false;
 
 		
 		private Dictionary<int, SceneState> m_SceneStates = new Dictionary<int, SceneState>();
@@ -106,12 +106,94 @@ namespace ImpRock.JumpTo.Editor
 		public static event System.Action<int, int> OnSceneCountChanged;
 		public static event System.Action<int, int> OnLoadedSceneCountChanged;
 		public static event System.Action<SceneState> OnSceneOpened;
+		public static event System.Action<string> OnSceneWillSave;
+		public static event System.Action<string> OnSceneSaved;
 
 
 		private static void Initialize()
 		{
 			s_Instance.InternalInitialize();
 		}
+
+
+		//***** Merged from SceneStateControl *****
+
+		/// <summary>
+		/// Called from SceneSaveDetector
+		/// </summary>
+		/// <param name="sceneAssetPath">The relative path to the scene being saved</param>
+		public static void SceneWillSave(string sceneAssetPath)
+		{
+			if (s_Instance == null)
+				return;
+
+			Debug.Log("SceneWillSave");
+
+			SceneLoadDetector.TemporarilyDestroyInstance(true);
+
+			if (OnSceneWillSave != null)
+				OnSceneWillSave(sceneAssetPath);
+
+			EditorApplication.delayCall +=
+				delegate ()
+				{
+					Debug.Log("Delayed SceneWillSave");
+
+					if (OnSceneSaved != null)
+						OnSceneSaved(sceneAssetPath);
+				};
+		}
+
+		/// <summary>
+		/// Called from SceneLoadDetector
+		/// </summary>
+		public static void SceneDataIsUnloading()
+		{
+			if (s_Instance == null)
+				return;
+			
+			s_Instance.m_HierarchyChanged = false;
+			EditorApplication.hierarchyWindowChanged += DetectRecompile;
+		}
+
+		/// <summary>
+		/// Called from SceneLoadDetector
+		/// </summary>
+		public static void SceneDataWillLoad()
+		{
+			if (s_Instance == null)
+				return;
+			
+			EditorApplication.delayCall +=
+				delegate ()
+				{
+					//if the hierarchy changed prior to the delayed scene load
+					//	then the scene load was the result of a scene asset being
+					//	opened or a new scene being created. else, it was triggered
+					//	by an assembly reload which deserializes the scene but does
+					//	NOT call the hierarchyWindowChanged event
+					if (s_Instance.m_HierarchyChanged)
+					{
+						Debug.Log("SceneWillLoad: Hierarchy has changed");
+
+						s_Instance.m_HierarchyChanged = false;
+					}
+					else
+						Debug.Log("SceneWillLoad: Hierarchy has NOT changed");
+
+					EditorApplication.hierarchyWindowChanged -= DetectRecompile;
+				};
+		}
+
+		private static void DetectRecompile()
+		{
+			if (s_Instance == null)
+				return;
+
+			s_Instance.m_HierarchyChanged = true;
+			EditorApplication.hierarchyWindowChanged -= DetectRecompile;
+		}
+		//*****************************************
 
 
 		public SceneState GetSceneState(int sceneId)
