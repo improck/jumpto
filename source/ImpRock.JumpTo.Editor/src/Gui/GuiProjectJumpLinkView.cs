@@ -16,7 +16,7 @@ namespace ImpRock.JumpTo.Editor
 
 			base.OnWindowEnable(window);
 
-			m_LinkContainer.OnLinksChanged += OnProjectsLinksChanged;
+			m_LinkContainer.OnLinksChanged += OnProjectLinksChanged;
 
 			m_ControlTitle = new GUIContent(JumpToResources.Instance.GetText(ResId.LabelProjectLinks));
 			m_MenuOpenLink = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextOpenLink));
@@ -25,7 +25,7 @@ namespace ImpRock.JumpTo.Editor
 
 		public override void OnWindowDisable(EditorWindow window)
 		{
-			m_LinkContainer.OnLinksChanged -= OnProjectsLinksChanged;
+			m_LinkContainer.OnLinksChanged -= OnProjectLinksChanged;
 		}
 
 		protected override void ShowLinkContextMenu()
@@ -39,14 +39,9 @@ namespace ImpRock.JumpTo.Editor
 			m_MenuPingLink.text = JumpToResources.Instance.GetText(ResId.MenuContextPingLink) + " \"" + m_LinkContainer.ActiveSelectedObject.LinkLabelContent.text + "\"";
 
 			int selectionCount = m_LinkContainer.SelectionCount;
-			if (selectionCount == 0)
-			{
-			}
-			else if (selectionCount == 1)
+			if (selectionCount == 1)
 			{
 				menu.AddItem(m_MenuPingLink, false, PingSelectedLink);
-				menu.AddItem(m_MenuSetAsSelection, false, SetAsSelection);
-				menu.AddItem(m_MenuAddToSelection, false, AddToSelection);
 				menu.AddItem(m_MenuOpenLink, false, OpenAssets);
 				menu.AddSeparator(string.Empty);
 				menu.AddItem(m_MenuRemoveLink, false, RemoveSelected);
@@ -56,8 +51,6 @@ namespace ImpRock.JumpTo.Editor
 			else if (selectionCount > 1)
 			{
 				menu.AddItem(m_MenuPingLink, false, PingSelectedLink);
-				menu.AddItem(m_MenuSetAsSelectionPlural, false, SetAsSelection);
-				menu.AddItem(m_MenuAddToSelectionPlural, false, AddToSelection);
 				menu.AddItem(m_MenuOpenLinkPlural, false, OpenAssets);
 				menu.AddSeparator(string.Empty);
 				menu.AddItem(m_MenuRemoveLinkPlural, false, RemoveSelected);
@@ -92,13 +85,17 @@ namespace ImpRock.JumpTo.Editor
 				AssetDatabase.OpenAsset(activeSelection.LinkReference);
 		}
 
-		private void OnProjectsLinksChanged()
+		private void OnProjectLinksChanged()
 		{
 			if (m_LinkContainer.Links.Count == 0)
 			{
 				m_Window.SerializationControlInstance.SaveProjectLinks();
 
 				m_MarkedForClose = true;
+			}
+			else
+			{
+				FindTotalHeight();
 			}
 		}
 	}

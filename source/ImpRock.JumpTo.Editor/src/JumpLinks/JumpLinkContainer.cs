@@ -292,11 +292,6 @@ namespace ImpRock.JumpTo.Editor
 
 		public void LinkSelectionSet(int index)
 		{
-			//for (int i = 0; i < m_Links.Count; i++)
-			//{
-			//	m_Links[i].Selected = i == index;
-			//}
-
 			m_ActiveSelection = Mathf.Clamp(index, -1, m_Links.Count - 1);
 
 			if (m_ActiveSelection > -1)
@@ -316,22 +311,11 @@ namespace ImpRock.JumpTo.Editor
 
 			Object[] totalSelectedObjects = new Object[(to - from) + 1];
 
-			//for (int i = 0; i < from; i++)
-			//{
-			//	m_Links[i].Selected = false;
-			//}
-
 			for (int i = from, j = 0; i <= to; i++, j++)
 			{
-				//m_Links[i].Selected = true;
 				totalSelectedObjects[j] = m_Links[i].LinkReference;
 			}
-
-			//for (int i = to + 1; i < m_Links.Count; i++)
-			//{
-			//	m_Links[i].Selected = false;
-			//}
-
+			
 			Selection.objects = totalSelectedObjects;
 		}
 
@@ -349,7 +333,6 @@ namespace ImpRock.JumpTo.Editor
 		{
 			if (index >= 0 && index < m_Links.Count)
 			{
-				//m_Links[index].Selected = true;
 				m_ActiveSelection = index;
 
 				if (!Selection.Contains(m_Links[m_ActiveSelection]))
@@ -367,7 +350,6 @@ namespace ImpRock.JumpTo.Editor
 		{
 			if (index >= 0 && index < m_Links.Count)
 			{
-				//m_Links[index].Selected = false;
 				m_ActiveSelection = index;
 
 				if (Selection.Contains(m_Links[m_ActiveSelection].LinkReference))
@@ -391,24 +373,23 @@ namespace ImpRock.JumpTo.Editor
 
 		public void LinkSelectionClear()
 		{
-			//for (int i = 0; i < m_Links.Count; i++)
-			//{
-			//	m_Links[i].Selected = false;
-			//}
-
 			m_ActiveSelection = -1;
 
 			Selection.objects = new Object[0];
 		}
 
-		public void RefreshLinks()
+		public virtual void RefreshLinks()
 		{
+			bool linksRemoved = false;
+
 			for (int i = m_Links.Count - 1; i >= 0; i--)
 			{
 				if (m_Links[i].LinkReference == null)
 				{
 					Object.DestroyImmediate(m_Links[i]);
 					m_Links.RemoveAt(i);
+
+					linksRemoved = true;
 				}
 				else
 				{
@@ -417,6 +398,9 @@ namespace ImpRock.JumpTo.Editor
 			}
 
 			RefreshLinksY();
+
+			if (linksRemoved && OnLinksChanged != null)
+				OnLinksChanged();
 		}
 
 		public void RefreshLinksY()

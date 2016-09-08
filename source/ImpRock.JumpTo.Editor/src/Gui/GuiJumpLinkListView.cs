@@ -141,7 +141,6 @@ namespace ImpRock.JumpTo.Editor
 			//raised repeatedly while a drag op is hovering
 			case EventType.DragUpdated:
 				{
-					//TODO: revisit drag owner concept
 					if (m_ProjectView != null && m_ProjectView.IsDragOwner)
 					{
 						break;
@@ -182,7 +181,6 @@ namespace ImpRock.JumpTo.Editor
 			//raised on mouse-up if DragAndDrop.visualMode != None or Rejected
 			case EventType.DragPerform:
 				{
-					//TODO: revisit drag owner concept
 					if (m_ProjectView != null && m_ProjectView.IsDragOwner)
 					{
 						break;

@@ -40,6 +40,14 @@ namespace ImpRock.JumpTo.Editor
 			SetupSceneState();
 		}
 
+		protected override void OnCreate()
+		{
+			base.OnCreate();
+
+			//TODO: freshly loaded hierarchy links should not be marked dirty
+			m_IsDirty = true;
+		}
+
 		protected override void OnDestroy()
 		{
 			base.OnDestroy();
@@ -48,6 +56,7 @@ namespace ImpRock.JumpTo.Editor
 			m_SceneState.OnNameChange -= OnSceneNameChanged;
 			m_SceneState.OnIsDirtyChange -= OnSceneIsDirtyChanged;
 			m_SceneState.OnIsLoadedChange -= OnSceneIsLoadedChanged;
+			m_SceneState.OnClose -= OnSceneClosed;
 		}
 
 		protected override Color DetermineNormalTextColor(HierarchyJumpLink link)
@@ -74,7 +83,8 @@ namespace ImpRock.JumpTo.Editor
 			//		to appear right-justified and all caps in a GenericMenu. the name is being
 			//		parsed for hotkeys, and " _" indicates 'no modifiers' in the hotkey string.
 			//		See: http://docs.unity3d.com/ScriptReference/MenuItem.html
-			m_MenuPingLink.text = JumpToResources.Instance.GetText(ResId.MenuContextPingLink) + " \"" + m_LinkContainer.ActiveSelectedObject.LinkReference.name + "\"";
+			m_MenuPingLink.text = JumpToResources.Instance.GetText(ResId.MenuContextPingLink) + " \""
+				+ m_LinkContainer.ActiveSelectedObject.LinkReference.name + "\"";
 
 			int selectionCount = m_LinkContainer.SelectionCount;
 			if (selectionCount == 0)
@@ -83,8 +93,6 @@ namespace ImpRock.JumpTo.Editor
 			else if (selectionCount == 1)
 			{
 				menu.AddItem(m_MenuPingLink, false, PingSelectedLink);
-				menu.AddItem(m_MenuSetAsSelection, false, SetAsSelection);
-				menu.AddItem(m_MenuAddToSelection, false, AddToSelection);
 			
 				if (ValidateSceneView())
 					menu.AddItem(m_MenuFrameLink, false, FrameLink);
@@ -98,8 +106,6 @@ namespace ImpRock.JumpTo.Editor
 			else if (selectionCount > 1)
 			{
 				menu.AddItem(m_MenuPingLink, false, PingSelectedLink);
-				menu.AddItem(m_MenuSetAsSelectionPlural, false, SetAsSelection);
-				menu.AddItem(m_MenuAddToSelectionPlural, false, AddToSelection);
 
 				if (ValidateSceneView())
 					menu.AddItem(m_MenuFrameLinkPlural, false, FrameLink);
@@ -118,7 +124,6 @@ namespace ImpRock.JumpTo.Editor
 		{
 			GenericMenu menu = null;
 
-			//TODO: make sure the scene is still loaded?
 			if (m_IsDirty)
 			{
 				menu = new GenericMenu();
@@ -149,6 +154,7 @@ namespace ImpRock.JumpTo.Editor
 				m_SceneState.OnNameChange -= OnSceneNameChanged;
 				m_SceneState.OnIsDirtyChange -= OnSceneIsDirtyChanged;
 				m_SceneState.OnIsLoadedChange -= OnSceneIsLoadedChanged;
+				m_SceneState.OnClose -= OnSceneClosed;
 
 				m_SceneState = null;
 			}
@@ -163,6 +169,7 @@ namespace ImpRock.JumpTo.Editor
 					m_SceneState.OnNameChange += OnSceneNameChanged;
 					m_SceneState.OnIsDirtyChange += OnSceneIsDirtyChanged;
 					m_SceneState.OnIsLoadedChange += OnSceneIsLoadedChanged;
+					m_SceneState.OnClose += OnSceneClosed;
 				}
 				else
 				{
@@ -205,9 +212,25 @@ namespace ImpRock.JumpTo.Editor
 
 		private void SaveLinks()
 		{
-			//TODO: detect links to objects not saved in the scene, warn the user
-			m_IsDirty = !m_Window.SerializationControlInstance.SaveHierarchyLinks(m_SceneId);
-			RefreshControlTitle();
+			if ((m_LinkContainer as HierarchyJumpLinkContainer).HasLinksToUnsavedInstances)
+			{
+				JumpToResources resources = JumpToResources.Instance;
+				if (EditorUtility.DisplayDialog(resources.GetText(ResId.DialogSaveLinksWarningTitle),
+					resources.GetText(ResId.DialogSaveLinksWarningMessage),
+					resources.GetText(ResId.DialogOk), resources.GetText(ResId.DialogCancel)))
+				{
+					m_Window.SerializationControlInstance.SaveHierarchyLinks(m_SceneId);
+
+					//keep the scene marked dirty so that they can save the scene, and then the links again
+					m_IsDirty = true;
+					RefreshControlTitle();
+				}
+			}
+			else
+			{
+				m_IsDirty = !m_Window.SerializationControlInstance.SaveHierarchyLinks(m_SceneId);
+				RefreshControlTitle();
+			}
 		}
 
 		private bool ValidateSceneView()
@@ -222,6 +245,7 @@ namespace ImpRock.JumpTo.Editor
 			{
 				m_IsDirty = true;
 				RefreshControlTitle();
+				FindTotalHeight();
 			}
 			else
 			{
@@ -243,14 +267,23 @@ namespace ImpRock.JumpTo.Editor
 
 		private void OnSceneIsLoadedChanged(int sceneId, bool isLoaded)
 		{
+			Debug.Log("Scene load change: " + m_ControlTitle.text + " isLoaded " + isLoaded);
 			if (!isLoaded)
 			{
+				m_LinkContainer.OnLinksChanged -= OnHierarchyLinksChanged;
 				m_MarkedForClose = true;
 
 				//NOTE: can't save here because the scene is already gone
 				//if (m_IsDirty)
 				//	m_Window.SerializationControlInstance.SaveHierarchyLinks(m_SceneId);
 			}
+		}
+
+		private void OnSceneClosed(int sceneId)
+		{
+			Debug.Log("Scene closed: " + m_ControlTitle.text);
+			m_LinkContainer.OnLinksChanged -= OnHierarchyLinksChanged;
+			m_MarkedForClose = true;
 		}
 	}
 }

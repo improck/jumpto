@@ -26,12 +26,8 @@ namespace ImpRock.JumpTo.Editor
 
 		protected GUIContent m_ControlTitle;
 		protected GUIContent m_MenuPingLink;
-		protected GUIContent m_MenuSetAsSelection;
-		protected GUIContent m_MenuAddToSelection;
 		protected GUIContent m_MenuRemoveLink;
 		protected GUIContent m_MenuRemoveAll;
-		protected GUIContent m_MenuSetAsSelectionPlural;
-		protected GUIContent m_MenuAddToSelectionPlural;
 		protected GUIContent m_MenuRemoveLinkPlural;
 
 		protected Texture2D m_IconHamburger;
@@ -58,12 +54,8 @@ namespace ImpRock.JumpTo.Editor
 			m_Window = window as JumpToEditorWindow;
 
 			m_MenuPingLink = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextPingLink));
-			m_MenuSetAsSelection = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextSetAsSelection));
-			m_MenuAddToSelection = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextAddToSelection));
 			m_MenuRemoveLink = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextRemoveLink));
 			m_MenuRemoveAll = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextRemoveAll));
-			m_MenuSetAsSelectionPlural = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextSetAsSelectionPlural));
-			m_MenuAddToSelectionPlural = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextAddToSelectionPlural));
 			m_MenuRemoveLinkPlural = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextRemoveLinkPlural));
 
 			m_IconHamburger = JumpToResources.Instance.GetImage(ResId.ImageHamburger);
@@ -129,15 +121,17 @@ namespace ImpRock.JumpTo.Editor
 			};
 
 			bool foldout = EditorGUI.Foldout(m_FoldoutRect, m_Foldout, m_ControlTitle, true);
-			if (foldout != m_Foldout && foldout)
+			if (foldout != m_Foldout)
 			{
-				m_LinkContainer.RefreshLinksY();
+				m_Foldout = foldout;
+
+				if (m_Foldout)
+				{
+					m_LinkContainer.RefreshLinksY();
+				}
+
+				FindTotalHeight();
 			}
-
-			m_Foldout = foldout;
-
-			//TODO: only find total height when the list changes
-			FindTotalHeight();
 		}
 
 		protected void HandleLinks()
@@ -154,6 +148,17 @@ namespace ImpRock.JumpTo.Editor
 			#region Event Switch
 			switch (Event.current.type)
 			{
+			case EventType.KeyDown:
+				{
+					Event currentEvent = Event.current;
+					if (currentEvent.keyCode == KeyCode.Delete &&
+						(Application.platform != RuntimePlatform.OSXEditor || currentEvent.command))
+					{
+						RemoveSelected();
+						m_Window.Repaint();
+					}
+				}
+				break;
 			case EventType.MouseDown:
 				{
 					OnMouseDown();

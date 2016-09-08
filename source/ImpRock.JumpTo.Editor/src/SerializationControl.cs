@@ -73,14 +73,14 @@ namespace ImpRock.JumpTo.Editor
 			{
 				SaveProjectLinks();
 
-				//TODO: save hierarchy links
+				//NOTE: can't save hierarchy links
 				//objects that are new in the scene have not been
 				//	assigned a localidinfile at this point, so they
 				//	will not save.
 			}
 		}
 
-		//TODO: wipes out an existing file or just saves nothing
+		//NOTE: wipes out an existing file or just saves nothing
 		//	this happens when the scene has changed, the user loads
 		//	a new scene and chooses save from the popup. this only
 		//	gets called after the delayCall, so the scene is already
@@ -98,7 +98,7 @@ namespace ImpRock.JumpTo.Editor
 		//{
 		//	if (CreateSaveDirectories())
 		//	{
-		//		//TODO: this is the troublesome one. scene objects have already been destroyed by this point
+		//		//NOTE: this is the troublesome one. scene objects have already been destroyed by this point
 		//		SaveHierarchyLinks(EditorApplication.currentScene);
 		//	}
 		//}

@@ -31,8 +31,14 @@ namespace ImpRock.JumpTo.Editor
 
 		public static readonly int DialogRemoveAllTitle = "dialog_removeAllTitle".GetHashCode();
 		public static readonly int DialogRemoveAllMessage = "dialog_removeAllMessage".GetHashCode();
+
+		public static readonly int DialogSaveLinksWarningTitle = "dialog_saveLinksWarningTitle".GetHashCode();
+		public static readonly int DialogSaveLinksWarningMessage = "dialog_saveLinksWarningMessage".GetHashCode();
+
 		public static readonly int DialogYes = "dialog_yes".GetHashCode();
 		public static readonly int DialogNo = "dialog_no".GetHashCode();
+		public static readonly int DialogOk = "dialog_ok".GetHashCode();
+		public static readonly int DialogCancel = "dialog_cancel".GetHashCode();
 
 		public static readonly int ImageHamburger;
 		public static readonly int ImageTabIcon = "tabicon.png".GetHashCode();

@@ -21,6 +21,8 @@ namespace ImpRock.JumpTo.Editor
 
 				m_Links.Add(link);
 			}
+
+			RaiseOnLinksChanged();
 		}
 
 		protected override void UpdateLinkInfo(ProjectJumpLink link, PrefabType prefabType)

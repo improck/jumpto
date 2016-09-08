@@ -126,9 +126,7 @@ namespace ImpRock.JumpTo.Editor
 		{
 			if (s_Instance == null)
 				return;
-
-			Debug.Log("SceneWillSave");
-
+			
 			SceneLoadDetector.TemporarilyDestroyInstance(true);
 
 			if (OnSceneWillSave != null)
@@ -137,8 +135,6 @@ namespace ImpRock.JumpTo.Editor
 			EditorApplication.delayCall +=
 				delegate ()
 				{
-					Debug.Log("Delayed SceneWillSave");
-
 					if (OnSceneSaved != null)
 						OnSceneSaved(sceneAssetPath);
 				};

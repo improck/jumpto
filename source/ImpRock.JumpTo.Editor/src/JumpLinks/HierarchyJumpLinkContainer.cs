@@ -4,8 +4,18 @@ using UnityEngine;
 
 namespace ImpRock.JumpTo.Editor
 {
+	[System.Serializable]
+	internal sealed class HierarchyJumpLinkContainerFaketionary : Faketionary<int, HierarchyJumpLinkContainer> { }
+
+
 	internal sealed class HierarchyJumpLinkContainer : JumpLinkContainer<HierarchyJumpLink>
 	{
+		[SerializeField] bool m_HasLinksToUnsavedInstances = false;
+
+
+		public bool HasLinksToUnsavedInstances { get { return m_HasLinksToUnsavedInstances; } }
+
+
 		public override void AddLink(UnityEngine.Object linkReference, PrefabType prefabType)
 		{
 			//basically, if no linked object in the list has a reference to the passed object
@@ -23,6 +33,13 @@ namespace ImpRock.JumpTo.Editor
 
 				RaiseOnLinksChanged();
 			}
+		}
+
+		public override void RefreshLinks()
+		{
+			m_HasLinksToUnsavedInstances = false;
+
+			base.RefreshLinks();
 		}
 
 		protected override void UpdateLinkInfo(HierarchyJumpLink link, PrefabType prefabType)
@@ -72,10 +89,19 @@ namespace ImpRock.JumpTo.Editor
 
 				Transform linkTransform = (linkReference as GameObject).transform;
 				link.LinkLabelContent.tooltip = JumpToUtility.GetTransformPath(linkTransform);
+				
+				if (prefabType == PrefabType.PrefabInstance || prefabType == PrefabType.ModelPrefabInstance)
+				{
+					linkReference = PrefabUtility.GetPrefabObject(linkReference);
+				}
+
+				SerializedObject serializedObject = new SerializedObject(linkReference);
+				serializedObject.SetInspectorMode(InspectorMode.Debug);
+				if (serializedObject.GetLocalIdInFile() == 0)
+				{
+					m_HasLinksToUnsavedInstances = true;
+				}
 			}
 		}
 	}
-
-	[System.Serializable]
-	internal sealed class HierarchyJumpLinkContainerFaketionary : Faketionary<int, HierarchyJumpLinkContainer> { }
 }
