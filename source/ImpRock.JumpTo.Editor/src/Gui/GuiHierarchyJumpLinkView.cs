@@ -14,6 +14,7 @@ namespace ImpRock.JumpTo.Editor
 		private GUIContent m_MenuSaveLinks;
 		private string m_TitleSuffix;
 		private SceneState m_SceneState = null;
+		private int m_SaveIconIndex = -1;
 		
 		[SerializeField] private bool m_IsDirty = false;
 		[SerializeField] private int m_SceneId = 0;
@@ -30,12 +31,19 @@ namespace ImpRock.JumpTo.Editor
 
 			m_LinkContainer.OnLinksChanged += OnHierarchyLinksChanged;
 
-			m_ControlTitle = new GUIContent();
+			m_Title = new GUIContent();
 			m_MenuFrameLink = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextFrameLink));
 			m_MenuFrameLinkPlural = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextFrameLinkPlural));
 			m_MenuSaveLinks = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextSaveLinks));
 
 			m_TitleSuffix = " " + JumpToResources.Instance.GetText(ResId.LabelHierarchyLinksSuffix);
+
+			ControlIcon controlIcon = new ControlIcon();
+			controlIcon.Enabled = true;
+			controlIcon.Icon = JumpToResources.Instance.GetImage(ResId.ImageDiskette);
+			controlIcon.OnClick = SaveLinks;
+			m_SaveIconIndex = m_ControlIcons.Count;
+			m_ControlIcons.Add(controlIcon);
 
 			SetupSceneState();
 		}
@@ -146,7 +154,7 @@ namespace ImpRock.JumpTo.Editor
 		{
 			FrameLink();
 		}
-
+		
 		private void SetupSceneState()
 		{
 			if (m_SceneState != null)
@@ -182,13 +190,24 @@ namespace ImpRock.JumpTo.Editor
 			}
 		}
 
+		private void SetSaveDirty(bool isDirty)
+		{
+			m_IsDirty = isDirty;
+
+			ControlIcon saveIcon = m_ControlIcons[m_SaveIconIndex];
+			saveIcon.Enabled = m_IsDirty;
+			m_ControlIcons[m_SaveIconIndex] = saveIcon;
+
+			RefreshControlTitle();
+		}
+
 		private void RefreshControlTitle()
 		{
 			string title = (m_SceneState.Name.Length != 0 ? m_SceneState.Name : "(Untitled)") + m_TitleSuffix;
 			if (m_IsDirty)
 				title += '*';
 
-			m_ControlTitle.text = title;
+			m_Title.text = title;
 		}
 
 		private void FrameLink()
@@ -222,14 +241,12 @@ namespace ImpRock.JumpTo.Editor
 					m_Window.SerializationControlInstance.SaveHierarchyLinks(m_SceneId);
 
 					//keep the scene marked dirty so that they can save the scene, and then the links again
-					m_IsDirty = true;
-					RefreshControlTitle();
+					SetSaveDirty(true);
 				}
 			}
 			else
 			{
-				m_IsDirty = !m_Window.SerializationControlInstance.SaveHierarchyLinks(m_SceneId);
-				RefreshControlTitle();
+				SetSaveDirty(!m_Window.SerializationControlInstance.SaveHierarchyLinks(m_SceneId));
 			}
 		}
 
@@ -243,8 +260,7 @@ namespace ImpRock.JumpTo.Editor
 		{
 			if (m_LinkContainer.Links.Count > 0)
 			{
-				m_IsDirty = true;
-				RefreshControlTitle();
+				SetSaveDirty(true);
 				FindTotalHeight();
 			}
 			else
@@ -261,13 +277,12 @@ namespace ImpRock.JumpTo.Editor
 
 		private void OnSceneIsDirtyChanged(int sceneId, bool isDirty)
 		{
-			m_IsDirty = m_IsDirty || isDirty;
-			RefreshControlTitle();
+			SetSaveDirty(m_IsDirty || isDirty);
 		}
 
 		private void OnSceneIsLoadedChanged(int sceneId, bool isLoaded)
 		{
-			Debug.Log("Scene load change: " + m_ControlTitle.text + " isLoaded " + isLoaded);
+			Debug.Log("Scene load change: " + m_Title.text + " isLoaded " + isLoaded);
 			if (!isLoaded)
 			{
 				m_LinkContainer.OnLinksChanged -= OnHierarchyLinksChanged;
@@ -281,7 +296,7 @@ namespace ImpRock.JumpTo.Editor
 
 		private void OnSceneClosed(int sceneId)
 		{
-			Debug.Log("Scene closed: " + m_ControlTitle.text);
+			Debug.Log("Scene closed: " + m_Title.text);
 			m_LinkContainer.OnLinksChanged -= OnHierarchyLinksChanged;
 			m_MarkedForClose = true;
 		}

@@ -39,19 +39,22 @@ namespace ImpRock.JumpTo.Editor
 		public static readonly int DialogNo = "dialog_no".GetHashCode();
 		public static readonly int DialogOk = "dialog_ok".GetHashCode();
 		public static readonly int DialogCancel = "dialog_cancel".GetHashCode();
-
-		public static readonly int ImageHamburger;
+		
 		public static readonly int ImageTabIcon = "tabicon.png".GetHashCode();
+		public static readonly int ImageHamburger;
+		public static readonly int ImageDiskette;
 
 		static ResId()
 		{
 			if (EditorGUIUtility.isProSkin)
 			{
 				ImageHamburger = "hamburger_pro.png".GetHashCode();
+				ImageDiskette = "diskette_pro.png".GetHashCode();
 			}
 			else
 			{
 				ImageHamburger = "hamburger.png".GetHashCode();
+				ImageDiskette = "diskette.png".GetHashCode();
 			}
 		}
 	}
@@ -112,11 +115,13 @@ namespace ImpRock.JumpTo.Editor
 			{
 				//pro skin
 				LoadImage("hamburger_pro.png");
+				LoadImage("diskette_pro.png");
 			}
 			else
 			{
 				//free skin
 				LoadImage("hamburger.png");
+				LoadImage("diskette.png");
 			}
 		}
 
@@ -179,40 +184,7 @@ namespace ImpRock.JumpTo.Editor
 				}
 			}
 		}
-
-		//private void LoadDefaultText()
-		//{
-		//	m_TextResources.Add(ResId.LabelProjectLinks, "Project Links");
-		//	m_TextResources.Add(ResId.LabelHierarchyLinks, "Hierarchy Links");
-
-		//	m_TextResources.Add(ResId.TooltipProjectFirst, "Project First");
-		//	m_TextResources.Add(ResId.TooltipHierarchyFirst, "Hierarchy First");
-		//	m_TextResources.Add(ResId.TooltipVertical, "Vertical Orientation");
-		//	m_TextResources.Add(ResId.TooltipHorizontal, "Horizontal Orientation");
-
-		//	m_TextResources.Add(ResId.MenuProjectView, "Project");
-		//	m_TextResources.Add(ResId.MenuHierarchyView, "Hierarchy");
-		//	m_TextResources.Add(ResId.MenuBothView, "Both");
-		//	m_TextResources.Add(ResId.MenuContextPingLink, "Ping");
-		//	m_TextResources.Add(ResId.MenuContextSetAsSelection, "Set This as Selection");
-		//	m_TextResources.Add(ResId.MenuContextAddToSelection, "Add This to Selection");
-		//	m_TextResources.Add(ResId.MenuContextFrameLink, "Frame This in Scene");
-		//	m_TextResources.Add(ResId.MenuContextOpenLink, "Open This");
-		//	m_TextResources.Add(ResId.MenuContextRemoveLink, "Remove This");
-		//	m_TextResources.Add(ResId.MenuContextRemoveAll, "Remove All");
-		//	m_TextResources.Add(ResId.MenuContextSetAsSelectionPlural, "Set These as Selection");
-		//	m_TextResources.Add(ResId.MenuContextAddToSelectionPlural, "Add These to Selection");
-		//	m_TextResources.Add(ResId.MenuContextFrameLinkPlural, "Frame These in Scene");
-		//	m_TextResources.Add(ResId.MenuContextOpenLinkPlural, "Open These");
-		//	m_TextResources.Add(ResId.MenuContextRemoveLinkPlural, "Remove These");
-		//	m_TextResources.Add(ResId.MenuContextSaveLinks, "Save Links");
-
-		//	m_TextResources.Add(ResId.DialogRemoveAllTitle, "Confirm Remove All");
-		//	m_TextResources.Add(ResId.DialogRemoveAllMessage, "Are you sure you want to remove all links from the list?");
-		//	m_TextResources.Add(ResId.DialogYes, "Yes");
-		//	m_TextResources.Add(ResId.DialogNo, "No");
-		//}
-
+		
 		private void CleanUp()
 		{
 			//unload images

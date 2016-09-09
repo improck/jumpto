@@ -18,7 +18,7 @@ namespace ImpRock.JumpTo.Editor
 
 			m_LinkContainer.OnLinksChanged += OnProjectLinksChanged;
 
-			m_ControlTitle = new GUIContent(JumpToResources.Instance.GetText(ResId.LabelProjectLinks));
+			m_Title = new GUIContent(JumpToResources.Instance.GetText(ResId.LabelProjectLinks));
 			m_MenuOpenLink = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextOpenLink));
 			m_MenuOpenLinkPlural = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextOpenLinkPlural));
 		}

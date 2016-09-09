@@ -5,6 +5,13 @@ using System.Collections.Generic;
 
 namespace ImpRock.JumpTo.Editor
 {
+	public struct ControlIcon
+	{
+		public bool Enabled;
+		public Texture2D Icon;
+		public System.Action OnClick;
+	}
+
 	internal abstract class GuiJumpLinkViewBase<T> : GuiBase where T : JumpLink
 	{
 		[SerializeField] protected bool m_HasFocus = false;
@@ -24,13 +31,13 @@ namespace ImpRock.JumpTo.Editor
 		protected bool m_MarkedForClose = false;
 		protected Vector2 m_GrabPosition = Vector2.zero;
 
-		protected GUIContent m_ControlTitle;
+		protected GUIContent m_Title;
 		protected GUIContent m_MenuPingLink;
 		protected GUIContent m_MenuRemoveLink;
 		protected GUIContent m_MenuRemoveAll;
 		protected GUIContent m_MenuRemoveLinkPlural;
 
-		protected Texture2D m_IconHamburger;
+		protected List<ControlIcon> m_ControlIcons = new List<ControlIcon>();
 
 		protected JumpToEditorWindow m_Window;
 
@@ -58,11 +65,15 @@ namespace ImpRock.JumpTo.Editor
 			m_MenuRemoveAll = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextRemoveAll));
 			m_MenuRemoveLinkPlural = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextRemoveLinkPlural));
 
-			m_IconHamburger = JumpToResources.Instance.GetImage(ResId.ImageHamburger);
+			ControlIcon controlIcon = new ControlIcon();
+			controlIcon.Enabled = true;
+			controlIcon.Icon = JumpToResources.Instance.GetImage(ResId.ImageHamburger);
+			controlIcon.OnClick = ShowTitleContextMenu;
+			m_ControlIcons.Add(controlIcon);
 			
-			m_ControlRect.y = 7.0f;
+			m_ControlRect.y = 3.0f;
 			m_ControlRect.width = 10.0f;
-			m_ControlRect.height = 8.0f;
+			m_ControlRect.height = 10.0f;
 
 			m_FoldoutRect.x = 0.0f;
 			m_FoldoutRect.y = 2.0f;
@@ -98,12 +109,25 @@ namespace ImpRock.JumpTo.Editor
 				{
 					if (currentEvent.button == 0)
 					{
-						if (m_ControlRect.Contains(currentEvent.mousePosition))
+						//because you can't ask the currentEvent if it's used...
+						bool clicked = false;
+						for (int i = 0; i < m_ControlIcons.Count; i++)
 						{
-							ShowTitleContextMenu();
-							currentEvent.Use();
+							if (!m_ControlIcons[i].Enabled)
+								continue;
+
+							if (m_ControlRect.Contains(currentEvent.mousePosition))
+							{
+								m_ControlIcons[i].OnClick();
+								currentEvent.Use();
+								clicked = true;
+								break;
+							}
+
+							m_ControlRect.x -= m_ControlRect.width + 4.0f;
 						}
-						else if (m_DrawRect.Contains(currentEvent.mousePosition))
+
+						if (!clicked && m_DrawRect.Contains(currentEvent.mousePosition))
 						{
 							m_HasFocus = true;
 							m_Window.Repaint();
@@ -115,12 +139,19 @@ namespace ImpRock.JumpTo.Editor
 				{
 					GraphicAssets.Instance.LinkViewTitleStyle.Draw(m_DrawRect, GUIContent.none, false, false, false, false);
 
-					GUI.DrawTexture(m_ControlRect, m_IconHamburger);
+					for (int i = 0; i < m_ControlIcons.Count; i++)
+					{
+						if (!m_ControlIcons[i].Enabled)
+							continue;
+
+						GUI.DrawTexture(m_ControlRect, m_ControlIcons[i].Icon);
+						m_ControlRect.x -= m_ControlRect.width + 4.0f;
+					}
 				}
 				break;
 			};
 
-			bool foldout = EditorGUI.Foldout(m_FoldoutRect, m_Foldout, m_ControlTitle, true);
+			bool foldout = EditorGUI.Foldout(m_FoldoutRect, m_Foldout, m_Title, false);
 			if (foldout != m_Foldout)
 			{
 				m_Foldout = foldout;

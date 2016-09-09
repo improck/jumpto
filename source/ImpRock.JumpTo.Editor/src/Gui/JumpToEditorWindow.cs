@@ -118,10 +118,6 @@ internal sealed class JumpToEditorWindow : EditorWindow
 
 		//m_Toolbar.OnWindowEnable(this);
 		m_JumpLinkListView.OnWindowEnable(this);
-
-		GUIContent titleContent = this.titleContent;
-		titleContent.text = "JumpTo";
-		titleContent.image = JumpToResources.Instance.GetImage(ResId.ImageTabIcon);
 	}
 
 	private void OnPostEnable()
@@ -134,6 +130,10 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		//{
 		//	EditorApplication.playmodeStateChanged += OnPlayModeStateChanged;
 		//}
+
+		GUIContent titleContent = this.titleContent;
+		titleContent.text = "JumpTo";
+		titleContent.image = JumpToResources.Instance.GetImage(ResId.ImageTabIcon);
 
 		EditorApplication.hierarchyWindowChanged += OnHierarchyWindowChange;
 	}

@@ -82,6 +82,10 @@
   <ItemGroup>
     <EmbeddedResource Include="res\image\hamburger_pro.png" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="res\image\diskette.png" />
+    <EmbeddedResource Include="res\image\diskette_pro.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy $(TargetPath) $(SolutionDir)..\unityproject\Assets\ImpRock\JumpTo\Editor
