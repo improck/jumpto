@@ -13,6 +13,7 @@ namespace ImpRock.JumpTo.Editor
 
 		private RectRef m_DrawRect = new RectRef();
 		private Rect m_ScrollViewRect;
+		private string m_HelpMessage1;
 
 		private JumpToEditorWindow m_Window;
 
@@ -22,6 +23,8 @@ namespace ImpRock.JumpTo.Editor
 		public override void OnWindowEnable(EditorWindow window)
 		{
 			m_Window = window as JumpToEditorWindow;
+
+			m_HelpMessage1 = JumpToResources.Instance.GetText(ResId.LabelHelpMessage1);
 
 			if (m_ProjectView == null && m_Window.JumpLinksInstance.ProjectLinks.Links.Count > 0)
 			{
@@ -88,51 +91,58 @@ namespace ImpRock.JumpTo.Editor
 
 			HandleDragAndDrop();
 
-			Vector2 iconSizeBak = EditorGUIUtility.GetIconSize();
-			EditorGUIUtility.SetIconSize(IconSize);
-
-			m_DrawRect.Set(0.0f, 0.0f, m_Size.x, m_Size.y);
-
-			//TODO: maybe only calculate this if the height changes?
-			float totalHeight = m_ProjectView != null ? m_ProjectView.TotalHeight : 0.0f;
-			for (int i = 0; i < m_HierarchyViews.Count; i++)
+			if (m_ProjectView != null || m_HierarchyViews.Count > 0)
 			{
-				totalHeight += m_HierarchyViews[i].TotalHeight;
-			}
+				Vector2 iconSizeBak = EditorGUIUtility.GetIconSize();
+				EditorGUIUtility.SetIconSize(IconSize);
 
-			m_ScrollViewRect.height = totalHeight;
-			
-			m_ScrollViewPosition = GUI.BeginScrollView(m_DrawRect, m_ScrollViewPosition, m_ScrollViewRect);
+				m_DrawRect.Set(0.0f, 0.0f, m_Size.x, m_Size.y);
 
-			//if the vertical scrollbar is visible, adjust view rect
-			//	width by the width of the scrollbar (17.0f)
-			if (m_ScrollViewRect.height > m_DrawRect.height)
-				m_DrawRect.width = m_DrawRect.width - 15.0f;
+				//TODO: maybe only calculate this if the height changes?
+				float totalHeight = m_ProjectView != null ? m_ProjectView.TotalHeight : 0.0f;
+				for (int i = 0; i < m_HierarchyViews.Count; i++)
+				{
+					totalHeight += m_HierarchyViews[i].TotalHeight;
+				}
 
-			//draw the project view
-			if (m_ProjectView != null)
-			{
-				m_DrawRect.height = m_ProjectView.TotalHeight;
-				m_ProjectView.Draw(m_DrawRect);
-			}
+				m_ScrollViewRect.height = totalHeight;
+
+				m_ScrollViewPosition = GUI.BeginScrollView(m_DrawRect, m_ScrollViewPosition, m_ScrollViewRect);
+
+				//if the vertical scrollbar is visible, adjust view rect
+				//	width by the width of the scrollbar (17.0f)
+				if (m_ScrollViewRect.height > m_DrawRect.height)
+					m_DrawRect.width = m_DrawRect.width - 15.0f;
+
+				//draw the project view
+				if (m_ProjectView != null)
+				{
+					m_DrawRect.height = m_ProjectView.TotalHeight;
+					m_ProjectView.Draw(m_DrawRect);
+				}
+				else
+				{
+					m_DrawRect.height = 0.0f;
+				}
+
+				//draw all hierarchy views
+				for (int i = 0; i < m_HierarchyViews.Count; i++)
+				{
+					m_DrawRect.y += m_DrawRect.height;
+					m_DrawRect.height = m_HierarchyViews[i].TotalHeight;
+					m_HierarchyViews[i].Draw(m_DrawRect);
+				}
+
+				GUI.EndScrollView(true);
+
+				HandleSelectAllCommand();
+
+				EditorGUIUtility.SetIconSize(iconSizeBak);
+			}	//project or hierarchy views exist
 			else
 			{
-				m_DrawRect.height = 0.0f;
+				EditorGUILayout.HelpBox(m_HelpMessage1, MessageType.Info);
 			}
-
-			//draw all hierarchy views
-			for (int i = 0; i < m_HierarchyViews.Count; i++)
-			{
-				m_DrawRect.y += m_DrawRect.height;
-				m_DrawRect.height = m_HierarchyViews[i].TotalHeight;
-				m_HierarchyViews[i].Draw(m_DrawRect);
-			}
-
-			GUI.EndScrollView(true);
-
-			HandleSelectAllCommand();
-
-			EditorGUIUtility.SetIconSize(iconSizeBak);
 		}
 
 		private void HandleSelectAllCommand()

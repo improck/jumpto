@@ -57,6 +57,8 @@ namespace ImpRock.JumpTo.Editor
 		protected abstract void ShowLinkContextMenu();
 		protected abstract void ShowTitleContextMenu();
 		protected abstract void OnDoubleClick();
+
+		protected virtual void OnRemoveAll() { }
 		
 
 		public void SelectAllAdditive()
@@ -547,6 +549,8 @@ namespace ImpRock.JumpTo.Editor
 				JumpToResources.Instance.GetText(ResId.DialogNo)))
 			{
 				m_LinkContainer.RemoveAll();
+
+				OnRemoveAll();
 			}
 		}
 

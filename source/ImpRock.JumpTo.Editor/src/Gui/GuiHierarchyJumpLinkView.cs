@@ -42,7 +42,7 @@ namespace ImpRock.JumpTo.Editor
 			m_TitleSuffix = " " + JumpToResources.Instance.GetText(ResId.LabelHierarchyLinksSuffix);
 
 			ControlIcon controlIcon = new ControlIcon();
-			controlIcon.Enabled = true;
+			controlIcon.Enabled = m_IsDirty;
 			controlIcon.Icon = JumpToResources.Instance.GetImage(ResId.ImageDiskette);
 			controlIcon.OnClick = SaveLinks;
 			m_SaveIconIndex = m_ControlIcons.Count;
@@ -170,7 +170,13 @@ namespace ImpRock.JumpTo.Editor
 		{
 			FrameLink();
 		}
-		
+
+		protected override void OnRemoveAll()
+		{
+			m_Window.SerializationControlInstance.SaveHierarchyLinks(m_SceneId);
+			m_MarkedForClose = true;
+		}
+
 		private void SetupSceneState()
 		{
 			if (m_SceneState != null)
@@ -282,7 +288,6 @@ namespace ImpRock.JumpTo.Editor
 			}
 			else
 			{
-				m_Window.SerializationControlInstance.SaveHierarchyLinks(m_SceneId);
 				m_MarkedForClose = true;
 			}
 		}

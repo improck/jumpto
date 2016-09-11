@@ -14,6 +14,8 @@ namespace ImpRock.JumpTo.Editor
 		public static readonly int LabelProjectLinks = "label_projectLinks".GetHashCode();
 		public static readonly int LabelHierarchyLinksSuffix = "label_hierarchyLinksSuffix".GetHashCode();
 
+		public static readonly int LabelHelpMessage1 = "label_helpMessage1".GetHashCode();
+
 		public static readonly int MenuContextSelectAll = "menu_contextSelectAll".GetHashCode();
 		public static readonly int MenuContextSelectInverse = "menu_contextSelectInverse".GetHashCode();
 		public static readonly int MenuContextPingLink = "menu_contextPingLink".GetHashCode();
