@@ -36,15 +36,13 @@ namespace ImpRock.JumpTo.Editor
 		public Texture2D IconHierarchyView { get; private set; }
 		
 		//***** GUI STYLES *****
-
+		
 		public GUIStyle LinkViewTitleStyle { get; private set; }
 		public GUIStyle LinkLabelStyle { get; private set; }
 		public GUIStyle ToolbarStyle { get; private set; }
 		public GUIStyle ToolbarButtonStyle { get; private set; }
 		public GUIStyle ToolbarPopupStyle { get; private set; }
 		public GUIStyle DragDropInsertionStyle { get; private set; }
-		//public GUIStyle DividerHorizontalStyle { get; private set; }
-		//public GUIStyle DividerVerticalStyle { get; private set; }
 
 		//***** COLORS *****
 
@@ -55,7 +53,7 @@ namespace ImpRock.JumpTo.Editor
 
 		public readonly Color DisabledColorModifier = new Color(0.0f, 0.0f, 0.0f, 0.4f);
 		public const float LinkHeight = 16.0f;
-		public const float LinkViewTitleBarHeight = 20.0f;
+		public const float LinkViewTitleBarHeight = 18.0f;
 
 
 		public void InitGuiStyle()
@@ -66,9 +64,16 @@ namespace ImpRock.JumpTo.Editor
 			else
 				editorSkin = EditorGUIUtility.GetBuiltinSkin(EditorSkin.Inspector);
 
-			LinkViewTitleStyle = new GUIStyle(editorSkin.GetStyle("IN BigTitle"));
-			LinkViewTitleStyle.name = "JumpTo Title";
+			//LinkViewTitleStyle = new GUIStyle(editorSkin.GetStyle("IN BigTitle"));
+			LinkViewTitleStyle = new GUIStyle(editorSkin.GetStyle("ProjectBrowserTopBarBg"));
+			LinkViewTitleStyle.name = "Link View Title";
 			LinkViewTitleStyle.alignment = TextAnchor.MiddleLeft;
+			LinkViewTitleStyle.clipping = TextClipping.Clip;
+			LinkViewTitleStyle.padding.top = -1;
+			LinkViewTitleStyle.padding.bottom = 0;
+			LinkViewTitleStyle.padding.left = 14;
+			LinkViewTitleStyle.padding.right = 32;
+			LinkViewTitleStyle.font = null;
 
 			LinkLabelStyle = new GUIStyle(editorSkin.GetStyle("PR Label"));
 			LinkLabelStyle.name = "Link Label Style";
@@ -81,16 +86,6 @@ namespace ImpRock.JumpTo.Editor
 			DragDropInsertionStyle = new GUIStyle(editorSkin.GetStyle("PR Insertion"));
 			DragDropInsertionStyle.imagePosition = ImagePosition.ImageOnly;
 			DragDropInsertionStyle.contentOffset = new Vector2(0.0f, -16.0f);
-
-			//DividerHorizontalStyle = new GUIStyle();
-			//DividerHorizontalStyle.name = "JumpTo Divider H";
-			//DividerHorizontalStyle.normal.background = ToolbarStyle.normal.background;
-			//DividerHorizontalStyle.border = new RectOffset(0, 0, 2, 2);
-
-			//DividerVerticalStyle = new GUIStyle();
-			//DividerVerticalStyle.name = "JumpTo Divider V";
-			//DividerVerticalStyle.normal.background = JumpToResources.Instance.GetImage(ResId.ImageDividerVertical);
-			//DividerVerticalStyle.border = new RectOffset(0, 0, 2, 2);
 		}
 
 		public void InitAssets()

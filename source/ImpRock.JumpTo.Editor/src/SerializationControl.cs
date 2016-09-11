@@ -108,6 +108,8 @@ namespace ImpRock.JumpTo.Editor
 			sceneState.OnIsLoadedChange += OnSceneLoadedChange;
 			sceneState.OnClose += OnSceneClosed;
 
+			Debug.Log("OnSceneOpened " + sceneState);
+
 			if (sceneState.IsLoaded)
 			{
 				SetSaveDirectoryPaths();
@@ -148,8 +150,7 @@ namespace ImpRock.JumpTo.Editor
 		//private void WaitForWindowOpenComplete()
 		//{
 		//	SetSaveDirectoryPaths();
-
-		//	LoadSettings();
+		
 		//	LoadProjectLinks();
 		//	//LoadHierarchyLinks();
 		//}
@@ -162,9 +163,13 @@ namespace ImpRock.JumpTo.Editor
 			{
 				LoadProjectLinks();
 			}
-			
+
+			//TODO: when unity first starts up, and JumpTo is already open, only an empty scene exists. scenes load later.
+			//	then why isn't OnSceneOpened getting called?
 			foreach (SceneState sceneState in SceneStateMonitor.Instance.GetSceneStates())
 			{
+				Debug.Log("Loading hierarchy links " + sceneState);
+
 				HierarchyJumpLinkContainer links =
 					m_Window.JumpLinksInstance.GetHierarchyJumpLinkContainer(sceneState.SceneId);
 
@@ -227,7 +232,7 @@ namespace ImpRock.JumpTo.Editor
 					{
 						streamWriter.Close();
 						success = false;
-						Debug.LogError("JumpTo Error: Unable to save project links; error when writing to file\n" + ex.Message);
+						Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[0]) + "\n" + ex.Message);
 					}
 				}
 			}
@@ -269,7 +274,7 @@ namespace ImpRock.JumpTo.Editor
 					{
 						streamWriter.Close();
 						success = false;
-						Debug.LogError("JumpTo Error: Unable to save hierarchy links; error when writing to file\n" + ex.Message);
+						Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[1]) + "\n" + ex.Message);
 					}
 				}
 			}
@@ -307,12 +312,12 @@ namespace ImpRock.JumpTo.Editor
 					}
 					else
 					{
-						Debug.LogError("JumpTo Error: Unable to load project links; file version mismatch");
+						Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[2]));
 					}
 				}
 				catch (System.Exception ex)
 				{
-					Debug.LogError("JumpTo Error: Unable to load project links; error when reading from file\n" + ex.Message);
+					Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[3]) + "\n" + ex.Message);
 				}
 			}
 		}
@@ -345,12 +350,13 @@ namespace ImpRock.JumpTo.Editor
 					}
 					else
 					{
-						Debug.LogError("JumpTo Error: Unable to load hierarchy links; file version mismatch");
+						Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[4]));
 					}
 				}
 				catch (System.Exception ex)
 				{
-					Debug.LogError("JumpTo Error: Unable to load hierarchy links; error when reading from file (" + scene.name + ")\n" + ex.ToString());
+					string logFormat = JumpToResources.Instance.GetText(ResId.LogStatements[5]);
+					Debug.LogError(string.Format(logFormat, scene.name) + "\n" + ex.Message);
 				}
 			}
 		}
@@ -363,8 +369,6 @@ namespace ImpRock.JumpTo.Editor
 
 		private bool CreateSaveDirectories()
 		{
-			//TODO: pull logerror statements from the resource loader
-
 			bool created = true;
 
 			SetSaveDirectoryPaths();
@@ -378,22 +382,26 @@ namespace ImpRock.JumpTo.Editor
 				catch (PathTooLongException)
 				{
 					created = false;
-					Debug.LogError("JumpTo: The save folder path exceeds the max path length allowed by your system " + m_SaveDirectory);
+					string logFormat = JumpToResources.Instance.GetText(ResId.LogStatements[6]);
+					Debug.LogError(string.Format(logFormat, m_SaveDirectory));
 				}
 				catch (IOException)
 				{
 					created = false;
-					Debug.LogError("JumpTo: File exists at path " + m_SaveDirectory + ". Please rename it and save again.");
+					string logFormat = JumpToResources.Instance.GetText(ResId.LogStatements[7]);
+					Debug.LogError(string.Format(logFormat, m_SaveDirectory));
 				}
 				catch (System.UnauthorizedAccessException)
 				{
 					created = false;
-					Debug.LogError("JumpTo: The system reports that the current user is not authorized to create " + m_SaveDirectory);
+					string logFormat = JumpToResources.Instance.GetText(ResId.LogStatements[8]);
+					Debug.LogError(string.Format(logFormat, m_SaveDirectory));
 				}
 				catch (System.ArgumentException)
 				{
 					created = false;
-					Debug.LogError("JumpTo: The save folder contains invalid characters " + m_SaveDirectory);
+					string logFormat = JumpToResources.Instance.GetText(ResId.LogStatements[9]);
+					Debug.LogError(string.Format(logFormat, m_SaveDirectory));
 				}
 			}
 
@@ -406,22 +414,26 @@ namespace ImpRock.JumpTo.Editor
 				catch (PathTooLongException)
 				{
 					created = false;
-					Debug.LogError("JumpTo: The save folder path exceeds the max path length allowed by your system " + m_HierarchySaveDirectory);
+					string logFormat = JumpToResources.Instance.GetText(ResId.LogStatements[10]);
+					Debug.LogError(string.Format(logFormat, m_HierarchySaveDirectory));
 				}
 				catch (IOException)
 				{
 					created = false;
-					Debug.LogError("JumpTo: File exists at path " + m_HierarchySaveDirectory + ". Please rename it and save again.");
+					string logFormat = JumpToResources.Instance.GetText(ResId.LogStatements[11]);
+					Debug.LogError(string.Format(logFormat, m_HierarchySaveDirectory));
 				}
 				catch (System.UnauthorizedAccessException)
 				{
 					created = false;
-					Debug.LogError("JumpTo: The system reports that the current user is not authorized to create " + m_HierarchySaveDirectory);
+					string logFormat = JumpToResources.Instance.GetText(ResId.LogStatements[12]);
+					Debug.LogError(string.Format(logFormat, m_HierarchySaveDirectory));
 				}
 				catch (System.ArgumentException)
 				{
 					created = false;
-					Debug.LogError("JumpTo: The save folder contains invalid characters " + m_HierarchySaveDirectory);
+					string logFormat = JumpToResources.Instance.GetText(ResId.LogStatements[13]);
+					Debug.LogError(string.Format(logFormat, m_HierarchySaveDirectory));
 				}
 			}
 
@@ -430,8 +442,6 @@ namespace ImpRock.JumpTo.Editor
 
 		private bool DeleteSaveFile(string filePath)
 		{
-			//TODO: pull logerror statements from the resource loader
-
 			bool deleted = true;
 
 			if (File.Exists(filePath))
@@ -443,22 +453,26 @@ namespace ImpRock.JumpTo.Editor
 				catch (PathTooLongException)
 				{
 					deleted = false;
-					Debug.LogError("JumpTo: The file path exceeds the max path length allowed by your system " + filePath);
+					string logFormat = JumpToResources.Instance.GetText(ResId.LogStatements[14]);
+					Debug.LogError(string.Format(logFormat, filePath));
 				}
 				catch (IOException)
 				{
 					deleted = false;
-					Debug.LogError("JumpTo: File " + filePath + " is in use. Unable to delete.");
+					string logFormat = JumpToResources.Instance.GetText(ResId.LogStatements[15]);
+					Debug.LogError(string.Format(logFormat, filePath));
 				}
 				catch (System.UnauthorizedAccessException)
 				{
 					deleted = false;
-					Debug.LogError("JumpTo: The system reports that the current user is not authorized to delete " + filePath);
+					string logFormat = JumpToResources.Instance.GetText(ResId.LogStatements[16]);
+					Debug.LogError(string.Format(logFormat, filePath));
 				}
 				catch (System.ArgumentException)
 				{
 					deleted = false;
-					Debug.LogError("JumpTo: The file path contains invalid characters " + filePath);
+					string logFormat = JumpToResources.Instance.GetText(ResId.LogStatements[17]);
+					Debug.LogError(string.Format(logFormat, filePath));
 				}
 			}
 

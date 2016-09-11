@@ -321,12 +321,33 @@ namespace ImpRock.JumpTo.Editor
 
 		public void LinkSelectionInvert()
 		{
-			//TODO: modify Selection.objects?
+			Object[] selectedObjects = Selection.objects;
+			List<Object> totalSelectedObjects = new List<Object>();
 
+			//TODO: make this more efficient
 			for (int i = 0; i < m_Links.Count; i++)
 			{
-				m_Links[i].Selected = !m_Links[i].Selected;
+				if (selectedObjects.Length > 0 && m_Links[i].Selected)
+				{
+					int index = System.Array.IndexOf(selectedObjects, m_Links[i].LinkReference);
+					if (index > -1)
+						selectedObjects[index] = null;
+				}
+				else
+				{
+					totalSelectedObjects.Add(m_Links[i].LinkReference);
+				}
 			}
+
+			for (int i = 0; i < selectedObjects.Length; i++)
+			{
+				if (selectedObjects[i] != null)
+					totalSelectedObjects.Add(selectedObjects[i]);
+			}
+
+			m_ActiveSelection = totalSelectedObjects.Count - 1;
+
+			Selection.objects = totalSelectedObjects.ToArray();
 		}
 
 		public void LinkSelectionAdd(int index)
@@ -368,6 +389,44 @@ namespace ImpRock.JumpTo.Editor
 
 					Selection.objects = totalSelectedObjects;
 				}
+			}
+		}
+
+		public void LinkSelectionAll(bool additive = false)
+		{
+			m_ActiveSelection = 0;
+
+			if (!additive)
+			{
+				int count = m_Links.Count;
+				Object[] totalSelectedObjects = new Object[count];
+				for (int i = 0; i < count; i++)
+				{
+					totalSelectedObjects[i] = m_Links[i].LinkReference;
+				}
+
+				Selection.objects = totalSelectedObjects;
+			}
+			else
+			{
+				Object[] selectedObjects = Selection.objects;
+				List<Object> totalSelectedObjects = new List<Object>();
+				for (int i = 0; i < m_Links.Count; i++)
+				{
+					int index = System.Array.IndexOf(selectedObjects, m_Links[i].LinkReference);
+					if (index > -1)
+						selectedObjects[index] = null;
+
+					totalSelectedObjects.Add(m_Links[i].LinkReference);
+				}
+
+				for (int i = 0; i < selectedObjects.Length; i++)
+				{
+					if (selectedObjects[i] != null)
+						totalSelectedObjects.Add(selectedObjects[i]);
+				}
+
+				Selection.objects = totalSelectedObjects.ToArray();
 			}
 		}
 

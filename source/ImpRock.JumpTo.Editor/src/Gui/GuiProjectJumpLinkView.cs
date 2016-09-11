@@ -45,8 +45,6 @@ namespace ImpRock.JumpTo.Editor
 				menu.AddItem(m_MenuOpenLink, false, OpenAssets);
 				menu.AddSeparator(string.Empty);
 				menu.AddItem(m_MenuRemoveLink, false, RemoveSelected);
-				//TODO: remove all but selected
-				//TODO: invert selection
 			}
 			else if (selectionCount > 1)
 			{
@@ -54,8 +52,6 @@ namespace ImpRock.JumpTo.Editor
 				menu.AddItem(m_MenuOpenLinkPlural, false, OpenAssets);
 				menu.AddSeparator(string.Empty);
 				menu.AddItem(m_MenuRemoveLinkPlural, false, RemoveSelected);
-				//TODO: remove all but selected
-				//TODO: invert selection
 			}
 
 			menu.ShowAsContext();
@@ -66,6 +62,18 @@ namespace ImpRock.JumpTo.Editor
 			if (m_LinkContainer.Links.Count > 0)
 			{
 				GenericMenu menu = new GenericMenu();
+
+				if (m_Foldout)
+					menu.AddItem(m_MenuSelectAll, false, SelectAll);
+				else
+					menu.AddDisabledItem(m_MenuSelectAll);
+
+				if (m_LinkContainer.HasSelection)
+					menu.AddItem(m_MenuSelectInverse, false, SelectInverse);
+				else
+					menu.AddDisabledItem(m_MenuSelectInverse);
+
+				menu.AddSeparator(string.Empty);
 
 				menu.AddItem(m_MenuRemoveAll, false, RemoveAll);
 

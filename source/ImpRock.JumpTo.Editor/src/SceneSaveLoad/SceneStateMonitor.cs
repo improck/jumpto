@@ -71,6 +71,11 @@ namespace ImpRock.JumpTo.Editor
 			OnClose?.Invoke(SceneId);
 			Debug.Log("SceneStateMonitor: scene closed " + Name);
 		}
+
+		public override string ToString()
+		{
+			return SceneId + " " + Name + " " + IsLoaded;
+		}
 	}
 
 	

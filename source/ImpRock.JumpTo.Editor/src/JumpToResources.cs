@@ -14,6 +14,8 @@ namespace ImpRock.JumpTo.Editor
 		public static readonly int LabelProjectLinks = "label_projectLinks".GetHashCode();
 		public static readonly int LabelHierarchyLinksSuffix = "label_hierarchyLinksSuffix".GetHashCode();
 
+		public static readonly int MenuContextSelectAll = "menu_contextSelectAll".GetHashCode();
+		public static readonly int MenuContextSelectInverse = "menu_contextSelectInverse".GetHashCode();
 		public static readonly int MenuContextPingLink = "menu_contextPingLink".GetHashCode();
 		public static readonly int MenuContextSetAsSelection = "menu_contextSetAsSelection".GetHashCode();
 		public static readonly int MenuContextAddToSelection = "menu_contextAddToSelection".GetHashCode();
@@ -43,6 +45,9 @@ namespace ImpRock.JumpTo.Editor
 		public static readonly int ImageTabIcon = "tabicon.png".GetHashCode();
 		public static readonly int ImageHamburger;
 		public static readonly int ImageDiskette;
+
+		public static int[] LogStatements;
+
 
 		static ResId()
 		{
@@ -97,7 +102,6 @@ namespace ImpRock.JumpTo.Editor
 		public void LoadResources()
 		{
 			//text resources
-			//LoadDefaultText();
 			switch (Application.systemLanguage)
 			{
 			case SystemLanguage.English:
@@ -138,6 +142,8 @@ namespace ImpRock.JumpTo.Editor
 					string id = string.Empty;
 					string text = string.Empty;
 
+					List<int> logIds = new List<int>();
+
 					while (!reader.EndOfStream)
 					{
 						line = reader.ReadLine();
@@ -149,6 +155,12 @@ namespace ImpRock.JumpTo.Editor
 						text = line.Substring(equalsPos + 3);
 
 						idHash = id.GetHashCode();
+
+						if (id.StartsWith("log"))
+						{
+							logIds.Add(idHash);
+							text = "JumpTo: " + text;
+						}
 						
 						if (m_TextResources.ContainsKey(idHash))
 						{
@@ -159,6 +171,8 @@ namespace ImpRock.JumpTo.Editor
 							m_TextResources.Add(idHash, text);
 						}
 					}
+
+					ResId.LogStatements = logIds.ToArray();
 				}
 			}
 		}

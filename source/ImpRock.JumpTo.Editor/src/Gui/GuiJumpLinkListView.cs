@@ -130,7 +130,26 @@ namespace ImpRock.JumpTo.Editor
 
 			GUI.EndScrollView(true);
 
+			HandleSelectAllCommand();
+
 			EditorGUIUtility.SetIconSize(iconSizeBak);
+		}
+
+		private void HandleSelectAllCommand()
+		{
+			if (Event.current.type == EventType.ValidateCommand &&
+				Event.current.commandName == "SelectAll")
+			{
+				Selection.objects = new Object[0];
+
+				if (m_ProjectView != null)
+					m_ProjectView.SelectAllAdditive();
+
+				for (int i = 0; i < m_HierarchyViews.Count; i++)
+				{
+					m_HierarchyViews[i].SelectAllAdditive();
+				}
+			}
 		}
 
 		private void HandleDragAndDrop()

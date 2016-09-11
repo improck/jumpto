@@ -12,7 +12,6 @@ internal sealed class JumpToEditorWindow : EditorWindow
 
 
 	[SerializeField] private JumpLinks m_JumpLinks;
-	//[SerializeField] private JumpToSettings m_Settings;
 	[SerializeField] private GuiJumpLinkListView m_JumpLinkListView;
 	[SerializeField] private SceneStateMonitor m_SceneStateMonitor;
 
@@ -23,12 +22,11 @@ internal sealed class JumpToEditorWindow : EditorWindow
 
 	
 	public JumpLinks JumpLinksInstance { get { return m_JumpLinks; } }
-	//public JumpToSettings JumpToSettingsInstance { get { return m_Settings; } }
 	public SceneStateMonitor SceneStateMonitorInstance { get { return m_SceneStateMonitor; } }
 	public SerializationControl SerializationControlInstance { get { return m_SerializationControl; } }
 
 
-	//NOTE: nobody's using these right now
+	//NOTE: not using these right now
 	//public static event EditorApplication.CallbackFunction OnWindowOpen;
 	//public static event EditorApplication.CallbackFunction OnWillEnable;
 	//public static event EditorApplication.CallbackFunction OnWillDisable;
@@ -65,17 +63,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		{
 			m_JumpLinks = JumpLinks.Create();
 		}
-
-		//if (m_Settings == null)
-		//{
-		//	m_Settings = JumpToSettings.Create();
-		//}
-
-		//if (m_Toolbar == null)
-		//{
-		//	m_Toolbar = GuiBase.Create<GuiToolbar>();
-		//}
-
+		
 		if (m_JumpLinkListView == null)
 		{
 			m_JumpLinkListView = GuiBase.Create<GuiJumpLinkListView>();
@@ -104,10 +92,6 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		//		OnWindowOpen();
 		//}
 
-		//NOTE: nobody's using it right now
-		//if (OnWillEnable != null)
-		//	OnWillEnable();
-
 		m_SerializationControl.OnWindowEnable();
 
 		RefreshMinSize();
@@ -115,8 +99,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		m_JumpLinks.RefreshProjectLinks();
 		m_JumpLinks.RefreshHierarchyLinks();
 		m_LastHierarchyRefreshTime = EditorApplication.timeSinceStartup;
-
-		//m_Toolbar.OnWindowEnable(this);
+		
 		m_JumpLinkListView.OnWindowEnable(this);
 	}
 

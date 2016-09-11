@@ -20,7 +20,7 @@ namespace ImpRock.JumpTo.Editor
 		[SerializeField] private int m_SceneId = 0;
 
 		public int SceneId { get { return m_SceneId; } set { m_SceneId = value; } }
-		
+
 
 		public override void OnWindowEnable(EditorWindow window)
 		{
@@ -132,16 +132,29 @@ namespace ImpRock.JumpTo.Editor
 		{
 			GenericMenu menu = null;
 
-			if (m_IsDirty)
-			{
-				menu = new GenericMenu();
-				menu.AddItem(m_MenuSaveLinks, false, SaveLinks);
-			}
-
 			if (m_LinkContainer.Links.Count > 0)
 			{
 				if (menu == null)
 					menu = new GenericMenu();
+
+				if (m_IsDirty)
+					menu.AddItem(m_MenuSaveLinks, false, SaveLinks);
+				else
+					menu.AddDisabledItem(m_MenuSaveLinks);
+
+				menu.AddSeparator(string.Empty);
+
+				if (m_Foldout)
+					menu.AddItem(m_MenuSelectAll, false, SelectAll);
+				else
+					menu.AddDisabledItem(m_MenuSelectAll);
+
+				if (m_Foldout && m_LinkContainer.HasSelection)
+					menu.AddItem(m_MenuSelectInverse, false, SelectInverse);
+				else
+					menu.AddDisabledItem(m_MenuSelectInverse);
+
+				menu.AddSeparator(string.Empty);
 
 				menu.AddItem(m_MenuRemoveAll, false, RemoveAll);
 			}
@@ -209,7 +222,7 @@ namespace ImpRock.JumpTo.Editor
 
 			m_Title.text = title;
 		}
-
+		
 		private void FrameLink()
 		{
 			SceneView sceneView = SceneView.lastActiveSceneView;

@@ -32,6 +32,8 @@ namespace ImpRock.JumpTo.Editor
 		protected Vector2 m_GrabPosition = Vector2.zero;
 
 		protected GUIContent m_Title;
+		protected GUIContent m_MenuSelectAll;
+		protected GUIContent m_MenuSelectInverse;
 		protected GUIContent m_MenuPingLink;
 		protected GUIContent m_MenuRemoveLink;
 		protected GUIContent m_MenuRemoveAll;
@@ -44,6 +46,7 @@ namespace ImpRock.JumpTo.Editor
 		protected JumpLinkContainer<T> m_LinkContainer = null;
 
 
+		public bool Foldout { get { return m_Foldout; } set { m_Foldout = value; } }
 		public bool IsDragOwner { get { return m_DragOwner; } }
 		public bool HasFocus { get { return m_HasFocus; } set { m_HasFocus = value; } }
 		public bool IsFocusedControl { get { return m_Window == EditorWindow.focusedWindow && m_HasFocus; } }
@@ -56,10 +59,20 @@ namespace ImpRock.JumpTo.Editor
 		protected abstract void OnDoubleClick();
 		
 
+		public void SelectAllAdditive()
+		{
+			if (m_Foldout)
+			{
+				m_LinkContainer.LinkSelectionAll(true);
+			}
+		}
+
 		public override void OnWindowEnable(EditorWindow window)
 		{
 			m_Window = window as JumpToEditorWindow;
 
+			m_MenuSelectAll = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextSelectAll));
+			m_MenuSelectInverse = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextSelectInverse));
 			m_MenuPingLink = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextPingLink));
 			m_MenuRemoveLink = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextRemoveLink));
 			m_MenuRemoveAll = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextRemoveAll));
@@ -71,12 +84,12 @@ namespace ImpRock.JumpTo.Editor
 			controlIcon.OnClick = ShowTitleContextMenu;
 			m_ControlIcons.Add(controlIcon);
 			
-			m_ControlRect.y = 3.0f;
 			m_ControlRect.width = 10.0f;
 			m_ControlRect.height = 10.0f;
+			m_ControlRect.y = (GraphicAssets.LinkViewTitleBarHeight - m_ControlRect.height) * 0.5f;
 
 			m_FoldoutRect.x = 0.0f;
-			m_FoldoutRect.y = 2.0f;
+			m_FoldoutRect.y = 1.0f;
 			m_FoldoutRect.width = 16.0f;
 			m_FoldoutRect.height = 16.0f;
 
@@ -100,7 +113,20 @@ namespace ImpRock.JumpTo.Editor
 		{
 			m_DrawRect.Set(0.0f, 0.0f, m_Size.x, GraphicAssets.LinkViewTitleBarHeight);
 
+			if (m_Foldout)
+				m_DrawRect.height += 2.0f;
+
 			m_ControlRect.x = m_Size.x - (m_ControlRect.width + 6.0f);
+
+			//TODO: make this more efficient
+			int titlePaddingRight = 8;
+			for (int i = 0; i < m_ControlIcons.Count; i++)
+			{
+				if (m_ControlIcons[i].Enabled)
+					titlePaddingRight += (int)m_ControlRect.width + 4;
+			}
+
+			GraphicAssets.Instance.LinkViewTitleStyle.padding.right = titlePaddingRight;
 			
 			Event currentEvent = Event.current;
 			switch (currentEvent.type)
@@ -109,8 +135,6 @@ namespace ImpRock.JumpTo.Editor
 				{
 					if (currentEvent.button == 0)
 					{
-						//because you can't ask the currentEvent if it's used...
-						bool clicked = false;
 						for (int i = 0; i < m_ControlIcons.Count; i++)
 						{
 							if (!m_ControlIcons[i].Enabled)
@@ -119,15 +143,14 @@ namespace ImpRock.JumpTo.Editor
 							if (m_ControlRect.Contains(currentEvent.mousePosition))
 							{
 								m_ControlIcons[i].OnClick();
-								currentEvent.Use();
-								clicked = true;
+								currentEvent.Use();	//changes the event type to Used
 								break;
 							}
 
 							m_ControlRect.x -= m_ControlRect.width + 4.0f;
 						}
 
-						if (!clicked && m_DrawRect.Contains(currentEvent.mousePosition))
+						if (currentEvent.type != EventType.Used && m_DrawRect.Contains(currentEvent.mousePosition))
 						{
 							m_HasFocus = true;
 							m_Window.Repaint();
@@ -137,7 +160,7 @@ namespace ImpRock.JumpTo.Editor
 				break;
 			case EventType.Repaint:
 				{
-					GraphicAssets.Instance.LinkViewTitleStyle.Draw(m_DrawRect, GUIContent.none, false, false, false, false);
+					GraphicAssets.Instance.LinkViewTitleStyle.Draw(m_DrawRect, m_Title, false, false, false, false);
 
 					for (int i = 0; i < m_ControlIcons.Count; i++)
 					{
@@ -151,7 +174,9 @@ namespace ImpRock.JumpTo.Editor
 				break;
 			};
 
-			bool foldout = EditorGUI.Foldout(m_FoldoutRect, m_Foldout, m_Title, false);
+			m_FoldoutRect.width = m_Size.x - titlePaddingRight;
+
+			bool foldout = EditorGUI.Foldout(m_FoldoutRect, m_Foldout, GUIContent.none, true);
 			if (foldout != m_Foldout)
 			{
 				m_Foldout = foldout;
@@ -237,9 +262,6 @@ namespace ImpRock.JumpTo.Editor
 		{
 			Event currentEvent = Event.current;
 
-			//if (!m_ScrollViewRect.Contains(currentEvent.mousePosition))
-			//	return;
-
 			if (!m_HasFocus)
 				m_Window.Repaint();
 
@@ -308,21 +330,13 @@ namespace ImpRock.JumpTo.Editor
 					//if links are currently selected
 					if (m_LinkContainer.HasSelection)
 					{
-						//and the click was not on a link (below last link)
-						if (hit == -1)
-						{
-							//m_LinkContainer.LinkSelectionClear();
-							//TODO: show a new context menu
-
-							//m_Window.Repaint();
-						}
-						//or the link that was clicked was already selected
-						else if (m_LinkContainer[hit].Selected)
+						//if the link that was clicked was already selected
+						if (m_LinkContainer[hit].Selected)
 						{
 							m_LinkContainer.ActiveSelection = hit;
 						}
 						//or a new link was selected
-						else
+						else if (hit > -1)
 						{
 							m_LinkContainer.LinkSelectionSet(hit);
 						}
@@ -380,8 +394,7 @@ namespace ImpRock.JumpTo.Editor
 				//	!(links[m_Grabbed].Area.RectInternal.Contains(currentEvent.mousePosition)))
 				{
 					m_DragOwner = true;
-
-					//Debug.Log("Start Drag");
+					
 					DragAndDrop.PrepareStartDrag();
 					DragAndDrop.paths = new string[] { };
 					DragAndDrop.objectReferences = m_LinkContainer.SelectedLinkReferences;
@@ -502,10 +515,27 @@ namespace ImpRock.JumpTo.Editor
 				m_DrawRect.y += m_DrawRect.height;
 			}
 
+			//padding on the bottom, in case we draw something under
+			//	the links some day
+			m_DrawRect.y += 2.0f;
+
 			if (m_DragInsert && m_InsertionIndex > -1)
 			{
 				graphicAssets.DragDropInsertionStyle.Draw(m_InsertionDrawRect, false, false, false, false);
 			}
+		}
+
+		protected void SelectAll()
+		{
+			if (m_Foldout)
+			{
+				m_LinkContainer.LinkSelectionAll();
+			}
+		}
+
+		protected void SelectInverse()
+		{
+			m_LinkContainer.LinkSelectionInvert();
 		}
 
 		protected void RemoveAll()
@@ -559,9 +589,13 @@ namespace ImpRock.JumpTo.Editor
 
 		protected void FindTotalHeight()
 		{
-			//toolbar height + (link height * link count)
-			float linksHeight = m_Foldout ? (m_LinkContainer.Links.Count * GraphicAssets.LinkHeight) : 0.0f;
-			m_TotalHeight = GraphicAssets.LinkViewTitleBarHeight + linksHeight;
+			//toolbar height + (link height * link count) + padding
+			m_TotalHeight = GraphicAssets.LinkViewTitleBarHeight;
+
+			if (m_Foldout)
+			{
+				m_TotalHeight += (m_LinkContainer.Links.Count * GraphicAssets.LinkHeight) + 4.0f;
+			}
 		}
 	}
 }

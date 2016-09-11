@@ -4,6 +4,8 @@
 
 label_projectLinks = Project Links
 label_hierarchyLinksSuffix = Links
+menu_contextSelectAll = Select All
+menu_contextSelectInverse = Select Inverse
 menu_contextPingLink = Ping
 menu_contextSetAsSelection = Set This as Selection
 menu_contextAddToSelection = Add This to Selection
@@ -25,3 +27,23 @@ dialog_yes = Yes
 dialog_no = No
 dialog_ok = OK
 dialog_cancel = Cancel
+
+; Log Statements
+log0000 = Unable to save project links; error when writing to file
+log0001 = Unable to save hierarchy links; error when writing to file
+log0002 = Unable to load project links; file version mismatch
+log0003 = Unable to load project links; error when reading from file
+log0004 = Unable to load hierarchy links; file version mismatch
+log0005 = Unable to load hierarchy links; error when reading from file ({0})
+log0006 = The save folder path exceeds the max path length allowed by your system {0}
+log0007 = File exists at path {0}. Please rename it and save again.
+log0008 = The system reports that the current user is not authorized to create {0}
+log0009 = The save folder contains invalid characters {0}
+log0010 = The save folder path exceeds the max path length allowed by your system {0}
+log0011 = File exists at path {0}. Please rename it and save again.
+log0012 = The system reports that the current user is not authorized to create {0}
+log0013 = The save folder contains invalid characters {0}
+log0014 = The file path exceeds the max path length allowed by your system {0}
+log0015 = File {0} is in use. Unable to delete.
+log0016 = The system reports that the current user is not authorized to delete {0}
+log0017 = The file path contains invalid characters {0}
