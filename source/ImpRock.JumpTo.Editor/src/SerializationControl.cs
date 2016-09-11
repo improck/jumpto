@@ -108,8 +108,6 @@ namespace ImpRock.JumpTo.Editor
 			sceneState.OnIsLoadedChange += OnSceneLoadedChange;
 			sceneState.OnClose += OnSceneClosed;
 
-			Debug.Log("OnSceneOpened " + sceneState);
-
 			if (sceneState.IsLoaded)
 			{
 				SetSaveDirectoryPaths();
@@ -117,26 +115,18 @@ namespace ImpRock.JumpTo.Editor
 			}
 		}
 		
-		private void OnSceneLoadedChange(int sceneId, bool isLoaded)
+		private void OnSceneLoadedChange(SceneState sceneState, bool isLoaded)
 		{
 			SetSaveDirectoryPaths();
 
-			Debug.Log("Scene load change: " + isLoaded);
-
 			if (isLoaded)
 			{
-				SceneState sceneState = SceneStateMonitor.Instance.GetSceneState(sceneId);
-				LoadHierarchyLinks(sceneId, sceneState.Scene);
-			}
-			else
-			{
-				//TODO: handle scene unload (???)
+				LoadHierarchyLinks(sceneState.SceneId, sceneState.Scene);
 			}
 		}
 
-		private void OnSceneClosed(int sceneId)
+		private void OnSceneClosed(SceneState sceneState)
 		{
-			SceneState sceneState = SceneStateMonitor.Instance.GetSceneState(sceneId);
 			sceneState.OnClose -= OnSceneClosed;
 			sceneState.OnIsLoadedChange -= OnSceneLoadedChange;
 		}
@@ -164,12 +154,8 @@ namespace ImpRock.JumpTo.Editor
 				LoadProjectLinks();
 			}
 
-			//TODO: when unity first starts up, and JumpTo is already open, only an empty scene exists. scenes load later.
-			//	then why isn't OnSceneOpened getting called?
 			foreach (SceneState sceneState in SceneStateMonitor.Instance.GetSceneStates())
 			{
-				Debug.Log("Loading hierarchy links " + sceneState);
-
 				HierarchyJumpLinkContainer links =
 					m_Window.JumpLinksInstance.GetHierarchyJumpLinkContainer(sceneState.SceneId);
 

@@ -29,6 +29,9 @@ namespace ImpRock.JumpTo.Editor
 			
 			base.OnWindowEnable(window);
 
+			if (m_MarkedForClose)
+				return;
+
 			m_LinkContainer.OnLinksChanged += OnHierarchyLinksChanged;
 
 			m_Title = new GUIContent();
@@ -194,12 +197,13 @@ namespace ImpRock.JumpTo.Editor
 				}
 				else
 				{
-					Debug.LogError("JumpTo: Attempted to create a link view for an invalid scene (ID: " + m_SceneId + ").");
+					string logFormat = JumpToResources.Instance.GetText(ResId.LogStatements[18]);
+					Debug.LogError(string.Format(logFormat, m_SceneId));
 				}
 			}
 			else
 			{
-				Debug.LogError("JumpTo: Attempted to create a link view for scene ID 0, which is invalid.");
+				Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[19]));
 			}
 		}
 
@@ -249,7 +253,7 @@ namespace ImpRock.JumpTo.Editor
 				JumpToResources resources = JumpToResources.Instance;
 				if (EditorUtility.DisplayDialog(resources.GetText(ResId.DialogSaveLinksWarningTitle),
 					resources.GetText(ResId.DialogSaveLinksWarningMessage),
-					resources.GetText(ResId.DialogOk), resources.GetText(ResId.DialogCancel)))
+					resources.GetText(ResId.DialogSaveLinks), resources.GetText(ResId.DialogCancel)))
 				{
 					m_Window.SerializationControlInstance.SaveHierarchyLinks(m_SceneId);
 
@@ -283,17 +287,17 @@ namespace ImpRock.JumpTo.Editor
 			}
 		}
 
-		private void OnSceneNameChanged(int sceneId, string sceneName)
+		private void OnSceneNameChanged(SceneState sceneState, string sceneName)
 		{
 			RefreshControlTitle();
 		}
 
-		private void OnSceneIsDirtyChanged(int sceneId, bool isDirty)
+		private void OnSceneIsDirtyChanged(SceneState sceneState, bool isDirty)
 		{
 			SetSaveDirty(m_IsDirty || isDirty);
 		}
 
-		private void OnSceneIsLoadedChanged(int sceneId, bool isLoaded)
+		private void OnSceneIsLoadedChanged(SceneState sceneState, bool isLoaded)
 		{
 			Debug.Log("Scene load change: " + m_Title.text + " isLoaded " + isLoaded);
 			if (!isLoaded)
@@ -307,7 +311,7 @@ namespace ImpRock.JumpTo.Editor
 			}
 		}
 
-		private void OnSceneClosed(int sceneId)
+		private void OnSceneClosed(SceneState sceneState)
 		{
 			Debug.Log("Scene closed: " + m_Title.text);
 			m_LinkContainer.OnLinksChanged -= OnHierarchyLinksChanged;

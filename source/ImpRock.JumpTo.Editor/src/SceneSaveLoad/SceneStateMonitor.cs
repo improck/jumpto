@@ -26,12 +26,12 @@ namespace ImpRock.JumpTo.Editor
 		public bool DiffIsLoaded { get { return IsLoaded != Scene.isLoaded; } }
 
 
-		public event System.Action<int, string> OnNameChange;
-		public event System.Action<int, string> OnPathChange;
-		public event System.Action<int, int> OnRootCountChange;
-		public event System.Action<int, bool> OnIsDirtyChange;
-		public event System.Action<int, bool> OnIsLoadedChange;
-		public event System.Action<int> OnClose;
+		public event System.Action<SceneState, string> OnNameChange;
+		public event System.Action<SceneState, string> OnPathChange;
+		public event System.Action<SceneState, int> OnRootCountChange;
+		public event System.Action<SceneState, bool> OnIsDirtyChange;
+		public event System.Action<SceneState, bool> OnIsLoadedChange;
+		public event System.Action<SceneState> OnClose;
 		
 
 		public SceneState(Scene scene)
@@ -48,15 +48,15 @@ namespace ImpRock.JumpTo.Editor
 		public void UpdateInfo()
 		{
 			if (OnNameChange != null && DiffName)
-				OnNameChange(SceneId, Scene.name);
+				OnNameChange(this, Scene.name);
 			if (OnPathChange != null && DiffPath)
-				OnPathChange(SceneId, Scene.path);
+				OnPathChange(this, Scene.path);
 			if (OnRootCountChange != null && DiffRootCount)
-				OnRootCountChange(SceneId, Scene.rootCount);
+				OnRootCountChange(this, Scene.rootCount);
 			if (OnIsDirtyChange != null && DiffIsDirty)
-				OnIsDirtyChange(SceneId, Scene.isDirty);
+				OnIsDirtyChange(this, Scene.isDirty);
 			if (OnIsLoadedChange != null && DiffIsLoaded)
-				OnIsLoadedChange(SceneId, Scene.isLoaded);
+				OnIsLoadedChange(this, Scene.isLoaded);
 				
 			SceneId = Scene.GetHashCode();
 			Name = Scene.name;
@@ -68,7 +68,7 @@ namespace ImpRock.JumpTo.Editor
 
 		public void SceneClosed()
 		{
-			OnClose?.Invoke(SceneId);
+			OnClose?.Invoke(this);
 			Debug.Log("SceneStateMonitor: scene closed " + Name);
 		}
 
@@ -115,10 +115,7 @@ namespace ImpRock.JumpTo.Editor
 		public static event System.Action<string> OnSceneSaved;
 
 
-		private static void Initialize()
-		{
-			s_Instance.InternalInitialize();
-		}
+		private static void Initialize() { }
 
 
 		//***** Merged from SceneStateControl *****
@@ -180,7 +177,9 @@ namespace ImpRock.JumpTo.Editor
 						s_Instance.m_HierarchyChanged = false;
 					}
 					else
+					{
 						Debug.Log("SceneWillLoad: Hierarchy has NOT changed");
+					}
 
 					EditorApplication.hierarchyWindowChanged -= DetectRecompile;
 				};
@@ -212,8 +211,10 @@ namespace ImpRock.JumpTo.Editor
 			return sceneStates;
 		}
 
-		public void InitializeSceneStates()
+		public void InitializeSceneStateData()
 		{
+			EditorApplication.hierarchyWindowChanged += OnHierarchyWindowChanged;
+
 			m_SceneCount = EditorSceneManager.sceneCount;
 			m_LoadedSceneCount = EditorSceneManager.loadedSceneCount;
 
@@ -223,64 +224,62 @@ namespace ImpRock.JumpTo.Editor
 				m_SceneStates[scene.GetHashCode()] = new SceneState(scene);
 			}
 		}
-		
-		private void InternalInitialize()
-		{
-			EditorApplication.delayCall +=
-				delegate ()
-				{
-					EditorApplication.hierarchyWindowChanged += OnHierarchyWindowChanged;
-				};
-		}
 
 		private void OnHierarchyWindowChanged()
 		{
-			int sceneCount = EditorSceneManager.sceneCount;
-			if (m_SceneCount != sceneCount)
+			int currentSceneCount = EditorSceneManager.sceneCount;
+
+			//TODO: there has got to be a more efficient way to do this!
+
+			//find newly opened scenes
+			bool sceneStateChanged = false;
+			int[] currentSceneIds = new int[currentSceneCount];
+			for (int i = 0; i < currentSceneCount; i++)
 			{
-				OnSceneCountChanged?.Invoke(m_SceneCount, sceneCount);
-
-				m_SceneCount = sceneCount;
-				
-				//find newly opened scenes
-				int[] allSceneIds = new int[m_SceneCount];
-				for (int i = 0; i < m_SceneCount; i++)
+				Scene scene = EditorSceneManager.GetSceneAt(i);
+				currentSceneIds[i] = scene.GetHashCode();
+				if (!m_SceneStates.ContainsKey(currentSceneIds[i]))
 				{
-					Scene scene = EditorSceneManager.GetSceneAt(i);
-					allSceneIds[i] = scene.GetHashCode();
-					if (!m_SceneStates.ContainsKey(allSceneIds[i]))
-					{
-						SceneState sceneState = new SceneState(scene);
-						m_SceneStates[allSceneIds[i]] = sceneState;
-						OnSceneOpened?.Invoke(sceneState);
-						Debug.Log("SceneStateMonitor: scene open " + sceneState.Name);
-					}
+					sceneStateChanged = true;
+					SceneState sceneState = new SceneState(scene);
+					m_SceneStates[currentSceneIds[i]] = sceneState;
+					OnSceneOpened?.Invoke(sceneState);
 				}
-
-				//find newly closed scenes & make a new dictionary
-				Dictionary<int, SceneState> sceneStates = new Dictionary<int, SceneState>();
-				foreach (KeyValuePair<int, SceneState> sceneStatePair in m_SceneStates)
-				{
-					if (System.Array.IndexOf(allSceneIds, sceneStatePair.Key) > -1)
-					{
-						sceneStates.Add(sceneStatePair.Key, sceneStatePair.Value);
-					}
-					else
-					{
-						sceneStatePair.Value.SceneClosed();
-					}
-				}
-
-				m_SceneStates = sceneStates;
 			}
 
-			sceneCount = EditorSceneManager.loadedSceneCount;
-			if (m_LoadedSceneCount != sceneCount)
+			//find newly closed scenes
+			Dictionary<int, SceneState> currentSceneStates = new Dictionary<int, SceneState>();
+			foreach (KeyValuePair<int, SceneState> sceneState in m_SceneStates)
 			{
-				OnLoadedSceneCountChanged?.Invoke(m_LoadedSceneCount, sceneCount);
-				Debug.Log("SceneStateMonitor: loaded scene count changed " + m_LoadedSceneCount + " -> " + sceneCount);
+				if (!ArrayUtility.Contains(currentSceneIds, sceneState.Key))
+				{
+					sceneStateChanged = true;
+					sceneState.Value.SceneClosed();
+				}
+				else
+				{
+					currentSceneStates.Add(sceneState.Key, sceneState.Value);
+				}
+			}
 
-				m_LoadedSceneCount = sceneCount;
+			if (sceneStateChanged)
+			{
+				m_SceneStates = currentSceneStates;
+			}
+
+			if (m_SceneCount != currentSceneCount)
+			{
+				OnSceneCountChanged?.Invoke(m_SceneCount, currentSceneCount);
+
+				m_SceneCount = currentSceneCount;
+			}
+
+			currentSceneCount = EditorSceneManager.loadedSceneCount;
+			if (m_LoadedSceneCount != currentSceneCount)
+			{
+				OnLoadedSceneCountChanged?.Invoke(m_LoadedSceneCount, currentSceneCount);
+				
+				m_LoadedSceneCount = currentSceneCount;
 			}
 
 			UpdateSceneData();

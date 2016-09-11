@@ -57,7 +57,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 			m_SceneStateMonitor = SceneStateMonitor.Create();
 		}
 
-		m_SceneStateMonitor.InitializeSceneStates();
+		m_SceneStateMonitor.InitializeSceneStateData();
 
 		if (m_JumpLinks == null)
 		{
@@ -101,6 +101,10 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		m_LastHierarchyRefreshTime = EditorApplication.timeSinceStartup;
 		
 		m_JumpLinkListView.OnWindowEnable(this);
+
+		GUIContent titleContent = this.titleContent;
+		titleContent.text = "JumpTo";
+		titleContent.image = JumpToResources.Instance.GetImage(ResId.ImageTabIcon);
 	}
 
 	private void OnPostEnable()
@@ -117,7 +121,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		GUIContent titleContent = this.titleContent;
 		titleContent.text = "JumpTo";
 		titleContent.image = JumpToResources.Instance.GetImage(ResId.ImageTabIcon);
-
+		
 		EditorApplication.hierarchyWindowChanged += OnHierarchyWindowChange;
 	}
 
