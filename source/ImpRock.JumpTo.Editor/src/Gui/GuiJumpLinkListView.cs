@@ -84,8 +84,11 @@ namespace ImpRock.JumpTo.Editor
 			{
 				if (m_HierarchyViews[i].MarkedForClose)
 				{
+					int sceneId = m_HierarchyViews[i].SceneId;
 					DestroyImmediate(m_HierarchyViews[i]);
 					m_HierarchyViews.RemoveAt(i);
+
+					m_Window.JumpLinksInstance.RemoveHierarchyJumpLinkContainer(sceneId);
 				}
 			}
 

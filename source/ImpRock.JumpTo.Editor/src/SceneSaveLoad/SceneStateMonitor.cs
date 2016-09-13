@@ -19,13 +19,6 @@ namespace ImpRock.JumpTo.Editor
 		public Scene Scene;
 		
 		
-		public bool DiffName { get { return Name != Scene.name; } }
-		public bool DiffPath { get { return Path != Scene.path; } }
-		public bool DiffRootCount { get { return RootCount != Scene.rootCount; } }
-		public bool DiffIsDirty { get { return IsDirty != Scene.isDirty; } }
-		public bool DiffIsLoaded { get { return IsLoaded != Scene.isLoaded; } }
-
-
 		public event System.Action<SceneState, string> OnNameChange;
 		public event System.Action<SceneState, string> OnPathChange;
 		public event System.Action<SceneState, int> OnRootCountChange;
@@ -47,29 +40,34 @@ namespace ImpRock.JumpTo.Editor
 
 		public void UpdateInfo()
 		{
-			if (OnNameChange != null && DiffName)
-				OnNameChange(this, Scene.name);
-			if (OnPathChange != null && DiffPath)
-				OnPathChange(this, Scene.path);
-			if (OnRootCountChange != null && DiffRootCount)
-				OnRootCountChange(this, Scene.rootCount);
-			if (OnIsDirtyChange != null && DiffIsDirty)
-				OnIsDirtyChange(this, Scene.isDirty);
-			if (OnIsLoadedChange != null && DiffIsLoaded)
-				OnIsLoadedChange(this, Scene.isLoaded);
-				
+			string oldName = Name;
+			string oldPath = Path;
+			int oldRootCount = RootCount;
+			bool oldIsDirty = IsDirty;
+			bool oldIsLoaded = IsLoaded;
+
 			SceneId = Scene.GetHashCode();
 			Name = Scene.name;
 			Path = Scene.path;
 			RootCount = Scene.rootCount;
 			IsDirty = Scene.isDirty;
 			IsLoaded = Scene.isLoaded;
+
+			if (OnRootCountChange != null && oldRootCount != RootCount)
+				OnRootCountChange(this, oldRootCount);
+			if (OnIsDirtyChange != null && oldIsDirty != IsDirty)
+				OnIsDirtyChange(this, oldIsDirty);
+			if (OnIsLoadedChange != null && oldIsLoaded != IsLoaded)
+				OnIsLoadedChange(this, oldIsLoaded);
+			if (OnPathChange != null && oldPath != Path)
+				OnPathChange(this, oldPath);
+			if (OnNameChange != null && oldName != Name)
+				OnNameChange(this, oldName);
 		}
 
 		public void SceneClosed()
 		{
 			OnClose?.Invoke(this);
-			Debug.Log("SceneStateMonitor: scene closed " + Name);
 		}
 
 		public override string ToString()
@@ -111,36 +109,12 @@ namespace ImpRock.JumpTo.Editor
 		public static event System.Action<int, int> OnSceneCountChanged;
 		public static event System.Action<int, int> OnLoadedSceneCountChanged;
 		public static event System.Action<SceneState> OnSceneOpened;
-		public static event System.Action<string> OnSceneWillSave;
-		public static event System.Action<string> OnSceneSaved;
-
+		
 
 		private static void Initialize() { }
 
 
 		//***** Merged from SceneStateControl *****
-
-		/// <summary>
-		/// Called from SceneSaveDetector
-		/// </summary>
-		/// <param name="sceneAssetPath">The relative path to the scene being saved</param>
-		public static void SceneWillSave(string sceneAssetPath)
-		{
-			if (s_Instance == null)
-				return;
-			
-			SceneLoadDetector.TemporarilyDestroyInstance(true);
-
-			if (OnSceneWillSave != null)
-				OnSceneWillSave(sceneAssetPath);
-
-			EditorApplication.delayCall +=
-				delegate ()
-				{
-					if (OnSceneSaved != null)
-						OnSceneSaved(sceneAssetPath);
-				};
-		}
 
 		/// <summary>
 		/// Called from SceneLoadDetector
@@ -208,6 +182,7 @@ namespace ImpRock.JumpTo.Editor
 		{
 			SceneState[] sceneStates = new SceneState[m_SceneStates.Count];
 			m_SceneStates.Values.CopyTo(sceneStates, 0);
+
 			return sceneStates;
 		}
 

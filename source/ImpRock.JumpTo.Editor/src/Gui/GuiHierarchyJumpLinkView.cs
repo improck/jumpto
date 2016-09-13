@@ -51,13 +51,13 @@ namespace ImpRock.JumpTo.Editor
 			SetupSceneState();
 		}
 
-		protected override void OnCreate()
-		{
-			base.OnCreate();
+		//protected override void OnCreate()
+		//{
+		//	base.OnCreate();
 
-			//TODO: freshly loaded hierarchy links should not be marked dirty
-			m_IsDirty = true;
-		}
+		//	//TODO: freshly loaded hierarchy links should not be marked dirty
+		//	m_IsDirty = true;
+		//}
 
 		protected override void OnDestroy()
 		{
@@ -65,6 +65,7 @@ namespace ImpRock.JumpTo.Editor
 
 			m_LinkContainer.OnLinksChanged -= OnHierarchyLinksChanged;
 			m_SceneState.OnNameChange -= OnSceneNameChanged;
+			m_SceneState.OnPathChange -= OnScenePathChanged;
 			m_SceneState.OnIsDirtyChange -= OnSceneIsDirtyChanged;
 			m_SceneState.OnIsLoadedChange -= OnSceneIsLoadedChanged;
 			m_SceneState.OnClose -= OnSceneClosed;
@@ -182,6 +183,7 @@ namespace ImpRock.JumpTo.Editor
 			if (m_SceneState != null)
 			{
 				m_SceneState.OnNameChange -= OnSceneNameChanged;
+				m_SceneState.OnPathChange -= OnScenePathChanged;
 				m_SceneState.OnIsDirtyChange -= OnSceneIsDirtyChanged;
 				m_SceneState.OnIsLoadedChange -= OnSceneIsLoadedChanged;
 				m_SceneState.OnClose -= OnSceneClosed;
@@ -197,6 +199,7 @@ namespace ImpRock.JumpTo.Editor
 					RefreshControlTitle();
 
 					m_SceneState.OnNameChange += OnSceneNameChanged;
+					m_SceneState.OnPathChange += OnScenePathChanged;
 					m_SceneState.OnIsDirtyChange += OnSceneIsDirtyChanged;
 					m_SceneState.OnIsLoadedChange += OnSceneIsLoadedChanged;
 					m_SceneState.OnClose += OnSceneClosed;
@@ -215,7 +218,10 @@ namespace ImpRock.JumpTo.Editor
 
 		private void SetSaveDirty(bool isDirty)
 		{
-			m_IsDirty = isDirty;
+			if (m_SceneState.Path.Length > 0)
+				m_IsDirty = isDirty;
+			else
+				m_IsDirty = false;
 
 			ControlIcon saveIcon = m_ControlIcons[m_SaveIconIndex];
 			saveIcon.Enabled = m_IsDirty;
@@ -223,7 +229,7 @@ namespace ImpRock.JumpTo.Editor
 
 			RefreshControlTitle();
 		}
-
+		
 		private void RefreshControlTitle()
 		{
 			string title = (m_SceneState.Name.Length != 0 ? m_SceneState.Name : "(Untitled)") + m_TitleSuffix;
@@ -292,20 +298,30 @@ namespace ImpRock.JumpTo.Editor
 			}
 		}
 
-		private void OnSceneNameChanged(SceneState sceneState, string sceneName)
+		private void OnSceneNameChanged(SceneState sceneState, string oldSceneName)
 		{
-			RefreshControlTitle();
+			if (oldSceneName != string.Empty)
+			{
+				RefreshControlTitle();
+			}
 		}
 
-		private void OnSceneIsDirtyChanged(SceneState sceneState, bool isDirty)
+		private void OnScenePathChanged(SceneState sceneState, string oldScenePath)
 		{
-			SetSaveDirty(m_IsDirty || isDirty);
+			if (oldScenePath == string.Empty)
+			{
+				SetSaveDirty(true);
+			}
 		}
 
-		private void OnSceneIsLoadedChanged(SceneState sceneState, bool isLoaded)
+		private void OnSceneIsDirtyChanged(SceneState sceneState, bool oldIsDirty)
 		{
-			Debug.Log("Scene load change: " + m_Title.text + " isLoaded " + isLoaded);
-			if (!isLoaded)
+			SetSaveDirty(m_IsDirty || sceneState.IsDirty);
+		}
+
+		private void OnSceneIsLoadedChanged(SceneState sceneState, bool oldIsLoaded)
+		{
+			if (!sceneState.IsLoaded)
 			{
 				m_LinkContainer.OnLinksChanged -= OnHierarchyLinksChanged;
 				m_MarkedForClose = true;
@@ -318,7 +334,6 @@ namespace ImpRock.JumpTo.Editor
 
 		private void OnSceneClosed(SceneState sceneState)
 		{
-			Debug.Log("Scene closed: " + m_Title.text);
 			m_LinkContainer.OnLinksChanged -= OnHierarchyLinksChanged;
 			m_MarkedForClose = true;
 		}

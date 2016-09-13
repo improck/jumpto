@@ -35,7 +35,8 @@ namespace ImpRock.JumpTo.Editor
 		{
 			m_Window = window;
 
-			SceneStateMonitor.OnSceneWillSave += OnSceneWillSave;
+			SceneSaveDetector.OnSceneWillSave += OnSceneWillSave;
+			SceneSaveDetector.OnSceneDeleted += OnSceneDeleted;
 			//SceneStateMonitor.OnSceneWillLoad += OnSceneWillLoad;
 			//SceneStateMonitor.OnSceneSaved += OnSceneSaved;
 			//SceneStateMonitor.OnSceneLoaded += OnSceneLoaded;
@@ -50,7 +51,8 @@ namespace ImpRock.JumpTo.Editor
 
 		public void Uninitialize()
 		{
-			SceneStateMonitor.OnSceneWillSave -= OnSceneWillSave;
+			SceneSaveDetector.OnSceneWillSave -= OnSceneWillSave;
+			SceneSaveDetector.OnSceneDeleted -= OnSceneDeleted;
 			//SceneStateMonitor.OnSceneWillLoad -= OnSceneWillLoad;
 			//SceneStateMonitor.OnSceneSaved -= OnSceneSaved;
 			//SceneStateMonitor.OnSceneLoaded -= OnSceneLoaded;
@@ -64,7 +66,7 @@ namespace ImpRock.JumpTo.Editor
 		}
 
 		/// <summary>
-		/// Called from SceneStateMonitor via SceneSaveDetector
+		/// Called from SceneSaveDetector
 		/// </summary>
 		/// <param name="sceneAssetPath"></param>
 		private void OnSceneWillSave(string sceneAssetPath)
@@ -78,6 +80,17 @@ namespace ImpRock.JumpTo.Editor
 				//	assigned a localidinfile at this point, so they
 				//	will not save.
 			}
+		}
+
+		/// <summary>
+		/// Called from SceneSaveDetector
+		/// </summary>
+		/// <param name="sceneAssetPath"></param>
+		private void OnSceneDeleted(string sceneAssetPath)
+		{
+			//TODO: delete the associated hierarchy links file IF it is not being viewed
+			//string sceneGuid = AssetDatabase.AssetPathToGUID(sceneAssetPath);
+			//string filePath = m_HierarchySaveDirectory + sceneGuid + SaveFileExtension;
 		}
 
 		//NOTE: wipes out an existing file or just saves nothing
@@ -115,11 +128,11 @@ namespace ImpRock.JumpTo.Editor
 			}
 		}
 		
-		private void OnSceneLoadedChange(SceneState sceneState, bool isLoaded)
+		private void OnSceneLoadedChange(SceneState sceneState, bool oldIsLoaded)
 		{
 			SetSaveDirectoryPaths();
 
-			if (isLoaded)
+			if (sceneState.IsLoaded)
 			{
 				LoadHierarchyLinks(sceneState.SceneId, sceneState.Scene);
 			}
