@@ -22,6 +22,8 @@ namespace ImpRock.JumpTo.Editor
 
 		public override void OnWindowEnable(EditorWindow window)
 		{
+			base.OnWindowEnable(window);
+
 			m_Window = window as JumpToEditorWindow;
 
 			m_HelpMessage1 = JumpToResources.Instance.GetText(ResId.LabelHelpMessage1);
@@ -69,6 +71,19 @@ namespace ImpRock.JumpTo.Editor
 
 			JumpLinks.OnHierarchyLinkAdded -= HierarchyLinkAddedHandler;
 			JumpLinks.OnProjectLinkAdded -= ProjectLinkAddedHandler;
+		}
+
+		public override void OnWindowClose(EditorWindow window)
+		{
+			base.OnWindowClose(window);
+
+			if (m_ProjectView != null)
+				m_ProjectView.OnWindowClose(window);
+
+			for (int i = 0; i < m_HierarchyViews.Count; i++)
+			{
+				m_HierarchyViews[i].OnWindowClose(window);
+			}
 		}
 
 		protected override void OnGui()

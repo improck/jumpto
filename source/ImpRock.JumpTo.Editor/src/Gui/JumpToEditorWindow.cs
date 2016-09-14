@@ -134,14 +134,11 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		//	OnWillDisable();
 
 		m_SerializationControl.OnWindowDisable();
-
-		//SceneLoadDetector.TemporarilyDestroyInstance();
-
+		
 		m_JumpLinkListView.OnWindowDisable(this);
 
 		EditorApplication.projectWindowChanged -= OnProjectWindowChange;
 		EditorApplication.hierarchyWindowChanged -= OnHierarchyWindowChange;
-		//SceneStateControl.OnSceneLoaded -= OnSceneLoaded;
 
 		m_Initialized = false;
 	}
@@ -151,24 +148,15 @@ internal sealed class JumpToEditorWindow : EditorWindow
 	private void OnDestroy()
 	{
 		s_InstanceCount--;
-		//Debug.Log("OnDestroy(): " + GetInstanceID() + " " + s_InstanceCount);
-
+		
 		//NOTE: nobody's using it right now
 		//if (OnWillClose != null)
 		//	OnWillClose();
 
 		m_SerializationControl.OnWindowClose();
 
-		//NOTE: this doesn't get called on editor close!
-		//using (System.IO.StreamWriter streamWriter = new System.IO.StreamWriter(@"r:\testfile.txt"))
-		//{
-		//	streamWriter.WriteLine("called from OnDestroy()");
-		//}
-
 		m_JumpLinkListView.OnWindowClose(this);
-
-		//m_FirstOpen = true;
-
+		
 		//SceneLoadDetector.PermanentlyDestroyInstance();
 
 		m_SerializationControl.Uninitialize();
@@ -232,17 +220,6 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		Repaint();
 	}
 	
-	//private void OnPlayModeStateChanged()
-	//{
-	//	//attempting to detect stops
-	//	if (!EditorApplication.isPlaying &&
-	//		!EditorApplication.isPaused)
-	//	{
-	//		//SceneLoadDetector.EnsureExistence();
-	//		EditorApplication.playmodeStateChanged -= OnPlayModeStateChanged;
-	//	}
-	//}
-
 	public void RefreshMinSize()
 	{
 		//TODO: need to notify the parent HostView's ContainerWindow of a minSize change
@@ -318,6 +295,12 @@ internal sealed class JumpToEditorWindow : EditorWindow
 	public static JumpToEditorWindow GetOrCreateWindow()
 	{
 		return EditorWindow.GetWindow<JumpToEditorWindow>("JumpTo");
+	}
+
+	public static bool IsOpen()
+	{
+		JumpToEditorWindow[] windows = Resources.FindObjectsOfTypeAll<JumpToEditorWindow>();
+		return windows != null && windows.Length > 0 && windows[0] != null && s_InstanceCount > 0;
 	}
 
 	public static void RepaintOpenWindows()

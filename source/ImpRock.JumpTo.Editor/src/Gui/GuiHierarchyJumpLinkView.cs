@@ -48,6 +48,9 @@ namespace ImpRock.JumpTo.Editor
 			m_SaveIconIndex = m_ControlIcons.Count;
 			m_ControlIcons.Add(controlIcon);
 
+			SceneSaveDetector.OnSceneDeleted += OnSceneDeleted;
+			SceneSaveDetector.OnSceneWillSave += OnSceneWillSave;
+
 			SetupSceneState();
 		}
 
@@ -59,16 +62,18 @@ namespace ImpRock.JumpTo.Editor
 		//	m_IsDirty = true;
 		//}
 
-		protected override void OnDestroy()
+		public override void OnWindowClose(EditorWindow window)
 		{
-			base.OnDestroy();
-
+			base.OnWindowClose(window);
+			
 			m_LinkContainer.OnLinksChanged -= OnHierarchyLinksChanged;
 			m_SceneState.OnNameChange -= OnSceneNameChanged;
 			m_SceneState.OnPathChange -= OnScenePathChanged;
 			m_SceneState.OnIsDirtyChange -= OnSceneIsDirtyChanged;
 			m_SceneState.OnIsLoadedChange -= OnSceneIsLoadedChanged;
 			m_SceneState.OnClose -= OnSceneClosed;
+			SceneSaveDetector.OnSceneDeleted -= OnSceneDeleted;
+			SceneSaveDetector.OnSceneWillSave -= OnSceneWillSave;
 		}
 
 		protected override Color DetermineNormalTextColor(HierarchyJumpLink link)
@@ -336,6 +341,29 @@ namespace ImpRock.JumpTo.Editor
 		{
 			m_LinkContainer.OnLinksChanged -= OnHierarchyLinksChanged;
 			m_MarkedForClose = true;
+		}
+
+		private void OnSceneWillSave(string sceneAssetPath)
+		{
+			if (m_MarkedForClose)
+				return;
+
+			if (m_SceneState.Path == sceneAssetPath)
+			{
+				SetSaveDirty(true);
+			}
+		}
+
+		private void OnSceneDeleted(string sceneAssetPath)
+		{
+			if (m_MarkedForClose)
+				return;
+
+			if (m_SceneState.Path == sceneAssetPath)
+			{
+				//cannot save links file with no saved scene
+				SetSaveDirty(false);
+			}
 		}
 	}
 }

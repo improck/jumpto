@@ -1,4 +1,6 @@
 ﻿using UnityEditor;
+using UnityEngine;
+using System.IO;
 
 
 namespace ImpRock.JumpTo.Editor
@@ -71,6 +73,41 @@ namespace ImpRock.JumpTo.Editor
 						OnSceneDeleted(sceneAssetPath);
 					};
 			}
+			//only do this if JumpTo isn't open because it handles it internally
+			else if (!JumpToEditorWindow.IsOpen())
+			{
+				EditorApplication.delayCall +=
+					delegate()
+					{
+						//TODO: make this prettier and more reliable
+						string jumpToPath = Path.GetFullPath(Application.dataPath) + Path.DirectorySeparatorChar + ".." + Path.DirectorySeparatorChar + "JumpTo" + Path.DirectorySeparatorChar;
+						string hierarchyLinksPath = jumpToPath + "HierarchyLinks" + Path.DirectorySeparatorChar;
+						string guid = AssetDatabase.AssetPathToGUID(sceneAssetPath);
+						string saveFilePath = hierarchyLinksPath + guid + ".jumpto";
+
+						DeleteFile(saveFilePath);
+					};
+			}
+		}
+
+		private static bool DeleteFile(string filePath)
+		{
+			bool deleted = true;
+
+			if (File.Exists(filePath))
+			{
+				try
+				{
+					File.Delete(filePath);
+				}
+				catch (System.Exception)
+				{
+					//TODO: localize this?
+					Debug.LogError("JumpTo: Caught an exception while trying to delete a file\n" + filePath);
+				}
+			}
+
+			return deleted;
 		}
 	}
 }

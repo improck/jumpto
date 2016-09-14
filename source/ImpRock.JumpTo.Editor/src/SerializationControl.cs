@@ -21,7 +21,6 @@ namespace ImpRock.JumpTo.Editor
 
 
 		private const string ProjectLinksSaveFile = "projectlinks";
-		private const string SettingsSaveFile = "settings";
 		private const string SaveFileExtension = ".jumpto";
 
 
@@ -88,9 +87,9 @@ namespace ImpRock.JumpTo.Editor
 		/// <param name="sceneAssetPath"></param>
 		private void OnSceneDeleted(string sceneAssetPath)
 		{
-			//TODO: delete the associated hierarchy links file IF it is not being viewed
-			//string sceneGuid = AssetDatabase.AssetPathToGUID(sceneAssetPath);
-			//string filePath = m_HierarchySaveDirectory + sceneGuid + SaveFileExtension;
+			string sceneGuid = AssetDatabase.AssetPathToGUID(sceneAssetPath);
+			string filePath = m_HierarchySaveDirectory + sceneGuid + SaveFileExtension;
+			DeleteSaveFile(filePath);
 		}
 
 		//NOTE: wipes out an existing file or just saves nothing
