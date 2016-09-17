@@ -166,6 +166,11 @@ namespace ImpRock.JumpTo.Editor
 				{
 					GraphicAssets.Instance.LinkViewTitleStyle.Draw(m_DrawRect, m_Title, false, false, false, false);
 
+					m_DrawRect.x = 14.0f;
+					m_DrawRect.width = 16.0f;
+					m_DrawRect.height = 16.0f;
+					GUI.DrawTexture(m_DrawRect, m_Title.image, ScaleMode.ScaleToFit);
+
 					for (int i = 0; i < m_ControlIcons.Count; i++)
 					{
 						if (!m_ControlIcons[i].Enabled)
@@ -553,6 +558,11 @@ namespace ImpRock.JumpTo.Editor
 				{
 					menu.AddItem(m_MenuSelectInverse, false, SelectInverse);
 					menu.AddItem(m_MenuSelectNone, false, SelectNone);
+				}
+				else
+				{
+					menu.AddDisabledItem(m_MenuSelectInverse);
+					menu.AddDisabledItem(m_MenuSelectNone);
 				}
 			}
 			else

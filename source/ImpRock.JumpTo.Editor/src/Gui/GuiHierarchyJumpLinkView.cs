@@ -34,7 +34,7 @@ namespace ImpRock.JumpTo.Editor
 
 			m_LinkContainer.OnLinksChanged += OnHierarchyLinksChanged;
 
-			m_Title = new GUIContent();
+			m_Title = new GUIContent(GraphicAssets.Instance.IconHierarchyView);
 			m_MenuFrameLink = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextFrameLink));
 			m_MenuFrameLinkPlural = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextFrameLinkPlural));
 			m_MenuSaveLinks = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextSaveLinks));

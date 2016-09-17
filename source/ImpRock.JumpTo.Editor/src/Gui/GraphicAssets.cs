@@ -68,11 +68,14 @@ namespace ImpRock.JumpTo.Editor
 			LinkViewTitleStyle.name = "Link View Title";
 			LinkViewTitleStyle.alignment = TextAnchor.MiddleLeft;
 			LinkViewTitleStyle.clipping = TextClipping.Clip;
-			LinkViewTitleStyle.padding.top = -1;
+			LinkViewTitleStyle.padding.top = 0;
 			LinkViewTitleStyle.padding.bottom = 0;
-			LinkViewTitleStyle.padding.left = 14;
+			LinkViewTitleStyle.padding.left = 32;
 			LinkViewTitleStyle.padding.right = 32;
+			LinkViewTitleStyle.contentOffset = new Vector2(0.0f, -1.0f);
 			LinkViewTitleStyle.font = null;
+			LinkViewTitleStyle.fontSize = 0;
+			LinkViewTitleStyle.imagePosition = ImagePosition.TextOnly;
 
 			LinkLabelStyle = new GUIStyle(editorSkin.GetStyle("PR Label"));
 			LinkLabelStyle.name = "Link Label Style";
@@ -93,8 +96,9 @@ namespace ImpRock.JumpTo.Editor
 			IconPrefabModel = EditorGUIUtility.FindTexture("PrefabModel Icon");
 			IconGameObject = EditorGUIUtility.FindTexture("GameObject Icon");
 			IconProjectView = EditorGUIUtility.FindTexture("Project");
-			IconHierarchyView = EditorGUIUtility.FindTexture("UnityEditor.HierarchyWindow");
-			
+			IconHierarchyView = EditorGUIUtility.FindTexture("SceneAsset Icon");
+
+
 			if (EditorGUIUtility.isProSkin)
 			{
 				LinkTextColors = new Color[]
