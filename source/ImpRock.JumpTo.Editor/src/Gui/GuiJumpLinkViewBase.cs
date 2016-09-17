@@ -34,6 +34,7 @@ namespace ImpRock.JumpTo.Editor
 		protected GUIContent m_Title;
 		protected GUIContent m_MenuSelectAll;
 		protected GUIContent m_MenuSelectInverse;
+		protected GUIContent m_MenuSelectNone;
 		protected GUIContent m_MenuPingLink;
 		protected GUIContent m_MenuRemoveLink;
 		protected GUIContent m_MenuRemoveAll;
@@ -59,13 +60,13 @@ namespace ImpRock.JumpTo.Editor
 		protected abstract void OnDoubleClick();
 
 		protected virtual void OnRemoveAll() { }
-		
 
-		public void SelectAllAdditive()
+
+		public void GlobalSelectAll()
 		{
 			if (m_Foldout)
 			{
-				m_LinkContainer.LinkSelectionAll(true);
+				m_LinkContainer.LinkSelectionAll();
 			}
 		}
 
@@ -75,6 +76,7 @@ namespace ImpRock.JumpTo.Editor
 
 			m_MenuSelectAll = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextSelectAll));
 			m_MenuSelectInverse = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextSelectInverse));
+			m_MenuSelectNone = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextSelectNone));
 			m_MenuPingLink = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextPingLink));
 			m_MenuRemoveLink = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextRemoveLink));
 			m_MenuRemoveAll = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextRemoveAll));
@@ -271,54 +273,50 @@ namespace ImpRock.JumpTo.Editor
 
 			if (currentEvent.button != 2)
 			{
-				//determine where the mouse clicked
+				//find the object under the mouse pointer
 				int hit = m_LinkContainer.LinkHitTest(currentEvent.mousePosition);
 				if (currentEvent.button == 0)
 				{
-					//if links are currently selected
-					if (m_LinkContainer.HasSelection)
+					//if a link was there
+					if (hit > -1)
 					{
-						//the click was on a link and the control/command key was down
-						if (currentEvent.control || (Application.platform == RuntimePlatform.OSXEditor && currentEvent.command))
+						//if links are currently selected
+						if (m_LinkContainer.HasSelection)
 						{
-							//toggle clicked link selection state
-							if (!m_LinkContainer[hit].Selected)
-								m_LinkContainer.LinkSelectionAdd(hit);
-							else
-								m_LinkContainer.LinkSelectionRemove(hit);
+							//the click was on a link and the control/command key was down
+							if (currentEvent.control || (Application.platform == RuntimePlatform.OSXEditor && currentEvent.command))
+							{
+								//toggle clicked link selection state
+								if (!m_LinkContainer[hit].Selected)
+									m_LinkContainer.LinkSelectionAdd(hit);
+								else
+									m_LinkContainer.LinkSelectionRemove(hit);
+
+								m_LinkContainer.LinkSelectionAddToUnitySelection();
+							}
+							//or the click was on a link and the shift key was down
+							else if (currentEvent.shift)
+							{
+								m_LinkContainer.LinkSelectionSetRange(m_LinkContainer.ActiveSelection, hit);
+
+								m_LinkContainer.LinkSelectionSetUnitySelection();
+							}
+							//or the clicked link was not already selected
+							else if (!m_LinkContainer[hit].Selected)
+							{
+								//set the selection to the clicked link
+								m_LinkContainer.LinkSelectionSet(hit);
+							}
 						}
-						//or the click was on a link and the shift key was down
-						else if (currentEvent.shift)
-						{
-							m_LinkContainer.LinkSelectionSetRange(m_LinkContainer.ActiveSelection, hit);
-						}
-						//or the clicked link was not already selected
-						else if (!m_LinkContainer[hit].Selected)
-						{
-							//set the selection to the clicked link
-							m_LinkContainer.LinkSelectionSet(hit);
-						}
-					}
-					else if (hit > -1)
-					{
-						//the click was on a link and the control/command key was down
-						if (currentEvent.control || (Application.platform == RuntimePlatform.OSXEditor && currentEvent.command))
-						{
-							//toggle clicked link selection state
-							if (!m_LinkContainer[hit].Selected)
-								m_LinkContainer.LinkSelectionAdd(hit);
-							else
-								m_LinkContainer.LinkSelectionRemove(hit);
-						}
+						//no links are selected
 						else
 						{
 							//set the selection to the clicked link
 							m_LinkContainer.LinkSelectionSet(hit);
 						}
-					}
+					} //if a link was hit
 
 					m_Grabbed = hit;
-					//NOTE: this may need to be set to the midline of the grabbed link
 					m_GrabPosition = currentEvent.mousePosition;
 
 					//on double-click
@@ -326,7 +324,7 @@ namespace ImpRock.JumpTo.Editor
 						OnDoubleClick();
 
 					currentEvent.Use();
-				}
+				} //handle left mouse button
 				else if (currentEvent.button == 1)
 				{
 					//if links are currently selected
@@ -341,19 +339,21 @@ namespace ImpRock.JumpTo.Editor
 						else if (hit > -1)
 						{
 							m_LinkContainer.LinkSelectionSet(hit);
+							m_LinkContainer.LinkSelectionSetUnitySelection();
 						}
 					}
-					//no links are selected, if a link was clicked
+					//no links are selected, and a link was hit
 					else if (hit > -1)
 					{
 						m_LinkContainer.LinkSelectionSet(hit);
+						m_LinkContainer.LinkSelectionSetUnitySelection();
 					}
 
 					m_ContextClick = true;
 
 					currentEvent.Use();
-				}
-			}
+				} //handle right mouse button
+			} //filter out middle mouse button
 		}
 
 		protected void OnMouseUp()
@@ -365,12 +365,23 @@ namespace ImpRock.JumpTo.Editor
 			{
 				if (currentEvent.button == 0)
 				{
-					if (!m_DragOwner &&
-						!currentEvent.shift &&
-						!currentEvent.control &&
-						!(Application.platform == RuntimePlatform.OSXEditor && currentEvent.command))
+					if (m_Grabbed > -1 && !m_DragOwner)
 					{
-						m_LinkContainer.LinkSelectionSet(m_Grabbed);
+						if (!currentEvent.shift && !currentEvent.control &&
+							!(Application.platform == RuntimePlatform.OSXEditor && currentEvent.command))
+						{
+							if (selectionCount > 1)
+							{
+								m_LinkContainer.LinkSelectionSet(m_Grabbed);
+							}
+
+							m_LinkContainer.LinkSelectionSetUnitySelection();
+						}
+						else if (selectionCount == 1)
+						{
+							m_LinkContainer.LinkSelectionAddToUnitySelection();
+						}
+
 						currentEvent.Use();
 					}
 				}
@@ -400,7 +411,7 @@ namespace ImpRock.JumpTo.Editor
 					DragAndDrop.PrepareStartDrag();
 					DragAndDrop.paths = new string[] { };
 					DragAndDrop.objectReferences = m_LinkContainer.SelectedLinkReferences;
-					DragAndDrop.StartDrag("Project Reference(s)");
+					DragAndDrop.StartDrag("JumpToSelection");
 					//NOTE: tried to set the visual mode here. always got reset to none.
 
 					currentEvent.Use();
@@ -440,11 +451,6 @@ namespace ImpRock.JumpTo.Editor
 						}
 					}
 				}
-				else
-				{
-					DragAndDrop.visualMode = DragAndDropVisualMode.Rejected;
-					m_DragInsert = false;
-				}
 
 				currentEvent.Use();
 			}
@@ -459,22 +465,32 @@ namespace ImpRock.JumpTo.Editor
 
 				m_LinkContainer.MoveSelected(m_InsertionIndex);
 
+				if (m_LinkContainer.SelectionCount == 1)
+				{
+					m_LinkContainer.LinkSelectionSetUnitySelection();
+				}
+
 				m_DragInsert = false;
 				m_DragOwner = false;
 				m_Grabbed = -1;
 				m_InsertionIndex = -1;
 
 				currentEvent.Use();
-
-				m_Window.Repaint();
-
+				
 				//reset the drag and drop data
 				DragAndDrop.PrepareStartDrag();
 			}
+
+			m_Window.Repaint();
 		}
 
 		protected void OnDragExited()
 		{
+			if (m_DragOwner && m_DragInsert)
+			{
+				m_LinkContainer.RefreshLinkSelections();
+			}
+
 			m_DragInsert = false;
 			m_DragOwner = false;
 			m_Grabbed = -1;
@@ -527,17 +543,46 @@ namespace ImpRock.JumpTo.Editor
 			}
 		}
 
-		protected void SelectAll()
+		protected void AddCommonTitleContextMenuItems(GenericMenu menu)
 		{
 			if (m_Foldout)
 			{
-				m_LinkContainer.LinkSelectionAll();
+				menu.AddItem(m_MenuSelectAll, false, SelectAll);
+
+				if (m_LinkContainer.HasSelection)
+				{
+					menu.AddItem(m_MenuSelectInverse, false, SelectInverse);
+					menu.AddItem(m_MenuSelectNone, false, SelectNone);
+				}
 			}
+			else
+			{
+				menu.AddDisabledItem(m_MenuSelectAll);
+				menu.AddDisabledItem(m_MenuSelectInverse);
+				menu.AddDisabledItem(m_MenuSelectNone);
+			}
+
+			menu.AddSeparator(string.Empty);
+
+			menu.AddItem(m_MenuRemoveAll, false, RemoveAll);
+		}
+
+		protected void SelectAll()
+		{
+			m_LinkContainer.LinkSelectionAll();
+			m_LinkContainer.LinkSelectionAddToUnitySelection();
 		}
 
 		protected void SelectInverse()
 		{
 			m_LinkContainer.LinkSelectionInvert();
+			m_LinkContainer.LinkSelectionAddToUnitySelection();
+		}
+
+		protected void SelectNone()
+		{
+			m_LinkContainer.LinkSelectionClear();
+			m_LinkContainer.LinkSelectionAddToUnitySelection();
 		}
 
 		protected void RemoveAll()
@@ -564,31 +609,6 @@ namespace ImpRock.JumpTo.Editor
 			T activeSelection = m_LinkContainer.ActiveSelectedObject;
 			if (activeSelection != null)
 				EditorGUIUtility.PingObject(activeSelection.LinkReference);
-		}
-
-		protected void SetAsSelection()
-		{
-			Object[] selectedLinks = m_LinkContainer.SelectedLinkReferences;
-			Selection.objects = selectedLinks;
-		}
-
-		protected void AddToSelection()
-		{
-			Object[] selectedLinks = m_LinkContainer.SelectedLinkReferences;
-
-			//NOTE: may or may not be the most efficient way to do this, but
-			//		it's easy to read
-			if (selectedLinks != null)
-			{
-				List<Object> selectionAdd = new List<Object>(Selection.objects);
-				for (int i = 0; i < selectedLinks.Length; i++)
-				{
-					if (!selectionAdd.Contains(selectedLinks[i]))
-						selectionAdd.Add(selectedLinks[i]);
-				}
-
-				Selection.objects = selectionAdd.ToArray();
-			}
 		}
 
 		protected void FindTotalHeight()

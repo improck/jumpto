@@ -63,19 +63,7 @@ namespace ImpRock.JumpTo.Editor
 			{
 				GenericMenu menu = new GenericMenu();
 
-				if (m_Foldout)
-					menu.AddItem(m_MenuSelectAll, false, SelectAll);
-				else
-					menu.AddDisabledItem(m_MenuSelectAll);
-
-				if (m_LinkContainer.HasSelection)
-					menu.AddItem(m_MenuSelectInverse, false, SelectInverse);
-				else
-					menu.AddDisabledItem(m_MenuSelectInverse);
-
-				menu.AddSeparator(string.Empty);
-
-				menu.AddItem(m_MenuRemoveAll, false, RemoveAll);
+				AddCommonTitleContextMenuItems(menu);
 
 				menu.ShowAsContext();
 			}

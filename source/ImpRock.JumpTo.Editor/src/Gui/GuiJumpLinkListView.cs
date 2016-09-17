@@ -168,15 +168,17 @@ namespace ImpRock.JumpTo.Editor
 			if (Event.current.type == EventType.ValidateCommand &&
 				Event.current.commandName == "SelectAll")
 			{
-				Selection.objects = new Object[0];
-
 				if (m_ProjectView != null)
-					m_ProjectView.SelectAllAdditive();
+				{
+					m_ProjectView.GlobalSelectAll();
+				}
 
 				for (int i = 0; i < m_HierarchyViews.Count; i++)
 				{
-					m_HierarchyViews[i].SelectAllAdditive();
+					m_HierarchyViews[i].GlobalSelectAll();
 				}
+
+				m_Window.JumpLinksInstance.SetAllSelectedLinksAsUnitySelection();
 			}
 		}
 

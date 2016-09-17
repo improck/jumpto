@@ -104,10 +104,7 @@ namespace ImpRock.JumpTo.Editor
 				+ m_LinkContainer.ActiveSelectedObject.LinkReference.name + "\"";
 
 			int selectionCount = m_LinkContainer.SelectionCount;
-			if (selectionCount == 0)
-			{
-			}
-			else if (selectionCount == 1)
+			if (selectionCount == 1)
 			{
 				menu.AddItem(m_MenuPingLink, false, PingSelectedLink);
 			
@@ -153,19 +150,7 @@ namespace ImpRock.JumpTo.Editor
 
 				menu.AddSeparator(string.Empty);
 
-				if (m_Foldout)
-					menu.AddItem(m_MenuSelectAll, false, SelectAll);
-				else
-					menu.AddDisabledItem(m_MenuSelectAll);
-
-				if (m_Foldout && m_LinkContainer.HasSelection)
-					menu.AddItem(m_MenuSelectInverse, false, SelectInverse);
-				else
-					menu.AddDisabledItem(m_MenuSelectInverse);
-
-				menu.AddSeparator(string.Empty);
-
-				menu.AddItem(m_MenuRemoveAll, false, RemoveAll);
+				AddCommonTitleContextMenuItems(menu);
 			}
 
 			if (menu != null)
@@ -252,14 +237,7 @@ namespace ImpRock.JumpTo.Editor
 
 			if (sceneView != null)
 			{
-				Object[] selectedLinks = m_LinkContainer.SelectedLinkReferences;
-				if (selectedLinks != null)
-				{
-					Object[] selection = Selection.objects;
-					Selection.objects = selectedLinks;
-					sceneView.FrameSelected();
-					Selection.objects = selection;
-				}
+				sceneView.FrameSelected();
 			}
 		}
 

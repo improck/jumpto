@@ -6,6 +6,7 @@ label_hierarchyLinksSuffix = Links
 label_helpMessage1 = Drag objects from the Project or Hierarchy windows and drop them here to create links. Project links will automatically be saved, but hierarchy links must be saved manually.
 menu_contextSelectAll = Select All
 menu_contextSelectInverse = Select Inverse
+menu_contextSelectNone = Select None
 menu_contextPingLink = Ping
 menu_contextSetAsSelection = Set This as Selection
 menu_contextAddToSelection = Add This to Selection

@@ -231,5 +231,39 @@ namespace ImpRock.JumpTo.Editor
 		{
 			m_ProjectLinkContainer.RefreshLinks();
 		}
+
+		public void SetAllSelectedLinksAsUnitySelection()
+		{
+			List<Object> allLinkReferences = new List<Object>();
+			JumpLink link;
+			int linkCount = 0;
+
+			List<ProjectJumpLink> projectJumpLinks = m_ProjectLinkContainer.Links;
+			linkCount = projectJumpLinks.Count;
+			for (int i = 0; i < linkCount; i++)
+			{
+				link = projectJumpLinks[i];
+				if (link.Selected)
+					allLinkReferences.Add(link.LinkReference);
+			}
+			
+			List<HierarchyJumpLink> hierarchyJumpLinks;
+			foreach (KeyValuePair<int, HierarchyJumpLinkContainer> container in m_HierarchyLinkContainers)
+			{
+				hierarchyJumpLinks = container.Value.Links;
+				linkCount = hierarchyJumpLinks.Count;
+				for (int i = 0; i < linkCount; i++)
+				{
+					link = hierarchyJumpLinks[i];
+					if (link.Selected)
+						allLinkReferences.Add(link.LinkReference);
+				}
+			}
+
+			if (allLinkReferences.Count > 0)
+			{
+				Selection.objects = allLinkReferences.ToArray();
+			}
+		}
 	}
 }

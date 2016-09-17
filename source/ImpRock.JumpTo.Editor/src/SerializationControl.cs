@@ -357,6 +357,8 @@ namespace ImpRock.JumpTo.Editor
 					Debug.LogError(string.Format(logFormat, scene.name) + "\n" + ex.Message);
 				}
 			}
+
+			m_Window.Repaint();
 		}
 		
 		private void SetSaveDirectoryPaths()

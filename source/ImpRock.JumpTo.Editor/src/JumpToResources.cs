@@ -1,10 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using System.IO;
-using System.Resources;
 
 
 namespace ImpRock.JumpTo.Editor
@@ -18,6 +15,7 @@ namespace ImpRock.JumpTo.Editor
 
 		public static readonly int MenuContextSelectAll = "menu_contextSelectAll".GetHashCode();
 		public static readonly int MenuContextSelectInverse = "menu_contextSelectInverse".GetHashCode();
+		public static readonly int MenuContextSelectNone = "menu_contextSelectNone".GetHashCode();
 		public static readonly int MenuContextPingLink = "menu_contextPingLink".GetHashCode();
 		public static readonly int MenuContextSetAsSelection = "menu_contextSetAsSelection".GetHashCode();
 		public static readonly int MenuContextAddToSelection = "menu_contextAddToSelection".GetHashCode();
