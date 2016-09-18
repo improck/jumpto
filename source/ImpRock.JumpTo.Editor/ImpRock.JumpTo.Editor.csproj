@@ -38,11 +38,11 @@
     <Reference Include="System.Xml" />
     <Reference Include="UnityEditor, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Unity54\Editor\Data\Managed\UnityEditor.dll</HintPath>
+      <HintPath>C:\Program Files\Unity53\Editor\Data\Managed\UnityEditor.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Unity54\Editor\Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>C:\Program Files\Unity53\Editor\Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -54,17 +54,14 @@
     <Compile Include="src\Gui\GuiJumpLinkListView.cs" />
     <Compile Include="src\Gui\GuiJumpLinkViewBase.cs" />
     <Compile Include="src\Gui\GuiProjectJumpLinkView.cs" />
-    <Compile Include="src\Gui\GuiToolbar.cs" />
     <Compile Include="src\JumpLinks\HierarchyJumpLinkContainer.cs" />
     <Compile Include="src\JumpLinks\JumpLinkContainer.cs" />
     <Compile Include="src\JumpLinks\JumpLinks.cs" />
     <Compile Include="src\Gui\JumpToEditorWindow.cs" />
     <Compile Include="src\JumpToResources.cs" />
-    <Compile Include="src\JumpToSettings.cs" />
     <Compile Include="src\JumpToUtility.cs" />
     <Compile Include="src\JumpLinks\ProjectJumpLinkContainer.cs" />
     <Compile Include="src\Gui\RectRef.cs" />
-    <Compile Include="src\SceneSaveLoad\SceneLoadDetector.cs" />
     <Compile Include="src\SceneSaveLoad\SceneStateMonitor.cs" />
     <Compile Include="src\SceneSaveLoad\SceneSaveDetector.cs" />
     <Compile Include="src\EditorScriptableObject.cs" />

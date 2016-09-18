@@ -244,7 +244,9 @@ namespace ImpRock.JumpTo.Editor
 
 		public bool SaveHierarchyLinks(int sceneId)
 		{
-			bool success = true;
+			bool success = CreateSaveDirectories();
+			if (!success)
+				return false;
 
 			string[] linkPaths = GetHierarchyLinkPaths(sceneId);
 
