@@ -15,6 +15,9 @@ internal sealed class JumpToEditorWindow : EditorWindow
 	[SerializeField] private GuiJumpLinkListView m_JumpLinkListView;
 	[SerializeField] private SceneStateMonitor m_SceneStateMonitor;
 
+	//not static because it needs to serialize
+	public Operation CurrentOperation = Operation.Idle;
+
 	[System.NonSerialized] private bool m_Initialized = false;
 	[System.NonSerialized] private RectRef m_Position = new RectRef();
 	[System.NonSerialized] private double m_LastHierarchyRefreshTime = 0.0f;
@@ -24,7 +27,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 	public JumpLinks JumpLinksInstance { get { return m_JumpLinks; } }
 	public SceneStateMonitor SceneStateMonitorInstance { get { return m_SceneStateMonitor; } }
 	public SerializationControl SerializationControlInstance { get { return m_SerializationControl; } }
-
+	
 
 	//NOTE: not using these right now
 	//public static event EditorApplication.CallbackFunction OnWindowOpen;
@@ -339,7 +342,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		window.CreateMultipleJumpLinks(selected);
 	}
 
-	[MenuItem("GameObject/Create Other/JumpTo Link", true)]
+	[MenuItem("GameObject/JumpTo Link", priority = 11, validate = true)]
 	public static bool JumpTo_GameObjectCreateOtherJumpLink_Validate()
 	{
 		JumpToEditorWindow[] windows = Resources.FindObjectsOfTypeAll<JumpToEditorWindow>();
@@ -348,7 +351,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		return windows.Length > 0 && windows[0].m_JumpLinks != null && selected != null && selected.Length > 0;
 	}
 
-	[MenuItem("GameObject/Create Other/JumpTo Link", false)]
+	[MenuItem("GameObject/JumpTo Link", priority = 11, validate = false)]
 	public static void JumpTo_GameObjectCreateOtherJumpLink()
 	{
 		Object[] selected = Selection.objects;

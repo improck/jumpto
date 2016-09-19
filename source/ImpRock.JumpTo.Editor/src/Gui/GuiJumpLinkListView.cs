@@ -252,7 +252,7 @@ namespace ImpRock.JumpTo.Editor
 
 					DragAndDrop.AcceptDrag();
 
-					OnDropProjectAndHierarchy();
+					OnDropObjectOrAsset();
 					
 					currentEvent.Use();
 
@@ -267,8 +267,10 @@ namespace ImpRock.JumpTo.Editor
 			}
 		}
 
-		private void OnDropProjectAndHierarchy()
+		private void OnDropObjectOrAsset()
 		{
+			m_Window.CurrentOperation |= Operation.CreatingLinkViaDragAndDrop;
+
 			UnityEngine.Object[] objectReferences = DragAndDrop.objectReferences;
 			if (objectReferences.Length > 0)
 			{
@@ -280,6 +282,8 @@ namespace ImpRock.JumpTo.Editor
 				m_Window.JumpLinksInstance.RefreshHierarchyLinks();
 				m_Window.JumpLinksInstance.RefreshAllLinkSelections();
 			}
+
+			m_Window.CurrentOperation &= ~Operation.CreatingLinkViaDragAndDrop;
 		}
 
 		private void HierarchyLinkAddedHandler(int sceneId)

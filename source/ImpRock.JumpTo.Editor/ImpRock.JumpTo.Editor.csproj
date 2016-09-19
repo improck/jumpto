@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="src\Operation.cs" />
     <Compile Include="src\Faketionary.cs" />
     <Compile Include="src\Gui\GraphicAssets.cs" />
     <Compile Include="src\Gui\GuiBase.cs" />

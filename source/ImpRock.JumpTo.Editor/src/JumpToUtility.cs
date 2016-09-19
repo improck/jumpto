@@ -65,21 +65,11 @@ namespace ImpRock.JumpTo.Editor
 			if (!hierarchyProperty.Find(orderedRootObjects[0].GetInstanceID(), null))
 				return;
 			
-			SerializedObject serializedObject = new SerializedObject(hierarchyProperty.pptrValue);
-			serializedObject.SetInspectorMode(InspectorMode.Debug);
-			int localId = serializedObject.GetLocalIdInFile();
-			PrefabType prefabType = PrefabUtility.GetPrefabType(hierarchyProperty.pptrValue);
-			if (prefabType != PrefabType.ModelPrefabInstance &&
-				prefabType != PrefabType.PrefabInstance)
-			{
-				idToGameObjects.Add(localId, hierarchyProperty.pptrValue as GameObject);
-			}
-			else
-			{
-				idToPrefabs.Add(localId, hierarchyProperty.pptrValue as GameObject);
-			}
-
-			while (hierarchyProperty.Next(null) && hierarchyProperty.pptrValue != null)
+			SerializedObject serializedObject;
+			PrefabType prefabType;
+			int localId;
+			
+			do
 			{
 				prefabType = PrefabUtility.GetPrefabType(hierarchyProperty.pptrValue);
 				if (prefabType != PrefabType.ModelPrefabInstance &&
@@ -88,7 +78,10 @@ namespace ImpRock.JumpTo.Editor
 					serializedObject = new SerializedObject(hierarchyProperty.pptrValue);
 					serializedObject.SetInspectorMode(InspectorMode.Debug);
 					localId = serializedObject.GetLocalIdInFile();
-					idToGameObjects.Add(localId, hierarchyProperty.pptrValue as GameObject);
+
+					//disconnected prefabs will have a localId of 0 if they haven't been saved to the scene
+					if (localId != 0)
+						idToGameObjects.Add(localId, hierarchyProperty.pptrValue as GameObject);
 				}
 				else
 				{
@@ -97,14 +90,18 @@ namespace ImpRock.JumpTo.Editor
 					serializedObject.SetInspectorMode(InspectorMode.Debug);
 					localId = serializedObject.GetLocalIdInFile();
 
-					if (!idToPrefabs.ContainsKey(localId))
+					if (localId != 0 && !idToPrefabs.ContainsKey(localId))
 					{
-						//NOTE: assuming here that the first one it runs into is the root of
-						//		a prefab that hasn't been added yet.
-						idToPrefabs.Add(localId, hierarchyProperty.pptrValue as GameObject);
+						SerializedProperty rootGameObject = serializedObject.FindProperty("m_RootGameObject");
+						if (rootGameObject.objectReferenceValue != null)
+						{
+							prefabObject = rootGameObject.objectReferenceValue;
+							idToPrefabs.Add(localId, prefabObject as GameObject);
+						}
 					}
 				}
 			}
+			while (hierarchyProperty.Next(null) && hierarchyProperty.pptrValue != null);
 		}
 
 		public static int FindSceneContaining(Object linkReference)

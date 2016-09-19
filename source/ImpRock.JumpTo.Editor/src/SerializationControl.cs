@@ -302,6 +302,8 @@ namespace ImpRock.JumpTo.Editor
 					if (streamReader.EndOfStream)
 						return;
 					
+					m_Window.CurrentOperation |= Operation.LoadingProjectLinks;
+
 					string fileVersion = streamReader.ReadLine();
 
 					System.Action<StreamReader> loader = FindProjectLinkLoader(fileVersion);
@@ -320,6 +322,8 @@ namespace ImpRock.JumpTo.Editor
 					Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[3]) + "\n" + ex.Message);
 				}
 			}
+
+			m_Window.CurrentOperation &= ~Operation.LoadingProjectLinks;
 		}
 
 		private void LoadHierarchyLinks(int sceneId, Scene scene)
@@ -340,6 +344,8 @@ namespace ImpRock.JumpTo.Editor
 					if (streamReader.EndOfStream)
 						return;
 
+					m_Window.CurrentOperation |= Operation.LoadingHierarchyLinks;
+
 					string fileVersion = streamReader.ReadLine();
 
 					System.Action<StreamReader, Scene> loader = FindHierarchyLinkLoader(fileVersion);
@@ -359,6 +365,8 @@ namespace ImpRock.JumpTo.Editor
 					Debug.LogError(string.Format(logFormat, scene.name) + "\n" + ex.Message);
 				}
 			}
+
+			m_Window.CurrentOperation &= ~Operation.LoadingHierarchyLinks;
 
 			m_Window.Repaint();
 		}

@@ -31,7 +31,7 @@ namespace ImpRock.JumpTo.Editor
 
 			if (m_MarkedForClose)
 				return;
-
+			
 			m_LinkContainer.OnLinksChanged += OnHierarchyLinksChanged;
 
 			m_Title = new GUIContent(GraphicAssets.Instance.IconHierarchyView);
@@ -40,6 +40,8 @@ namespace ImpRock.JumpTo.Editor
 			m_MenuSaveLinks = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextSaveLinks));
 
 			m_TitleSuffix = " " + JumpToResources.Instance.GetText(ResId.LabelHierarchyLinksSuffix);
+
+			m_IsDirty = (m_Window.CurrentOperation & Operation.CreatingLinkViaDragAndDrop) == Operation.CreatingLinkViaDragAndDrop;
 
 			ControlIcon controlIcon = new ControlIcon();
 			controlIcon.Enabled = m_IsDirty;
@@ -53,15 +55,7 @@ namespace ImpRock.JumpTo.Editor
 
 			SetupSceneState();
 		}
-
-		//protected override void OnCreate()
-		//{
-		//	base.OnCreate();
-
-		//	//TODO: freshly loaded hierarchy links should not be marked dirty
-		//	m_IsDirty = true;
-		//}
-
+		
 		public override void OnWindowClose(EditorWindow window)
 		{
 			base.OnWindowClose(window);
@@ -208,10 +202,15 @@ namespace ImpRock.JumpTo.Editor
 
 		private void SetSaveDirty(bool isDirty)
 		{
-			if (m_SceneState.Path.Length > 0)
-				m_IsDirty = isDirty;
-			else
+			if ((m_Window.CurrentOperation & Operation.LoadingHierarchyLinks) == Operation.LoadingHierarchyLinks ||
+				m_SceneState.Path.Length == 0)
+			{
 				m_IsDirty = false;
+			}
+			else
+			{
+				m_IsDirty = isDirty;
+			}
 
 			ControlIcon saveIcon = m_ControlIcons[m_SaveIconIndex];
 			saveIcon.Enabled = m_IsDirty;

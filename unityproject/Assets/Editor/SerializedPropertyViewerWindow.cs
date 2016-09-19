@@ -172,7 +172,9 @@ public class SerializedPropertyViewerWindow : EditorWindow
 		if (m_Inspected != null && m_Inspected.GetType() == typeof(GameObject))
 		{
 			PrefabType prefabType = PrefabUtility.GetPrefabType(m_Inspected);
-			m_IsPrefabInstance = prefabType == PrefabType.ModelPrefabInstance || prefabType == PrefabType.PrefabInstance;
+			m_IsPrefabInstance = prefabType == PrefabType.ModelPrefabInstance || prefabType == PrefabType.PrefabInstance
+				|| prefabType == PrefabType.DisconnectedModelPrefabInstance || prefabType == PrefabType.DisconnectedPrefabInstance
+				|| prefabType == PrefabType.ModelPrefab || prefabType == PrefabType.Prefab;
 		}
 		else
 		{

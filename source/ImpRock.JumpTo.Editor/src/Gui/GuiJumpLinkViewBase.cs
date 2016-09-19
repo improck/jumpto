@@ -168,7 +168,7 @@ namespace ImpRock.JumpTo.Editor
 
 					m_DrawRect.x = 14.0f;
 					m_DrawRect.width = 16.0f;
-					m_DrawRect.height = 16.0f;
+					m_DrawRect.height = GraphicAssets.LinkViewTitleBarHeight;
 					GUI.DrawTexture(m_DrawRect, m_Title.image, ScaleMode.ScaleToFit);
 
 					for (int i = 0; i < m_ControlIcons.Count; i++)
@@ -204,10 +204,11 @@ namespace ImpRock.JumpTo.Editor
 			List<T> links = m_LinkContainer.Links;
 
 			m_DrawRect.x = 0.0f;
-			m_DrawRect.y += m_DrawRect.height;	//height of the title header
+			m_DrawRect.y += GraphicAssets.LinkViewTitleBarHeight;
 			m_DrawRect.width = m_Size.x;
 			m_DrawRect.height = m_Size.y - m_DrawRect.y;
 
+			//makes the link area rects relative to (0,0)
 			GUI.BeginGroup(m_DrawRect);
 
 			#region Event Switch
