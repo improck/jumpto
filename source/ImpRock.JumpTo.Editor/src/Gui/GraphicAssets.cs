@@ -39,10 +39,8 @@ namespace ImpRock.JumpTo.Editor
 		
 		public GUIStyle LinkViewTitleStyle { get; private set; }
 		public GUIStyle LinkLabelStyle { get; private set; }
-		public GUIStyle ToolbarStyle { get; private set; }
-		public GUIStyle ToolbarButtonStyle { get; private set; }
-		public GUIStyle ToolbarPopupStyle { get; private set; }
 		public GUIStyle DragDropInsertionStyle { get; private set; }
+		public GUIStyle FoldoutStyle { get; private set; }
 
 		//***** COLORS *****
 
@@ -54,12 +52,13 @@ namespace ImpRock.JumpTo.Editor
 		public readonly Color DisabledColorModifier = new Color(0.0f, 0.0f, 0.0f, 0.4f);
 		public const float LinkHeight = 16.0f;
 		public const float LinkViewTitleBarHeight = 18.0f;
+		public const bool ForceProSkin = false;
 
 
 		public void InitGuiStyle()
 		{
 			GUISkin editorSkin = null;
-			if (EditorGUIUtility.isProSkin)
+			if (EditorGUIUtility.isProSkin || ForceProSkin)
 				editorSkin = EditorGUIUtility.GetBuiltinSkin(EditorSkin.Scene);
 			else
 				editorSkin = EditorGUIUtility.GetBuiltinSkin(EditorSkin.Inspector);
@@ -76,14 +75,13 @@ namespace ImpRock.JumpTo.Editor
 			LinkViewTitleStyle.font = null;
 			LinkViewTitleStyle.fontSize = 0;
 			LinkViewTitleStyle.imagePosition = ImagePosition.TextOnly;
+			LinkViewTitleStyle.normal.textColor = LinkTextColors[0];
 
 			LinkLabelStyle = new GUIStyle(editorSkin.GetStyle("PR Label"));
 			LinkLabelStyle.name = "Link Label Style";
 			LinkLabelStyle.padding.left = 8;
-
-			ToolbarStyle = new GUIStyle(editorSkin.GetStyle("Toolbar"));
-			ToolbarPopupStyle = new GUIStyle(editorSkin.GetStyle("ToolbarPopup"));
-			ToolbarButtonStyle = new GUIStyle(editorSkin.GetStyle("toolbarbutton"));
+			
+			FoldoutStyle = new GUIStyle(editorSkin.GetStyle("Foldout"));
 
 			DragDropInsertionStyle = new GUIStyle(editorSkin.GetStyle("PR Insertion"));
 			DragDropInsertionStyle.imagePosition = ImagePosition.ImageOnly;
@@ -99,7 +97,7 @@ namespace ImpRock.JumpTo.Editor
 			IconHierarchyView = EditorGUIUtility.FindTexture("SceneAsset Icon");
 
 
-			if (EditorGUIUtility.isProSkin)
+			if (EditorGUIUtility.isProSkin || ForceProSkin)
 			{
 				LinkTextColors = new Color[]
 				{

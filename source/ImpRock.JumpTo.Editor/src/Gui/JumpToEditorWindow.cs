@@ -112,15 +112,6 @@ internal sealed class JumpToEditorWindow : EditorWindow
 
 	private void OnPostEnable()
 	{
-		//if (!EditorApplication.isPlayingOrWillChangePlaymode)
-		//{
-		//	//SceneLoadDetector.EnsureExistence();
-		//}
-		//else
-		//{
-		//	EditorApplication.playmodeStateChanged += OnPlayModeStateChanged;
-		//}
-
 		GUIContent titleContent = this.titleContent;
 		titleContent.text = "JumpTo";
 		titleContent.image = JumpToResources.Instance.GetImage(ResId.ImageTabIcon);
@@ -160,11 +151,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 
 		m_JumpLinkListView.OnWindowClose(this);
 		
-		//SceneLoadDetector.PermanentlyDestroyInstance();
-
 		m_SerializationControl.Uninitialize();
-		//GraphicAssets.DestroyInstance();
-		//ResLoad.DestroyInstance();
 	}
 
 	private void Init()
@@ -180,11 +167,21 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		if (!m_Initialized)
 			Init();
 
+#if DEBUG
+		if (GraphicAssets.ForceProSkin)
+			GUILayout.BeginVertical(EditorGUIUtility.GetBuiltinSkin(EditorSkin.Scene).GetStyle("hostview"));
+#endif
+
 		//position.x & y are the position of the window in Unity, i think
 		//	maybe it's the window position on the desktop
 		//	either way it wasn't the value i expected, so i force (0, 0)
 		m_Position.Set(0.0f, 0.0f, position.width, position.height);
 		m_JumpLinkListView.Draw(m_Position);
+
+#if DEBUG
+		if (GraphicAssets.ForceProSkin)
+			GUILayout.EndVertical();
+#endif
 	}
 
 	private void OnBecameVisible()

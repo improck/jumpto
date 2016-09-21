@@ -113,63 +113,7 @@ namespace ImpRock.JumpTo.Editor
 
 		private static void Initialize() { }
 
-
-		//***** Merged from SceneStateControl *****
-
-		/// <summary>
-		/// Called from SceneLoadDetector
-		/// </summary>
-		public static void SceneDataIsUnloading()
-		{
-			if (s_Instance == null)
-				return;
-			
-			s_Instance.m_HierarchyChanged = false;
-			EditorApplication.hierarchyWindowChanged += DetectRecompile;
-		}
-
-		/// <summary>
-		/// Called from SceneLoadDetector
-		/// </summary>
-		public static void SceneDataWillLoad()
-		{
-			if (s_Instance == null)
-				return;
-			
-			EditorApplication.delayCall +=
-				delegate ()
-				{
-					//if the hierarchy changed prior to the delayed scene load
-					//	then the scene load was the result of a scene asset being
-					//	opened or a new scene being created. else, it was triggered
-					//	by an assembly reload which deserializes the scene but does
-					//	NOT call the hierarchyWindowChanged event
-					if (s_Instance.m_HierarchyChanged)
-					{
-						Debug.Log("SceneWillLoad: Hierarchy has changed");
-
-						s_Instance.m_HierarchyChanged = false;
-					}
-					else
-					{
-						Debug.Log("SceneWillLoad: Hierarchy has NOT changed");
-					}
-
-					EditorApplication.hierarchyWindowChanged -= DetectRecompile;
-				};
-		}
-
-		private static void DetectRecompile()
-		{
-			if (s_Instance == null)
-				return;
-
-			s_Instance.m_HierarchyChanged = true;
-			EditorApplication.hierarchyWindowChanged -= DetectRecompile;
-		}
-		//*****************************************
-
-
+		
 		public SceneState GetSceneState(int sceneId)
 		{
 			SceneState sceneState = null;

@@ -52,7 +52,7 @@ namespace ImpRock.JumpTo.Editor
 
 		static ResId()
 		{
-			if (EditorGUIUtility.isProSkin)
+			if (EditorGUIUtility.isProSkin || GraphicAssets.ForceProSkin)
 			{
 				ImageHamburger = "hamburger_pro.png".GetHashCode();
 				ImageDiskette = "diskette_pro.png".GetHashCode();
@@ -116,7 +116,7 @@ namespace ImpRock.JumpTo.Editor
 			//image resources
 			LoadImage("tabicon.png");
 
-			if (EditorGUIUtility.isProSkin)
+			if (EditorGUIUtility.isProSkin || GraphicAssets.ForceProSkin)
 			{
 				//pro skin
 				LoadImage("hamburger_pro.png");

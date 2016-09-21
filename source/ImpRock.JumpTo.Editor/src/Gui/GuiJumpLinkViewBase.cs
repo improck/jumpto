@@ -30,6 +30,7 @@ namespace ImpRock.JumpTo.Editor
 		protected bool m_Foldout = true;
 		protected bool m_MarkedForClose = false;
 		protected Vector2 m_GrabPosition = Vector2.zero;
+		protected Color m_HeaderColorModifier = new Color(1.0f, 1.0f, 1.0f, 0.9f);
 
 		protected GUIContent m_Title;
 		protected GUIContent m_MenuSelectAll;
@@ -164,7 +165,10 @@ namespace ImpRock.JumpTo.Editor
 				break;
 			case EventType.Repaint:
 				{
+					Color guiColor = GUI.color;
+					GUI.color *= m_HeaderColorModifier;
 					GraphicAssets.Instance.LinkViewTitleStyle.Draw(m_DrawRect, m_Title, false, false, false, false);
+					GUI.color = guiColor;
 
 					m_DrawRect.x = 14.0f;
 					m_DrawRect.width = 16.0f;
@@ -185,7 +189,7 @@ namespace ImpRock.JumpTo.Editor
 
 			m_FoldoutRect.width = m_Size.x - titlePaddingRight;
 
-			bool foldout = EditorGUI.Foldout(m_FoldoutRect, m_Foldout, GUIContent.none, true);
+			bool foldout = EditorGUI.Foldout(m_FoldoutRect, m_Foldout, GUIContent.none, true, GraphicAssets.Instance.FoldoutStyle);
 			if (foldout != m_Foldout)
 			{
 				m_Foldout = foldout;
