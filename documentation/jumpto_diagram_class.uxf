@@ -1,29 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<diagram program="umlet" version="12.2">
+<diagram program="umlet" version="14.2">
   <zoom_level>10</zoom_level>
   <element>
-    <type>com.umlet.element.Class</type>
+    <id>UMLClass</id>
     <coordinates>
-      <x>360</x>
-      <y>570</y>
+      <x>650</x>
+      <y>760</y>
       <w>170</w>
       <h>120</h>
     </coordinates>
     <panel_attributes>&lt;&lt;Singleton&gt;&gt;
 SerializationControl
 --
-+onSerialize: delegate
-+onDeserialize: delegate
---
-+Serialize()
-+Deserialize()</panel_attributes>
+</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
-    <type>com.umlet.element.Class</type>
+    <id>UMLClass</id>
     <coordinates>
-      <x>1450</x>
-      <y>630</y>
+      <x>1740</x>
+      <y>820</y>
       <w>150</w>
       <h>50</h>
     </coordinates>
@@ -34,10 +30,10 @@ SerializationControl
     <additional_attributes/>
   </element>
   <element>
-    <type>com.umlet.element.Class</type>
+    <id>UMLClass</id>
     <coordinates>
-      <x>360</x>
-      <y>740</y>
+      <x>650</x>
+      <y>930</y>
       <w>170</w>
       <h>150</h>
     </coordinates>
@@ -54,23 +50,10 @@ SerializationControl
     <additional_attributes/>
   </element>
   <element>
-    <type>com.umlet.element.Class</type>
+    <id>UMLClass</id>
     <coordinates>
-      <x>170</x>
-      <y>620</y>
-      <w>140</w>
-      <h>100</h>
-    </coordinates>
-    <panel_attributes>GuiJumpToToolbar
---
---</panel_attributes>
-    <additional_attributes/>
-  </element>
-  <element>
-    <type>com.umlet.element.Class</type>
-    <coordinates>
-      <x>330</x>
-      <y>1060</y>
+      <x>620</x>
+      <y>1250</y>
       <w>150</w>
       <h>70</h>
     </coordinates>
@@ -80,10 +63,10 @@ SerializationControl
     <additional_attributes/>
   </element>
   <element>
-    <type>com.umlet.element.Class</type>
+    <id>UMLClass</id>
     <coordinates>
-      <x>310</x>
-      <y>1140</y>
+      <x>600</x>
+      <y>1330</y>
       <w>170</w>
       <h>70</h>
     </coordinates>
@@ -93,10 +76,10 @@ SerializationControl
     <additional_attributes/>
   </element>
   <element>
-    <type>com.umlet.element.Class</type>
+    <id>UMLClass</id>
     <coordinates>
-      <x>330</x>
-      <y>980</y>
+      <x>620</x>
+      <y>1170</y>
       <w>150</w>
       <h>70</h>
     </coordinates>
@@ -106,10 +89,10 @@ SerializationControl
     <additional_attributes/>
   </element>
   <element>
-    <type>com.umlet.element.Class</type>
+    <id>UMLClass</id>
     <coordinates>
-      <x>1580</x>
-      <y>510</y>
+      <x>1870</x>
+      <y>700</y>
       <w>160</w>
       <h>80</h>
     </coordinates>
@@ -121,36 +104,43 @@ SerializationControl
     <additional_attributes/>
   </element>
   <element>
-    <type>com.umlet.element.Class</type>
+    <id>UMLClass</id>
     <coordinates>
-      <x>770</x>
-      <y>0</y>
-      <w>450</w>
-      <h>260</h>
+      <x>1040</x>
+      <y>130</y>
+      <w>500</w>
+      <h>360</h>
     </coordinates>
     <panel_attributes>&lt;&lt;Psuedo-Singleton&gt;&gt;
 JumpLinks
 --
 -m_ProjectLinkContainer: ProjectJumpLinkContainer
--m_HierarchyLinkContainer: HierarchyJumpLinkContainer
+-m_HierarchyLinkContainers: HierarchyJumpLinkContainerFaketionary
+&lt;&lt;property&gt;&gt; +ProjectLinks: ProjectJumpLinkContainer
+&lt;&lt;property&gt;&gt; +HierarchyLinks: HierarchyJumpLinkContainerFaketionary
+_&lt;&lt;event&gt;&gt; +OnProjectLinkAdded: System.Action_
+_&lt;&lt;event&gt;&gt; +OnHierarchyLinkAdded: System.Action&lt;int&gt;_
 --
-+GetJumpLinkContainer&lt;T&gt;(): JumpLinkContainer&lt;T&gt;, T: JumpLink
-+WouldBeProjectLink(linkReference: Object): bool
-+WouldBeHierarchyLink(linkReference: Object): bool
+#Initialize()
++GetHierarchyJumpLinkContainer(sceneId: int): HierarchyJumpLinkContainer
++AddHierarchyJumpLinkContainer(sceneId: int): HierarchyJumpLinkContainer
++RemoveHierarchyJumpLinkContainer(sceneId: in)
+_+WouldBeProjectLink(linkReference: Object): bool_
+_+WouldBeHierarchyLink(linkReference: Object): bool_
 +CreateJumpLink(linkReference: UnityEngine.Object)
 +CreateOnlyProjectJumpLink(linkReference: UnityEngine.Object)
 +CreateOnlyHierarchyJumpLink(linkReference: UnityEngine.Object)
++RefreshAllLinkSelections()
 +RefreshProjectLinks()
 +RefreshHierarchyLinks()
-+OnSerialize()
-+OnDeserialize()</panel_attributes>
++SetAllSelectedLinksAsUnitySelection()</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
-    <type>com.umlet.element.Class</type>
+    <id>UMLClass</id>
     <coordinates>
-      <x>150</x>
-      <y>990</y>
+      <x>810</x>
+      <y>1250</y>
       <w>160</w>
       <h>80</h>
     </coordinates>
@@ -161,27 +151,10 @@ JumpLinks
     <additional_attributes/>
   </element>
   <element>
-    <type>com.umlet.element.Class</type>
+    <id>UMLClass</id>
     <coordinates>
-      <x>570</x>
-      <y>340</y>
-      <w>180</w>
-      <h>100</h>
-    </coordinates>
-    <panel_attributes>&lt;&lt;Pseudo-Singleton&gt;&gt;
-JumpToSettings
---
---
-+OnSerialize()
-+OnDeserialize()
-_+Create(): JumpToSettings_</panel_attributes>
-    <additional_attributes/>
-  </element>
-  <element>
-    <type>com.umlet.element.Class</type>
-    <coordinates>
-      <x>850</x>
-      <y>360</y>
+      <x>1140</x>
+      <y>550</y>
       <w>290</w>
       <h>50</h>
     </coordinates>
@@ -191,10 +164,10 @@ _+Create(): JumpToSettings_</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
-    <type>com.umlet.element.Class</type>
+    <id>UMLClass</id>
     <coordinates>
-      <x>1040</x>
-      <y>490</y>
+      <x>1330</x>
+      <y>680</y>
       <w>330</w>
       <h>210</h>
     </coordinates>
@@ -213,43 +186,32 @@ _+Create(): JumpToSettings_</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
-    <type>com.umlet.element.Relation</type>
+    <id>Relation</id>
     <coordinates>
-      <x>1080</x>
-      <y>380</y>
-      <w>50</w>
-      <h>130</h>
+      <x>1390</x>
+      <y>590</y>
+      <w>30</w>
+      <h>110</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>30;30;30;110</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;90.0</additional_attributes>
   </element>
   <element>
-    <type>com.umlet.element.Relation</type>
+    <id>Relation</id>
     <coordinates>
-      <x>970</x>
-      <y>230</y>
-      <w>50</w>
-      <h>150</h>
+      <x>1280</x>
+      <y>480</y>
+      <w>30</w>
+      <h>90</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>30;130;30;30</additional_attributes>
+    <additional_attributes>10.0;70.0;10.0;10.0</additional_attributes>
   </element>
   <element>
-    <type>com.umlet.element.Relation</type>
+    <id>UMLClass</id>
     <coordinates>
-      <x>720</x>
-      <y>360</y>
-      <w>150</w>
-      <h>50</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>130;30;30;30</additional_attributes>
-  </element>
-  <element>
-    <type>com.umlet.element.Class</type>
-    <coordinates>
-      <x>270</x>
-      <y>1240</y>
+      <x>560</x>
+      <y>1430</y>
       <w>150</w>
       <h>80</h>
     </coordinates>
@@ -261,10 +223,10 @@ GraphicAssets
     <additional_attributes/>
   </element>
   <element>
-    <type>com.umlet.element.Class</type>
+    <id>UMLClass</id>
     <coordinates>
-      <x>1230</x>
-      <y>290</y>
+      <x>640</x>
+      <y>560</y>
       <w>180</w>
       <h>170</h>
     </coordinates>
@@ -282,34 +244,34 @@ PrefabInstanceBroken = 3
     <additional_attributes/>
   </element>
   <element>
-    <type>com.umlet.element.Relation</type>
+    <id>Relation</id>
     <coordinates>
-      <x>1340</x>
-      <y>620</y>
-      <w>130</w>
-      <h>50</h>
+      <x>1650</x>
+      <y>830</y>
+      <w>110</w>
+      <h>30</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>30;30;110;30</additional_attributes>
+    <additional_attributes>10.0;10.0;90.0;10.0</additional_attributes>
   </element>
   <element>
-    <type>com.umlet.element.Relation</type>
+    <id>Relation</id>
     <coordinates>
-      <x>1340</x>
-      <y>510</y>
-      <w>260</w>
-      <h>50</h>
+      <x>1650</x>
+      <y>720</y>
+      <w>240</w>
+      <h>30</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>30;30;240;30</additional_attributes>
+    <additional_attributes>10.0;10.0;220.0;10.0</additional_attributes>
   </element>
   <element>
-    <type>com.umlet.element.Class</type>
+    <id>UMLClass</id>
     <coordinates>
-      <x>570</x>
-      <y>480</y>
+      <x>860</x>
+      <y>670</y>
       <w>440</w>
-      <h>520</h>
+      <h>570</h>
     </coordinates>
     <panel_attributes>template=T: JumpLink
 /JumpLinkContainer/
@@ -333,34 +295,39 @@ PrefabInstanceBroken = 3
 +RemoveAll()
 +MoveLink(from: int, to: int)
 +MoveSelected(to: int)
++RefreshLinkSelections()
 +LinkSelectionSet(index: int)
 +LinkSelectionSetRange(from: int, to: int)
 +LinkSelectionInvert()
 +LinkSelectionAdd(index: int)
++LinkSelectionRemove(index: int)
 +LinkSelectionClear()
++LinkSelectionSetUnitySelection()
++LinkSelectionAddToUnitySelection()
 +RefreshLinks()
 +RefreshLinksY()
 +LinkHitTest(position: Vector2): int
 +SelectionHitTest(position: Vector2): bool
+#RaiseOnLinksChanged()
 </panel_attributes>
     <additional_attributes/>
   </element>
   <element>
-    <type>com.umlet.element.Relation</type>
+    <id>Relation</id>
     <coordinates>
-      <x>850</x>
-      <y>380</y>
-      <w>50</w>
-      <h>130</h>
+      <x>1160</x>
+      <y>590</y>
+      <w>30</w>
+      <h>110</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>30;30;30;110</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;90.0</additional_attributes>
   </element>
   <element>
-    <type>com.umlet.element.Class</type>
+    <id>UMLClass</id>
     <coordinates>
-      <x>1170</x>
-      <y>770</y>
+      <x>1460</x>
+      <y>960</y>
       <w>420</w>
       <h>70</h>
     </coordinates>
@@ -372,23 +339,24 @@ PrefabInstanceBroken = 3
     <additional_attributes/>
   </element>
   <element>
-    <type>com.umlet.element.Relation</type>
+    <id>Relation</id>
     <coordinates>
-      <x>940</x>
-      <y>760</y>
-      <w>250</w>
-      <h>94</h>
+      <x>1240</x>
+      <y>980</y>
+      <w>240</w>
+      <h>40</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;.
 &lt;&lt;bind&gt;&gt;
-T: ProjectJumpLink</panel_attributes>
-    <additional_attributes>30;50;230;50</additional_attributes>
+T: ProjectJumpLink
+fontsize=10</panel_attributes>
+    <additional_attributes>10.0;20.0;220.0;20.0</additional_attributes>
   </element>
   <element>
-    <type>com.umlet.element.Class</type>
+    <id>UMLClass</id>
     <coordinates>
-      <x>1260</x>
-      <y>880</y>
+      <x>1550</x>
+      <y>1070</y>
       <w>440</w>
       <h>90</h>
     </coordinates>
@@ -401,40 +369,162 @@ T: ProjectJumpLink</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
-    <type>com.umlet.element.Relation</type>
+    <id>Relation</id>
     <coordinates>
-      <x>940</x>
-      <y>880</y>
-      <w>340</w>
-      <h>94</h>
+      <x>1240</x>
+      <y>1100</y>
+      <w>330</w>
+      <h>40</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;.
 &lt;&lt;bind&gt;&gt;
-T: HierarchyJumpLink</panel_attributes>
-    <additional_attributes>30;50;320;50</additional_attributes>
+T: HierarchyJumpLink
+fontsize=10</panel_attributes>
+    <additional_attributes>10.0;20.0;310.0;20.0</additional_attributes>
   </element>
   <element>
-    <type>com.umlet.element.Relation</type>
+    <id>Relation</id>
     <coordinates>
-      <x>1490</x>
-      <y>650</y>
-      <w>50</w>
-      <h>140</h>
+      <x>1800</x>
+      <y>860</y>
+      <w>30</w>
+      <h>120</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;-&gt;
 m2=  *</panel_attributes>
-    <additional_attributes>30;120;30;30</additional_attributes>
+    <additional_attributes>10.0;100.0;10.0;10.0</additional_attributes>
   </element>
   <element>
-    <type>com.umlet.element.Relation</type>
+    <id>Relation</id>
     <coordinates>
-      <x>1630</x>
-      <y>560</y>
-      <w>50</w>
-      <h>340</h>
+      <x>1940</x>
+      <y>770</y>
+      <w>30</w>
+      <h>320</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;-&gt;
 m2=  *</panel_attributes>
-    <additional_attributes>30;320;30;30</additional_attributes>
+    <additional_attributes>10.0;300.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1600</x>
+      <y>1220</y>
+      <w>390</w>
+      <h>250</h>
+    </coordinates>
+    <panel_attributes>template=K,V
+Faketionary
+--
+-m_Keys: List&lt;K&gt;
+-m_Values: List&lt;V&gt;
+&lt;&lt;property&gt;&gt; operator[K]
+&lt;&lt;property&gt;&gt; Keys: List&lt;K&gt;
+&lt;&lt;property&gt;&gt; Values: List&lt;V&gt;
+&lt;&lt;property&gt;&gt; Count: int
+--
++Add(key: K, value: V)
++Remove(key: K): bool
++TryGetValue(key: K, &lt;&lt;out&gt;&gt; value: V): bool
++ContainsKey(key: K): bool
++Clear()
++GetEnumerator(): IEnumerator&lt;KeyValuePair&lt;K, V&gt;&gt;
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1160</x>
+      <y>1310</y>
+      <w>280</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>HierarchyJumpLinkContainerFaketionary</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1430</x>
+      <y>1310</y>
+      <w>190</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.
+&lt;&lt;bind&gt;&gt;
+K: int
+V: HierarchyJumpLinkContainer
+fontsize=10</panel_attributes>
+    <additional_attributes>170.0;20.0;10.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>540</x>
+      <y>170</y>
+      <w>380</w>
+      <h>300</h>
+    </coordinates>
+    <panel_attributes>SceneState
+--
++SceneId: int
++Name: string
++Path: string
++RootCount: int
++IsDirty: bool
++IsLoaded: bool
++Scene: Scene
+&lt;&lt;event&gt;&gt; +OnNameChange: Action&lt;SceneState, string&gt;
+&lt;&lt;event&gt;&gt; +OnPathChange: Action&lt;SceneState, string&gt;
+&lt;&lt;event&gt;&gt; +OnRootCountChange: Action&lt;SceneState, int&gt;
+&lt;&lt;event&gt;&gt; +OnIsDirtyChange: Action&lt;SceneState, bool&gt;
+&lt;&lt;event&gt;&gt; +OnIsLoadedChange: Action&lt;SceneState, bool&gt;
+&lt;&lt;event&gt;&gt; +OnClose: Action&lt;SceneState&gt;
+--
++ctor(scene: Scene)
++UpdateInfo()
++SceneClosed()</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>50</x>
+      <y>170</y>
+      <w>360</w>
+      <h>270</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Pseudo-Singleton&gt;&gt;
+SceneStateMonitor
+--
+-m_SceneCount: int
+-m_LoadedSceneCount: int
+-m_HierarchyChanged: bool
+-m_SceneStates: Dictionary&lt;int, SceneState&gt;
+_&lt;&lt;event&gt;&gt; +OnSceneCountChanged: Action&lt;int, int&gt;_
+_&lt;&lt;event&gt;&gt; +OnLoadedSceneCountChanged: Action&lt;int, int&gt;_
+_&lt;&lt;event&gt;&gt; +OnSceneOpened: Action&lt;SceneState&gt;_
+--
+_-Initialize()_
++GetSceneState(sceneId: int): SceneState
++GetSceneStates(): SceneState[]
++InitializeSceneStateData()
+-OnHierarchyWindowChanged()
+-UpdateSceneData()</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>400</x>
+      <y>300</y>
+      <w>160</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-&gt;
+m2=*</panel_attributes>
+    <additional_attributes>10.0;10.0;140.0;10.0</additional_attributes>
   </element>
 </diagram>
