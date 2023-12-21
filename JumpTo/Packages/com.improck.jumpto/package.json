@@ -1,0 +1,22 @@
+{
+  "name": "com.improck.jumpto",
+  "version": "2.0.0",
+  "displayName": "ImpRock - JumpTo",
+  "description": "A favorites tool for Unity",
+  "unity": "2019.1",
+  "unityRelease": "0b5",
+  "documentationUrl": "https://improck.com/jumpto",
+  "changelogUrl": "https://example.com/changelog.html",
+  "licensesUrl": "https://example.com/licensing.html",
+  "keywords": [
+    "improck",
+    "shortcut",
+    "favorite",
+    "bookmark"
+  ],
+  "author": {
+    "name": "Dean Lackey",
+    "email": "dean@improck.com",
+    "url": "https://improck.com"
+  }
+}
