@@ -95,7 +95,7 @@ namespace ImpRock.JumpTo.Editor
 					linkReference = PrefabUtility.GetPrefabObject(linkReference);
 				}
 
-				SerializedObject serializedObject = new SerializedObject(linkReference);
+				SerializedObject serializedObject = new(linkReference);
 				serializedObject.SetInspectorMode(InspectorMode.Debug);
 				if (serializedObject.GetLocalIdInFile() == 0)
 				{

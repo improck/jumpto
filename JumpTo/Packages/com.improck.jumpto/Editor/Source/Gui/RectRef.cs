@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿#pragma warning disable IDE1006 // Naming Styles: properties must be pascal-case
+
 using UnityEngine;
 
 
@@ -7,13 +8,15 @@ namespace ImpRock.JumpTo.Editor
 	[System.Serializable]
 	internal class RectRef
 	{
-		[SerializeField]
-		private Rect m_RectInternal;
+		[SerializeField] private Rect m_RectInternal;
 
-		//NOTE: remember that this returns a COPY of the internal rect
+		/// <summary>
+		/// Returns a COPY of the internal rect
+		/// </summary>
 		public Rect RectInternal { get { return m_RectInternal; } }
 
 		//pass-through properties
+
 		public float x { get { return m_RectInternal.x; } set { m_RectInternal.x = value; } }
 		public float y { get { return m_RectInternal.y; } set { m_RectInternal.y = value; } }
 		public float width { get { return m_RectInternal.width; } set { m_RectInternal.width = value; } }
@@ -83,3 +86,5 @@ namespace ImpRock.JumpTo.Editor
 		}
 	}
 }
+
+#pragma warning restore IDE1006 // Naming Styles

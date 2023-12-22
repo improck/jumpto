@@ -19,7 +19,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 	public Operation CurrentOperation = Operation.Idle;
 
 	[System.NonSerialized] private bool m_Initialized = false;
-	[System.NonSerialized] private RectRef m_Position = new RectRef();
+	[System.NonSerialized] private RectRef m_Position = new();
 	[System.NonSerialized] private double m_LastHierarchyRefreshTime = 0.0f;
 	[System.NonSerialized] private SerializationControl m_SerializationControl = null;
 
@@ -53,7 +53,6 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		s_InstanceCount++;
 
 		JumpToResources.Instance.LoadResources();
-		//GraphicAssets.Instance.InitAssets();
 
 		if (m_SceneStateMonitor == null)
 		{
@@ -163,7 +162,8 @@ internal sealed class JumpToEditorWindow : EditorWindow
 
 	private void OnGUI()
 	{
-		//NOTE: it's ridiculous that I have to do this here.
+		//NOTE: it's ridiculous that I have to do this here, but some
+		//		things can only be called from inside OnGUI().
 		if (!m_Initialized)
 			Init();
 

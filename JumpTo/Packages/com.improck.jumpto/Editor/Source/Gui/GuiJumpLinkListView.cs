@@ -9,15 +9,15 @@ namespace ImpRock.JumpTo.Editor
 	{
 		[SerializeField] private Vector2 m_ScrollViewPosition;
 		[SerializeField] private GuiProjectJumpLinkView m_ProjectView;
-		[SerializeField] private List<GuiHierarchyJumpLinkView> m_HierarchyViews = new List<GuiHierarchyJumpLinkView>();
+		[SerializeField] private List<GuiHierarchyJumpLinkView> m_HierarchyViews = new();
 
-		private RectRef m_DrawRect = new RectRef();
+		private readonly RectRef m_DrawRect = new();
 		private Rect m_ScrollViewRect;
 		private string m_HelpMessage1;
 
 		private JumpToEditorWindow m_Window;
 
-		private readonly Vector2 IconSize = new Vector2(16.0f, 16.0f);
+		private readonly Vector2 IconSize = new(16.0f, 16.0f);
 		
 
 		public override void OnWindowEnable(EditorWindow window)

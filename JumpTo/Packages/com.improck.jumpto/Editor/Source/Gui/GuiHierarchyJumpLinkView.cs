@@ -43,10 +43,13 @@ namespace ImpRock.JumpTo.Editor
 
 			m_IsDirty = (m_Window.CurrentOperation & Operation.CreatingLinkViaDragAndDrop) == Operation.CreatingLinkViaDragAndDrop;
 
-			ControlIcon controlIcon = new ControlIcon();
-			controlIcon.Enabled = m_IsDirty;
-			controlIcon.Icon = JumpToResources.Instance.GetImage(ResId.ImageDiskette);
-			controlIcon.OnClick = SaveLinks;
+			ControlIcon controlIcon = new()
+			{
+				Enabled = m_IsDirty,
+				Icon = JumpToResources.Instance.GetImage(ResId.ImageDiskette),
+				OnClick = SaveLinks
+			};
+
 			m_SaveIconIndex = m_ControlIcons.Count;
 			m_ControlIcons.Add(controlIcon);
 
@@ -88,7 +91,7 @@ namespace ImpRock.JumpTo.Editor
 
 		protected override void ShowLinkContextMenu()
 		{
-			GenericMenu menu = new GenericMenu();
+			GenericMenu menu = new();
 
 			//NOTE: a space followed by an underscore (" _") will cause all text following that
 			//		to appear right-justified and all caps in a GenericMenu. the name is being
@@ -147,8 +150,7 @@ namespace ImpRock.JumpTo.Editor
 				AddCommonTitleContextMenuItems(menu);
 			}
 
-			if (menu != null)
-				menu.ShowAsContext();
+			menu?.ShowAsContext();
 		}
 
 		protected override void OnDoubleClick()

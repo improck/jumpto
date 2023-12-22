@@ -30,7 +30,7 @@ namespace ImpRock.JumpTo.Editor
 		protected bool m_Foldout = true;
 		protected bool m_MarkedForClose = false;
 		protected Vector2 m_GrabPosition = Vector2.zero;
-		protected Color m_HeaderColorModifier = new Color(1.0f, 1.0f, 1.0f, 0.9f);
+		protected Color m_HeaderColorModifier = new(1.0f, 1.0f, 1.0f, 0.9f);
 
 		protected GUIContent m_Title;
 		protected GUIContent m_MenuSelectAll;
@@ -41,7 +41,7 @@ namespace ImpRock.JumpTo.Editor
 		protected GUIContent m_MenuRemoveAll;
 		protected GUIContent m_MenuRemoveLinkPlural;
 
-		protected List<ControlIcon> m_ControlIcons = new List<ControlIcon>();
+		protected List<ControlIcon> m_ControlIcons = new();
 
 		protected JumpToEditorWindow m_Window;
 
@@ -83,10 +83,13 @@ namespace ImpRock.JumpTo.Editor
 			m_MenuRemoveAll = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextRemoveAll));
 			m_MenuRemoveLinkPlural = new GUIContent(JumpToResources.Instance.GetText(ResId.MenuContextRemoveLinkPlural));
 
-			ControlIcon controlIcon = new ControlIcon();
-			controlIcon.Enabled = true;
-			controlIcon.Icon = JumpToResources.Instance.GetImage(ResId.ImageHamburger);
-			controlIcon.OnClick = ShowTitleContextMenu;
+			ControlIcon controlIcon = new()
+			{
+				Enabled = true,
+				Icon = JumpToResources.Instance.GetImage(ResId.ImageHamburger),
+				OnClick = ShowTitleContextMenu
+			};
+
 			m_ControlIcons.Add(controlIcon);
 			
 			m_ControlRect.width = 10.0f;

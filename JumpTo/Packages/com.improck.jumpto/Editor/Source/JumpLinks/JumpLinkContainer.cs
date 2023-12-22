@@ -7,7 +7,7 @@ namespace ImpRock.JumpTo.Editor
 {
 	internal abstract class JumpLinkContainer<T> : ScriptableObject where T : JumpLink
 	{
-		[SerializeField] protected List<T> m_Links = new List<T>();
+		[SerializeField] protected List<T> m_Links = new();
 		[SerializeField] protected int m_ActiveSelection = -1;
 		[SerializeField] protected int m_SelectionCount = 0;
 		
@@ -40,7 +40,7 @@ namespace ImpRock.JumpTo.Editor
 				}
 				else
 				{
-					List<T> selection = new List<T>();
+					List<T> selection = new();
 					for (int i = 0; i < m_Links.Count; i++)
 					{
 						if (m_Links[i].Selected)
@@ -60,7 +60,7 @@ namespace ImpRock.JumpTo.Editor
 					return null;
 				else
 				{
-					List<Object> selection = new List<Object>();
+					List<Object> selection = new();
 					for (int i = 0; i < m_Links.Count; i++)
 					{
 						if (m_Links[i].Selected)
@@ -115,8 +115,7 @@ namespace ImpRock.JumpTo.Editor
 				m_Links[i].Area.y = i * GraphicAssets.LinkHeight;
 			}
 
-			if (OnLinksChanged != null)
-				OnLinksChanged();
+			OnLinksChanged?.Invoke();
 		}
 
 		public void RemoveSelected()
@@ -136,8 +135,7 @@ namespace ImpRock.JumpTo.Editor
 
 			m_SelectionCount = 0;
 
-			if (OnLinksChanged != null)
-				OnLinksChanged();
+			OnLinksChanged?.Invoke();
 		}
 
 		public void RemoveNonSelected()
@@ -157,8 +155,7 @@ namespace ImpRock.JumpTo.Editor
 
 			RefreshLinksY();
 
-			if (OnLinksChanged != null)
-				OnLinksChanged();
+			OnLinksChanged?.Invoke();
 		}
 
 		public void RemoveAll()
@@ -166,8 +163,7 @@ namespace ImpRock.JumpTo.Editor
 			m_Links.Clear();
 			m_ActiveSelection = -1;
 
-			if (OnLinksChanged != null)
-				OnLinksChanged();
+			OnLinksChanged?.Invoke();
 		}
 
 		public void MoveLink(int from, int to)
@@ -182,8 +178,8 @@ namespace ImpRock.JumpTo.Editor
 
 			//find the range of links that will shift
 			//	within the list as a result of the move
-			int min = 0;
-			int max = 0;
+			int min;
+			int max;
 			if (to > from)
 			{
 				to--;
@@ -207,14 +203,13 @@ namespace ImpRock.JumpTo.Editor
 				m_Links[min].Area.y = min * GraphicAssets.LinkHeight;
 			}
 
-			if (OnLinksChanged != null)
-				OnLinksChanged();
+			OnLinksChanged?.Invoke();
 		}
 
 		public void MoveSelected(int to)
 		{
 			//get the indices of the selected links
-			List<int> selection = new List<int>();
+			List<int> selection = new();
 			for (int i = 0; i < m_Links.Count; i++)
 			{
 				if (m_Links[i].Selected)
@@ -251,8 +246,7 @@ namespace ImpRock.JumpTo.Editor
 			//fix all of the y-positions
 			RefreshLinksY();
 
-			if (OnLinksChanged != null)
-				OnLinksChanged();
+			OnLinksChanged?.Invoke();
 		}
 
 		public void RefreshLinkSelections()
@@ -381,11 +375,9 @@ namespace ImpRock.JumpTo.Editor
 
 		public void LinkSelectionAddToUnitySelection()
 		{
-			Object[] selectedObjects = Selection.objects;
-			List<Object> totalSelectedObjects = new List<Object>();
-
 			//TODO: make this more efficient
-			int index = -1;
+			Object[] selectedObjects = Selection.objects;
+			List<Object> totalSelectedObjects = new();
 			for (int i = 0; i < m_Links.Count; i++)
 			{
 				//add selected objects to the list
@@ -396,7 +388,7 @@ namespace ImpRock.JumpTo.Editor
 				//filter non-selected from current selection
 				else if (selectedObjects.Length > 0)
 				{
-					index = System.Array.IndexOf(selectedObjects, m_Links[i].LinkReference);
+					int index = System.Array.IndexOf(selectedObjects, m_Links[i].LinkReference);
 					if (index > -1)
 						selectedObjects[index] = null;
 				}
@@ -426,7 +418,8 @@ namespace ImpRock.JumpTo.Editor
 				}
 				else
 				{
-					UpdateLinkInfo(m_Links[i], PrefabUtility.GetPrefabType(m_Links[i].LinkReference));
+					T link = m_Links[i];
+					UpdateLinkInfo(link, PrefabUtility.GetPrefabType(link.LinkReference));
 				}
 			}
 
@@ -458,14 +451,11 @@ namespace ImpRock.JumpTo.Editor
 				{
 					int indexMin = 0;
 					int indexMax = linkCount - 1;
-					int index = 0;
-					RectRef rect = null;
-
 					while (indexMax >= indexMin)
 					{
-						index = (indexMin + indexMax) >> 1;
+						int index = (indexMin + indexMax) >> 1;
 
-						rect = m_Links[index].Area;
+						RectRef rect = m_Links[index].Area;
 
 						//if below the link rect
 						if (rect.yMax < position.y)
@@ -507,8 +497,7 @@ namespace ImpRock.JumpTo.Editor
 
 		protected void RaiseOnLinksChanged()
 		{
-			if (OnLinksChanged != null)
-				OnLinksChanged();
+			OnLinksChanged?.Invoke();
 		}
 	}
 }

@@ -8,8 +8,8 @@ namespace ImpRock.JumpTo.Editor
 	[System.Serializable]
 	public class Faketionary<K, V> : IEnumerable<KeyValuePair<K, V>>
 	{
-		[SerializeField] private List<K> m_Keys = new List<K>();
-		[SerializeField] private List<V> m_Values = new List<V>();
+		[SerializeField] private List<K> m_Keys = new();
+		[SerializeField] private List<V> m_Values = new();
 
 
 		public List<K> Keys { get { return new List<K>(m_Keys); } }
@@ -23,7 +23,7 @@ namespace ImpRock.JumpTo.Editor
 				int index = m_Keys.IndexOf(key);
 				if (index == -1)
 				{
-					return default(V);
+					return default;
 				}
 
 				return m_Values[index];
@@ -69,7 +69,7 @@ namespace ImpRock.JumpTo.Editor
 			int index = m_Keys.IndexOf(key);
 			if (index == -1)
 			{
-				value = default(V);
+				value = default;
 				return false;
 			}
 

@@ -12,29 +12,30 @@ namespace ImpRock.JumpTo.Editor
 	{
 		public static string GetRootOrderPath(Transform transform, Transform root = null)
 		{
-			SerializedObject so = null;
-			Stack<string> pathStack = new Stack<string>();
-			Transform rootParent = root != null ? root.parent : null;
-			while (transform != null && transform != rootParent)
-			{
-				so = new SerializedObject(transform);
-				pathStack.Push("/" + so.FindProperty("m_RootOrder").intValue.ToString());
+			//SerializedObject so = null;
+			//Stack<string> pathStack = new Stack<string>();
+			//Transform rootParent = root != null ? root.parent : null;
+			//while (transform != null && transform != rootParent)
+			//{
+			//	so = new SerializedObject(transform);
+			//	pathStack.Push("/" + so.FindProperty("m_RootOrder").intValue.ToString());
 
-				transform = transform.parent;
-			}
+			//	transform = transform.parent;
+			//}
 
-			StringBuilder pathBuilder = new StringBuilder();
-			while (pathStack.Count > 0)
-			{
-				pathBuilder.Append(pathStack.Pop());
-			}
+			//StringBuilder pathBuilder = new StringBuilder();
+			//while (pathStack.Count > 0)
+			//{
+			//	pathBuilder.Append(pathStack.Pop());
+			//}
 
-			return pathBuilder.ToString();
+			//return pathBuilder.ToString();
+			return " ";
 		}
 
 		public static string GetTransformPath(Transform transform, Transform root = null)
 		{
-			Stack<string> pathStack = new Stack<string>();
+			Stack<string> pathStack = new();
 			Transform rootParent = root != null ? root.parent : null;
 			while (transform != null && transform != rootParent)
 			{
@@ -43,7 +44,7 @@ namespace ImpRock.JumpTo.Editor
 				transform = transform.parent;
 			}
 
-			StringBuilder pathBuilder = new StringBuilder();
+			StringBuilder pathBuilder = new();
 			while (pathStack.Count > 0)
 			{
 				pathBuilder.Append(pathStack.Pop());
@@ -61,7 +62,7 @@ namespace ImpRock.JumpTo.Editor
 			if (orderedRootObjects == null || orderedRootObjects.Length == 0)
 				return;
 			
-			HierarchyProperty hierarchyProperty = new HierarchyProperty(HierarchyType.GameObjects);
+			HierarchyProperty hierarchyProperty = new(HierarchyType.GameObjects);
 			if (!hierarchyProperty.Find(orderedRootObjects[0].GetInstanceID(), null))
 				return;
 			
@@ -109,7 +110,7 @@ namespace ImpRock.JumpTo.Editor
 			Transform linkRoot = (linkReference as GameObject).transform.root;
 
 			int sceneCount = SceneManager.sceneCount;
-			List<GameObject> rootObjects = new List<GameObject>();
+			List<GameObject> rootObjects = new();
 			for (int i = 0; i < sceneCount; i++)
 			{
 				Scene scene = SceneManager.GetSceneAt(i);

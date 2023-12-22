@@ -103,7 +103,7 @@ namespace ImpRock.JumpTo.Editor
 		[SerializeField] private bool m_HierarchyChanged = false;
 
 		
-		private Dictionary<int, SceneState> m_SceneStates = new Dictionary<int, SceneState>();
+		private Dictionary<int, SceneState> m_SceneStates = new();
 
 
 		public static event System.Action<int, int> OnSceneCountChanged;
@@ -116,8 +116,7 @@ namespace ImpRock.JumpTo.Editor
 		
 		public SceneState GetSceneState(int sceneId)
 		{
-			SceneState sceneState = null;
-			m_SceneStates.TryGetValue(sceneId, out sceneState);
+			m_SceneStates.TryGetValue(sceneId, out SceneState sceneState);
 
 			return sceneState;
 		}
@@ -132,7 +131,7 @@ namespace ImpRock.JumpTo.Editor
 
 		public void InitializeSceneStateData()
 		{
-			EditorApplication.hierarchyWindowChanged += OnHierarchyWindowChanged;
+			EditorApplication.hierarchyChanged += OnHierarchyWindowChanged;
 
 			m_SceneCount = EditorSceneManager.sceneCount;
 			m_LoadedSceneCount = SceneManager.loadedSceneCount;
@@ -160,14 +159,14 @@ namespace ImpRock.JumpTo.Editor
 				if (!m_SceneStates.ContainsKey(currentSceneIds[i]))
 				{
 					sceneStateChanged = true;
-					SceneState sceneState = new SceneState(scene);
+					SceneState sceneState = new(scene);
 					m_SceneStates[currentSceneIds[i]] = sceneState;
 					OnSceneOpened?.Invoke(sceneState);
 				}
 			}
 
 			//find newly closed scenes
-			Dictionary<int, SceneState> currentSceneStates = new Dictionary<int, SceneState>();
+			Dictionary<int, SceneState> currentSceneStates = new();
 			foreach (KeyValuePair<int, SceneState> sceneState in m_SceneStates)
 			{
 				if (!ArrayUtility.Contains(currentSceneIds, sceneState.Key))

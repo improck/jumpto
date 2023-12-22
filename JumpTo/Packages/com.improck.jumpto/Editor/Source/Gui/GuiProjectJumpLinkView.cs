@@ -30,7 +30,7 @@ namespace ImpRock.JumpTo.Editor
 
 		protected override void ShowLinkContextMenu()
 		{
-			GenericMenu menu = new GenericMenu();
+			GenericMenu menu = new();
 
 			//NOTE: a space followed by an underscore (" _") will cause all text following that
 			//		to appear right-justified and all caps in a GenericMenu. the name is being
@@ -61,7 +61,7 @@ namespace ImpRock.JumpTo.Editor
 		{
 			if (m_LinkContainer.Links.Count > 0)
 			{
-				GenericMenu menu = new GenericMenu();
+				GenericMenu menu = new();
 
 				AddCommonTitleContextMenuItems(menu);
 

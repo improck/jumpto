@@ -86,8 +86,8 @@ namespace ImpRock.JumpTo.Editor
 		#endregion
 
 
-		private Dictionary<int, string> m_TextResources = new Dictionary<int, string>();
-		private Dictionary<int, Texture2D> m_ImageResources = new Dictionary<int, Texture2D>();
+		private readonly Dictionary<int, string> m_TextResources = new();
+		private readonly Dictionary<int, Texture2D> m_ImageResources = new();
 
 
 		public string GetText(int textId)

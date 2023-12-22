@@ -11,7 +11,7 @@ namespace ImpRock.JumpTo.Editor
 	//TODO: all auto-saving of hierarchy links is disabled. not enough info from unity editor to make it work.
 	internal sealed class SerializationControl
 	{
-		private static System.Version s_Version = null;
+		private static readonly System.Version s_Version = null;
 
 		public System.Version Version { get { return s_Version; } }
 
@@ -36,9 +36,6 @@ namespace ImpRock.JumpTo.Editor
 
 			SceneSaveDetector.OnSceneWillSave += OnSceneWillSave;
 			SceneSaveDetector.OnSceneDeleted += OnSceneDeleted;
-			//SceneStateMonitor.OnSceneWillLoad += OnSceneWillLoad;
-			//SceneStateMonitor.OnSceneSaved += OnSceneSaved;
-			//SceneStateMonitor.OnSceneLoaded += OnSceneLoaded;
 			SceneStateMonitor.OnSceneOpened += OnSceneOpened;
 
 			foreach (SceneState sceneState in SceneStateMonitor.Instance.GetSceneStates())
@@ -52,9 +49,6 @@ namespace ImpRock.JumpTo.Editor
 		{
 			SceneSaveDetector.OnSceneWillSave -= OnSceneWillSave;
 			SceneSaveDetector.OnSceneDeleted -= OnSceneDeleted;
-			//SceneStateMonitor.OnSceneWillLoad -= OnSceneWillLoad;
-			//SceneStateMonitor.OnSceneSaved -= OnSceneSaved;
-			//SceneStateMonitor.OnSceneLoaded -= OnSceneLoaded;
 			SceneStateMonitor.OnSceneOpened -= OnSceneOpened;
 
 			foreach (SceneState sceneState in SceneStateMonitor.Instance.GetSceneStates())
@@ -92,29 +86,6 @@ namespace ImpRock.JumpTo.Editor
 			DeleteSaveFile(filePath);
 		}
 
-		//NOTE: wipes out an existing file or just saves nothing
-		//	this happens when the scene has changed, the user loads
-		//	a new scene and chooses save from the popup. this only
-		//	gets called after the delayCall, so the scene is already
-		//	unloaded. can't just save hi links from OnSceneWillSave
-		//	because there may not yet be an asset file.
-		//private void OnSceneSaved(string sceneAssetPath)
-		//{
-		//	if (CreateSaveDirectories())
-		//	{
-		//		SaveHierarchyLinks(sceneAssetPath);
-		//	}
-		//}
-
-		//private void OnSceneWillLoad()
-		//{
-		//	if (CreateSaveDirectories())
-		//	{
-		//		//NOTE: this is the troublesome one. scene objects have already been destroyed by this point
-		//		SaveHierarchyLinks(EditorApplication.currentScene);
-		//	}
-		//}
-
 		private void OnSceneOpened(SceneState sceneState)
 		{
 			sceneState.OnIsLoadedChange += OnSceneLoadedChange;
@@ -142,20 +113,6 @@ namespace ImpRock.JumpTo.Editor
 			sceneState.OnClose -= OnSceneClosed;
 			sceneState.OnIsLoadedChange -= OnSceneLoadedChange;
 		}
-
-		//private void OnWindowOpen()
-		//{
-		//	//Debug.Log("window open");
-		//	EditorApplication.delayCall += WaitForWindowOpenComplete;
-		//}
-
-		//private void WaitForWindowOpenComplete()
-		//{
-		//	SetSaveDirectoryPaths();
-		
-		//	LoadProjectLinks();
-		//	//LoadHierarchyLinks();
-		//}
 
 		public void OnWindowEnable()
 		{
@@ -190,6 +147,7 @@ namespace ImpRock.JumpTo.Editor
 			{
 				SaveProjectLinks();
 
+				//TODO: why did i comment this out?
 				//if (EditorApplication.currentScene != string.Empty)
 				//{
 				//	GetHierarchyLinkPaths();
@@ -206,32 +164,31 @@ namespace ImpRock.JumpTo.Editor
 			Object[] linkReferences = m_Window.JumpLinksInstance.ProjectLinks.AllLinkReferences;
 			if (linkReferences != null)
 			{
-				using (StreamWriter streamWriter = new StreamWriter(filePath))
+				using StreamWriter streamWriter = new(filePath);
+
+				try
 				{
-					try
+					streamWriter.WriteLine(Version.ToString());
+
+					int instanceId;
+					string line;
+					for (int i = 0; i < linkReferences.Length; i++)
 					{
-						streamWriter.WriteLine(Version.ToString());
+						instanceId = linkReferences[i].GetInstanceID();
+						line = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(instanceId));
+						if (AssetDatabase.IsSubAsset(instanceId))
+							line += "|" + instanceId;
 
-						int instanceId;
-						string line;
-						for (int i = 0; i < linkReferences.Length; i++)
-						{
-							instanceId = linkReferences[i].GetInstanceID();
-							line = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(instanceId));
-							if (AssetDatabase.IsSubAsset(instanceId))
-								line += "|" + instanceId;
-
-							streamWriter.WriteLine(line);
-						}
-
-						streamWriter.Close();
+						streamWriter.WriteLine(line);
 					}
-					catch (System.Exception ex)
-					{
-						streamWriter.Close();
-						success = false;
-						Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[0]) + "\n" + ex.Message);
-					}
+
+					streamWriter.Close();
+				}
+				catch (System.Exception ex)
+				{
+					streamWriter.Close();
+					success = false;
+					Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[0]) + "\n" + ex.Message);
 				}
 			}
 			else
@@ -255,27 +212,26 @@ namespace ImpRock.JumpTo.Editor
 			string filePath = m_HierarchySaveDirectory + sceneGuid + SaveFileExtension;
 			if (linkPaths != null)
 			{
-				using (StreamWriter streamWriter = new StreamWriter(filePath))
+				using StreamWriter streamWriter = new(filePath);
+
+				try
 				{
-					try
-					{
-						streamWriter.WriteLine(Version.ToString());
+					streamWriter.WriteLine(Version.ToString());
 
-						for (int i = 0; i < linkPaths.Length; i++)
-						{
-							if (linkPaths[i] != null &&
-								linkPaths[i].Length > 0)
-								streamWriter.WriteLine(linkPaths[i]);
-						}
-
-						streamWriter.Close();
-					}
-					catch (System.Exception ex)
+					for (int i = 0; i < linkPaths.Length; i++)
 					{
-						streamWriter.Close();
-						success = false;
-						Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[1]) + "\n" + ex.Message);
+						if (linkPaths[i] != null &&
+							linkPaths[i].Length > 0)
+							streamWriter.WriteLine(linkPaths[i]);
 					}
+
+					streamWriter.Close();
+				}
+				catch (System.Exception ex)
+				{
+					streamWriter.Close();
+					success = false;
+					Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[1]) + "\n" + ex.Message);
 				}
 			}
 			else
@@ -295,7 +251,7 @@ namespace ImpRock.JumpTo.Editor
 			ProjectJumpLinkContainer links = m_Window.JumpLinksInstance.ProjectLinks;
 			links.RemoveAll();
 
-			using (StreamReader streamReader = new StreamReader(filePath))
+			using (StreamReader streamReader = new(filePath))
 			{
 				try
 				{
@@ -337,7 +293,7 @@ namespace ImpRock.JumpTo.Editor
 			HierarchyJumpLinkContainer links = m_Window.JumpLinksInstance.AddHierarchyJumpLinkContainer(sceneId);
 			links.RemoveAll();
 
-			using (StreamReader streamReader = new StreamReader(filePath))
+			using (StreamReader streamReader = new(filePath))
 			{
 				try
 				{
@@ -495,14 +451,11 @@ namespace ImpRock.JumpTo.Editor
 			if (linkReferences != null)
 			{
 				SerializedObject serializedObject;
-				int localId = 0;
-				Object linkReferenceObject = null;
-				Transform linkReferenceTransform = null;
 				string[] linkPaths = new string[linkReferences.Length];
 				for (int i = 0; i < linkReferences.Length; i++)
 				{
-					linkReferenceObject = linkReferences[i];
-					linkReferenceTransform = (linkReferenceObject as GameObject).transform;
+					Object linkReferenceObject = linkReferences[i];
+					Transform linkReferenceTransform = (linkReferenceObject as GameObject).transform;
 
 					string paths = "|";
 
@@ -527,7 +480,7 @@ namespace ImpRock.JumpTo.Editor
 					serializedObject = new SerializedObject(linkReferenceObject);
 					serializedObject.SetInspectorMode(InspectorMode.Debug);
 
-					localId = serializedObject.GetLocalIdInFile();
+					int localId = serializedObject.GetLocalIdInFile();
 					linkPaths[i] = (int)prefabType + "|" + localId.ToString() + paths;
 				}
 
@@ -539,7 +492,7 @@ namespace ImpRock.JumpTo.Editor
 
 		private System.Action<StreamReader> FindProjectLinkLoader(string fileVersion)
 		{
-			System.Version version = new System.Version(fileVersion);
+			System.Version version = new(fileVersion);
 
 			if (version.Major == 2)
 			{
@@ -551,7 +504,7 @@ namespace ImpRock.JumpTo.Editor
 
 		private System.Action<StreamReader, Scene> FindHierarchyLinkLoader(string fileVersion)
 		{
-			System.Version version = new System.Version(fileVersion);
+			System.Version version = new(fileVersion);
 
 			if (version.Major == 2)
 			{
@@ -623,27 +576,26 @@ namespace ImpRock.JumpTo.Editor
 			//"unordered" because it's not guaranteed that these objects
 			//	are in the same order as they are in the scene
 			GameObject[] unorderedRootObjects = scene.GetRootGameObjects();
+			
+			//TODO: m_RootOrder no longer a member of Transform. try GetSiblingIndex() instead?
+			//n;
 
 			if (unorderedRootObjects.Length > 0)
 			{
 				GameObject[] rootObjects = new GameObject[unorderedRootObjects.Length];
-
-				//put the root objects in order
-				SerializedObject so = null;
 				for (int i = 0; i < rootObjects.Length; i++)
 				{
-					so = new SerializedObject(unorderedRootObjects[i].transform);
+					//put the root objects in order
+					SerializedObject so = new(unorderedRootObjects[i].transform);
 					rootObjects[so.FindProperty("m_RootOrder").intValue] = unorderedRootObjects[i];
 				}
 
-				Dictionary<int, GameObject> localIdToGameObjects = new Dictionary<int, GameObject>();
-				Dictionary<int, GameObject> localIdToPrefabs = new Dictionary<int, GameObject>();
+				Dictionary<int, GameObject> localIdToGameObjects = new();
+				Dictionary<int, GameObject> localIdToPrefabs = new();
 				JumpToUtility.GetAllLocalIds(rootObjects, localIdToGameObjects, localIdToPrefabs);
 
 				string line;
 				string transformPath;
-				int prefabTypeId = 0;
-				int localId = 0;
 				char[] delimiterPipe = new char[] { '|' };
 				char[] delimeterForwardSlash = new char[] { '/' };
 				string[] lineSegments;
@@ -659,10 +611,10 @@ namespace ImpRock.JumpTo.Editor
 					if (lineSegments.Length == 0)
 						continue;
 
-					if (!int.TryParse(lineSegments[0], out prefabTypeId))
+					if (!int.TryParse(lineSegments[0], out int prefabTypeId))
 						continue;
 
-					if (!int.TryParse(lineSegments[1], out localId))
+					if (!int.TryParse(lineSegments[1], out int localId))
 						continue;
 
 					//the localId should NEVER be zero
@@ -676,8 +628,7 @@ namespace ImpRock.JumpTo.Editor
 					if (prefabType != PrefabType.ModelPrefabInstance &&
 						prefabType != PrefabType.PrefabInstance)
 					{
-						GameObject gameObject = null;
-						if (localIdToGameObjects.TryGetValue(localId, out gameObject))
+						if (localIdToGameObjects.TryGetValue(localId, out GameObject gameObject))
 							jumpLinks.CreateOnlyHierarchyJumpLink(gameObject);
 
 						//TODO: what if it's not found?
@@ -691,8 +642,7 @@ namespace ImpRock.JumpTo.Editor
 						//		it may not be correctly relinked on load. blame Unity for this.
 
 						//get the root node for the prefab instance
-						GameObject gameObject = null;
-						if (localIdToPrefabs.TryGetValue(localId, out gameObject))
+						if (localIdToPrefabs.TryGetValue(localId, out GameObject gameObject))
 						{
 							//get names of the path nodes
 							transformNames = lineSegments[3].Split(delimeterForwardSlash, System.StringSplitOptions.RemoveEmptyEntries);
