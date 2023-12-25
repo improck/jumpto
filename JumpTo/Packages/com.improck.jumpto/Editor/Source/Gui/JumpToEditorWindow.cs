@@ -19,7 +19,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 	public Operation CurrentOperation = Operation.Idle;
 
 	[System.NonSerialized] private bool m_Initialized = false;
-	[System.NonSerialized] private RectRef m_Position = new();
+	[System.NonSerialized] private RectRef m_Position = new RectRef();
 	[System.NonSerialized] private double m_LastHierarchyRefreshTime = 0.0f;
 	[System.NonSerialized] private SerializationControl m_SerializationControl = null;
 

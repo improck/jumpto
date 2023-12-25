@@ -47,7 +47,7 @@ namespace ImpRock.JumpTo.Editor
 
 		//***** CONSTANTS *****
 
-		public readonly Color DisabledColorModifier = new(0.0f, 0.0f, 0.0f, 0.4f);
+		public readonly Color DisabledColorModifier = new Color(0.0f, 0.0f, 0.0f, 0.4f);
 		public const float LinkHeight = 16.0f;
 		public const float LinkViewTitleBarHeight = 18.0f;
 		public const bool ForceProSkin = false;
@@ -99,39 +99,47 @@ namespace ImpRock.JumpTo.Editor
 
 		public void InitAssets()
 		{
+#if UNITY_2020_OR_NEWER
 			IconPrefabNormal = EditorGUIUtility.Load("Prefab On Icon") as Texture2D;
 			IconPrefabModel = EditorGUIUtility.Load("PrefabModel Icon") as Texture2D;
 			IconGameObject = EditorGUIUtility.Load("GameObject Icon") as Texture2D;
 			IconProjectView = EditorGUIUtility.Load("Project") as Texture2D;
 			IconHierarchyView = EditorGUIUtility.Load("d_SceneAsset Icon") as Texture2D;
+#else
+			IconPrefabNormal = EditorGUIUtility.Load("PrefabNormal Icon") as Texture2D;
+			IconPrefabModel = EditorGUIUtility.Load("PrefabModel Icon") as Texture2D;
+			IconGameObject = EditorGUIUtility.Load("GameObject Icon") as Texture2D;
+			IconProjectView = EditorGUIUtility.Load("Project") as Texture2D;
+			IconHierarchyView = EditorGUIUtility.Load("SceneAsset Icon") as Texture2D;
+#endif
 
 			if (EditorGUIUtility.isProSkin || ForceProSkin)
 			{
 				LinkTextColors = new Color[]
 				{
-					new(0.7f, 0.7f, 0.7f, 1.0f),	//normal
-					new(0.84f, 0.6f, 0.92f, 1.0f),	//model
-					new(0.298f, 0.5f, 0.85f, 1.0f),	//prefab
-					new(0.7f, 0.4f, 0.4f, 1.0f)		//broken prefab
+					new Color(0.7f, 0.7f, 0.7f, 1.0f),		//normal
+					new Color(0.84f, 0.6f, 0.92f, 1.0f),	//model
+					new Color(0.298f, 0.5f, 0.85f, 1.0f),	//prefab
+					new Color(0.7f, 0.4f, 0.4f, 1.0f)		//broken prefab
 				};
 			}
 			else
 			{
 				LinkTextColors = new Color[]
 				{
-					Color.black,					//normal
-					new(0.6f, 0.0f, 0.8f, 1.0f),	//model
-					new(0.0f, 0.3f, 0.6f, 1.0f),	//prefab
-					new(0.4f, 0.0f, 0.0f, 1.0f)		//broken prefab
+					Color.black,							//normal
+					new Color(0.6f, 0.0f, 0.8f, 1.0f),		//model
+					new Color(0.0f, 0.3f, 0.6f, 1.0f),		//prefab
+					new Color(0.4f, 0.0f, 0.0f, 1.0f)		//broken prefab
 				};
 			}
 
 			SelectedLinkTextColors = new Color[]
 			{
-				Color.white,						//normal
-				new(0.92f, 0.8f, 1.0f, 1.0f),		//model
-				new(0.7f, 0.75f, 1.0f, 1.0f),		//prefab
-				new(1.0f, 0.7f, 0.7f, 1.0f)			//broken prefab
+				Color.white,								//normal
+				new Color(0.92f, 0.8f, 1.0f, 1.0f),			//model
+				new Color(0.7f, 0.75f, 1.0f, 1.0f),			//prefab
+				new Color(1.0f, 0.7f, 0.7f, 1.0f)			//broken prefab
 			};
 		}
 	}

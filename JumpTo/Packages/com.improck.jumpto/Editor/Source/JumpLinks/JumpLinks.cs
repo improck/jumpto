@@ -21,7 +21,7 @@ namespace ImpRock.JumpTo.Editor
 	internal abstract class JumpLink : ScriptableObject
 	{
 		[SerializeField] protected UnityEngine.Object m_LinkReference;
-		[SerializeField] protected GUIContent m_LinkLabelContent = new();
+		[SerializeField] protected GUIContent m_LinkLabelContent = new GUIContent();
 		[SerializeField] protected LinkReferenceType m_ReferenceType = LinkReferenceType.Asset;
 		[SerializeField] protected bool m_Selected = false;
 
@@ -58,7 +58,7 @@ namespace ImpRock.JumpTo.Editor
 	{
 		[SerializeField] private ProjectJumpLinkContainer m_ProjectLinkContainer;
 		//NOTE: scene handle can be used as a unique id, but only while the scene is known to the scene manager
-		[SerializeField] private HierarchyJumpLinkContainerFaketionary m_HierarchyLinkContainers = new();
+		[SerializeField] private HierarchyJumpLinkContainerFaketionary m_HierarchyLinkContainers = new HierarchyJumpLinkContainerFaketionary();
 		
 
 		public ProjectJumpLinkContainer ProjectLinks { get { return m_ProjectLinkContainer; } }
@@ -77,13 +77,15 @@ namespace ImpRock.JumpTo.Editor
 
 		public HierarchyJumpLinkContainer GetHierarchyJumpLinkContainer(int sceneId)
 		{
-			m_HierarchyLinkContainers.TryGetValue(sceneId, out HierarchyJumpLinkContainer container);
+			HierarchyJumpLinkContainer container;
+			m_HierarchyLinkContainers.TryGetValue(sceneId, out container);
 			return container;
 		}
 
 		public HierarchyJumpLinkContainer AddHierarchyJumpLinkContainer(int sceneId)
 		{
-			if (!m_HierarchyLinkContainers.TryGetValue(sceneId, out HierarchyJumpLinkContainer container))
+			HierarchyJumpLinkContainer container;
+			if (!m_HierarchyLinkContainers.TryGetValue(sceneId, out container))
 			{
 				container = ScriptableObject.CreateInstance<HierarchyJumpLinkContainer>();
 				container.hideFlags = HideFlags.HideAndDontSave;
@@ -127,7 +129,7 @@ namespace ImpRock.JumpTo.Editor
 					OnProjectLinkAdded?.Invoke();
 				}
 			}
-			else if (linkReference is not Component)
+			else if (!(linkReference is Component))
 			{
 				m_ProjectLinkContainer.AddLink(linkReference, PrefabType.None);
 
@@ -141,7 +143,7 @@ namespace ImpRock.JumpTo.Editor
 				return;
 
 			PrefabType prefabType = PrefabUtility.GetPrefabType(linkReference);
-			if (linkReference is not GameObject ||
+			if (!(linkReference is GameObject) ||
 				prefabType == PrefabType.ModelPrefab ||
 				prefabType == PrefabType.Prefab)
 			{
@@ -202,7 +204,7 @@ namespace ImpRock.JumpTo.Editor
 
 		public void SetAllSelectedLinksAsUnitySelection()
 		{
-			List<Object> allLinkReferences = new();
+			List<Object> allLinkReferences = new List<Object>();
 			JumpLink link;
 			List<ProjectJumpLink> projectJumpLinks = m_ProjectLinkContainer.Links;
 			int linkCount = projectJumpLinks.Count;

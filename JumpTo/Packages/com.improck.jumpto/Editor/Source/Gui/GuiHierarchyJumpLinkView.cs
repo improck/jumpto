@@ -43,7 +43,7 @@ namespace ImpRock.JumpTo.Editor
 
 			m_IsDirty = (m_Window.CurrentOperation & Operation.CreatingLinkViaDragAndDrop) == Operation.CreatingLinkViaDragAndDrop;
 
-			ControlIcon controlIcon = new()
+			ControlIcon controlIcon = new ControlIcon()
 			{
 				Enabled = m_IsDirty,
 				Icon = JumpToResources.Instance.GetImage(ResId.ImageDiskette),
@@ -91,7 +91,7 @@ namespace ImpRock.JumpTo.Editor
 
 		protected override void ShowLinkContextMenu()
 		{
-			GenericMenu menu = new();
+			GenericMenu menu = new GenericMenu();
 
 			//NOTE: a space followed by an underscore (" _") will cause all text following that
 			//		to appear right-justified and all caps in a GenericMenu. the name is being

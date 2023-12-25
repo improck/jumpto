@@ -86,8 +86,8 @@ namespace ImpRock.JumpTo.Editor
 		#endregion
 
 
-		private readonly Dictionary<int, string> m_TextResources = new();
-		private readonly Dictionary<int, Texture2D> m_ImageResources = new();
+		private readonly Dictionary<int, string> m_TextResources = new Dictionary<int, string>();
+		private readonly Dictionary<int, Texture2D> m_ImageResources = new Dictionary<int, Texture2D>();
 
 
 		public string GetText(int textId)
@@ -135,45 +135,46 @@ namespace ImpRock.JumpTo.Editor
 			TextAsset langAsset = AssetDatabase.LoadAssetAtPath<TextAsset>($"Packages/com.improck.jumpto/Editor/Lang/{fileName}");
 			if (langAsset != null)
 			{
-				using StringReader reader = new(langAsset.text);
-
-				int idHash = 0;
-				int equalsPos = 0;
-				const string equals = " = ";
-				string line = string.Empty;
-				string id = string.Empty;
-				string text = string.Empty;
-
-				List<int> logIds = new();
-
-				while ((line = reader.ReadLine()) != null)
+				using (StringReader reader = new StringReader(langAsset.text))
 				{
-					if (line.Length == 0 || line[0] == ';')
-						continue;
+					int idHash = 0;
+					int equalsPos = 0;
+					const string equals = " = ";
+					string line = string.Empty;
+					string id = string.Empty;
+					string text = string.Empty;
 
-					equalsPos = line.IndexOf(equals);
-					id = line.Substring(0, equalsPos);
-					text = line.Substring(equalsPos + 3);
+					List<int> logIds = new List<int>();
 
-					idHash = id.GetHashCode();
-
-					if (id.StartsWith("log"))
+					while ((line = reader.ReadLine()) != null)
 					{
-						logIds.Add(idHash);
-						text = "JumpTo: " + text;
+						if (line.Length == 0 || line[0] == ';')
+							continue;
+
+						equalsPos = line.IndexOf(equals);
+						id = line.Substring(0, equalsPos);
+						text = line.Substring(equalsPos + 3);
+
+						idHash = id.GetHashCode();
+
+						if (id.StartsWith("log"))
+						{
+							logIds.Add(idHash);
+							text = "JumpTo: " + text;
+						}
+
+						if (m_TextResources.ContainsKey(idHash))
+						{
+							m_TextResources[idHash] = text;
+						}
+						else
+						{
+							m_TextResources.Add(idHash, text);
+						}
 					}
 
-					if (m_TextResources.ContainsKey(idHash))
-					{
-						m_TextResources[idHash] = text;
-					}
-					else
-					{
-						m_TextResources.Add(idHash, text);
-					}
+					ResId.LogStatements = logIds.ToArray();
 				}
-
-				ResId.LogStatements = logIds.ToArray();
 			}
 		}
 

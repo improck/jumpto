@@ -14,6 +14,7 @@
 /[Jj]ump[Tt]o/
 
 # Generated package files
+/[Pp]ackages/manifest.json
 /[Pp]ackages/packages-lock.json
 
 # MemoryCaptures can get excessive in size.

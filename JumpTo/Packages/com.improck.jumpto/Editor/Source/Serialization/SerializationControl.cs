@@ -157,26 +157,27 @@ namespace ImpRock.JumpTo.Editor
 
 			if (m_Window.JumpLinksInstance.ProjectLinks.Links.Count > 0)
 			{
-				using StreamWriter streamWriter = new(m_CurrentFileFormat.GetProjectLinksFilePath());
+				using (StreamWriter streamWriter = new StreamWriter(m_CurrentFileFormat.GetProjectLinksFilePath()))
+				{
+					try
+					{
+						streamWriter.WriteLine(m_CurrentFileFormat.FileVersion.ToString(4));
 
-				try
-				{
-					streamWriter.WriteLine(m_CurrentFileFormat.FileVersion.ToString(4));
-
-					SerializeProjectLinksDelegate serializer = FindProjectLinksSerializer(m_CurrentFileFormat.FileVersion);
-					if (serializer != null)
-						serializer?.Invoke(m_CurrentFileFormat, streamWriter, m_Window.JumpLinksInstance.ProjectLinks.AllLinkReferences);
-					else
-						Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[0]));
-				}
-				catch (System.Exception ex)
-				{
-					success = false;
-					Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[0]) + "\n" + ex.Message);
-				}
-				finally
-				{
-					streamWriter.Close();
+						SerializeProjectLinksDelegate serializer = FindProjectLinksSerializer(m_CurrentFileFormat.FileVersion);
+						if (serializer != null)
+							serializer?.Invoke(m_CurrentFileFormat, streamWriter, m_Window.JumpLinksInstance.ProjectLinks.AllLinkReferences);
+						else
+							Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[0]));
+					}
+					catch (System.Exception ex)
+					{
+						success = false;
+						Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[0]) + "\n" + ex.Message);
+					}
+					finally
+					{
+						streamWriter.Close();
+					}
 				}
 			}
 			else
@@ -198,26 +199,27 @@ namespace ImpRock.JumpTo.Editor
 			string sceneGuid = AssetDatabase.AssetPathToGUID(sceneAssetPath);
 			if (m_Window.JumpLinksInstance.HierarchyLinks[sceneId].Links.Count > 0)
 			{
-				using StreamWriter streamWriter = new(m_CurrentFileFormat.GetHierarchyLinkFilePath(sceneGuid));
+				using (StreamWriter streamWriter = new StreamWriter(m_CurrentFileFormat.GetHierarchyLinkFilePath(sceneGuid)))
+				{
+					try
+					{
+						streamWriter.WriteLine(m_CurrentFileFormat.FileVersion.ToString(4));
 
-				try
-				{
-					streamWriter.WriteLine(m_CurrentFileFormat.FileVersion.ToString(4));
-
-					SerializeHierarchyLinksDelegate serializer = FindHierarchyLinksSerializer(m_CurrentFileFormat.FileVersion);
-					if (serializer != null)
-						serializer?.Invoke(m_CurrentFileFormat, streamWriter, m_Window.JumpLinksInstance.ProjectLinks.AllLinkReferences);
-					else
-						Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[1]));
-				}
-				catch (System.Exception ex)
-				{
-					success = false;
-					Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[1]) + "\n" + ex.Message);
-				}
-				finally
-				{
-					streamWriter.Close();
+						SerializeHierarchyLinksDelegate serializer = FindHierarchyLinksSerializer(m_CurrentFileFormat.FileVersion);
+						if (serializer != null)
+							serializer?.Invoke(m_CurrentFileFormat, streamWriter, m_Window.JumpLinksInstance.ProjectLinks.AllLinkReferences);
+						else
+							Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[1]));
+					}
+					catch (System.Exception ex)
+					{
+						success = false;
+						Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[1]) + "\n" + ex.Message);
+					}
+					finally
+					{
+						streamWriter.Close();
+					}
 				}
 			}
 			else
@@ -237,44 +239,46 @@ namespace ImpRock.JumpTo.Editor
 			ProjectJumpLinkContainer links = m_Window.JumpLinksInstance.ProjectLinks;
 			links.RemoveAll();
 
-			using StreamReader streamReader = new(filePath);
-
-			try
+			using (StreamReader streamReader = new StreamReader(filePath))
 			{
-				m_Window.CurrentOperation |= Operation.LoadingProjectLinks;
-
-				if (streamReader.EndOfStream)
-					return;
-
-				string readVersion = streamReader.ReadLine();
-
-				if (System.Version.TryParse(readVersion, out System.Version fileVersion))
+				try
 				{
-					DeserializeProjectLinksDelegate deserializer = FindProjectLinksDeserializer(fileVersion);
-					if (deserializer != null)
+					m_Window.CurrentOperation |= Operation.LoadingProjectLinks;
+
+					if (streamReader.EndOfStream)
+						return;
+
+					string readVersion = streamReader.ReadLine();
+
+					System.Version fileVersion;
+					if (System.Version.TryParse(readVersion, out fileVersion))
 					{
-						FileFormat fileFormat = m_CurrentFileFormat;
-						fileFormat.FileVersion = fileVersion;
-						deserializer(fileFormat, streamReader, m_Window.JumpLinksInstance);
+						DeserializeProjectLinksDelegate deserializer = FindProjectLinksDeserializer(fileVersion);
+						if (deserializer != null)
+						{
+							FileFormat fileFormat = m_CurrentFileFormat;
+							fileFormat.FileVersion = fileVersion;
+							deserializer(fileFormat, streamReader, m_Window.JumpLinksInstance);
+						}
+						else
+						{
+							Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[2]));
+						}
 					}
 					else
 					{
 						Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[2]));
 					}
 				}
-				else
+				catch (System.Exception ex)
 				{
-					Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[2]));
+					Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[3]) + "\n" + ex.Message);
 				}
-			}
-			catch (System.Exception ex)
-			{
-				Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[3]) + "\n" + ex.Message);
-			}
-			finally
-			{
-				streamReader.Close();
-				m_Window.CurrentOperation &= ~Operation.LoadingProjectLinks;
+				finally
+				{
+					streamReader.Close();
+					m_Window.CurrentOperation &= ~Operation.LoadingProjectLinks;
+				}
 			}
 		}
 
@@ -288,7 +292,7 @@ namespace ImpRock.JumpTo.Editor
 			HierarchyJumpLinkContainer links = m_Window.JumpLinksInstance.AddHierarchyJumpLinkContainer(sceneId);
 			links.RemoveAll();
 
-			using (StreamReader streamReader = new(filePath))
+			using (StreamReader streamReader = new StreamReader(filePath))
 			{
 				try
 				{
@@ -298,7 +302,8 @@ namespace ImpRock.JumpTo.Editor
 					m_Window.CurrentOperation |= Operation.LoadingHierarchyLinks;
 
 					string readVersion = streamReader.ReadLine();
-					if (System.Version.TryParse(readVersion, out System.Version fileVersion))
+					System.Version fileVersion;
+					if (System.Version.TryParse(readVersion, out fileVersion))
 					{
 						DeserializeHierarchyLinksDelegate deserializer = FindHierarchyLinkDeserializer(fileVersion);
 						if (deserializer != null)

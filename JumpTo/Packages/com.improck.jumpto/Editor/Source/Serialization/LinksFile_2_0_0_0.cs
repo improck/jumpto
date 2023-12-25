@@ -123,12 +123,12 @@ namespace ImpRock.JumpTo.Editor
 				for (int i = 0; i < rootObjects.Length; i++)
 				{
 					//put the root objects in order
-					SerializedObject so = new(unorderedRootObjects[i].transform);
+					SerializedObject so = new SerializedObject(unorderedRootObjects[i].transform);
 					rootObjects[so.FindProperty("m_RootOrder").intValue] = unorderedRootObjects[i];
 				}
 
-				Dictionary<int, GameObject> localIdToGameObjects = new();
-				Dictionary<int, GameObject> localIdToPrefabs = new();
+				Dictionary<int, GameObject> localIdToGameObjects = new Dictionary<int, GameObject>();
+				Dictionary<int, GameObject> localIdToPrefabs = new Dictionary<int, GameObject>();
 				JumpToUtility.GetAllLocalIds(rootObjects, localIdToGameObjects, localIdToPrefabs);
 
 				string line;
@@ -148,10 +148,12 @@ namespace ImpRock.JumpTo.Editor
 					if (lineSegments.Length == 0)
 						continue;
 
-					if (!int.TryParse(lineSegments[0], out int prefabTypeId))
+					int prefabTypeId;
+					if (!int.TryParse(lineSegments[0], out prefabTypeId))
 						continue;
 
-					if (!int.TryParse(lineSegments[1], out int localId))
+					int localId;
+					if (!int.TryParse(lineSegments[1], out localId))
 						continue;
 
 					//the localId should NEVER be zero
@@ -165,7 +167,8 @@ namespace ImpRock.JumpTo.Editor
 					if (prefabType != PrefabType.ModelPrefabInstance &&
 						prefabType != PrefabType.PrefabInstance)
 					{
-						if (localIdToGameObjects.TryGetValue(localId, out GameObject gameObject))
+						GameObject gameObject;
+						if (localIdToGameObjects.TryGetValue(localId, out gameObject))
 							jumpLinks.CreateOnlyHierarchyJumpLink(gameObject);
 
 						//TODO: what if it's not found?
@@ -179,7 +182,8 @@ namespace ImpRock.JumpTo.Editor
 						//		it may not be correctly relinked on load. blame Unity for this.
 
 						//get the root node for the prefab instance
-						if (localIdToPrefabs.TryGetValue(localId, out GameObject gameObject))
+						GameObject gameObject;
+						if (localIdToPrefabs.TryGetValue(localId, out gameObject))
 						{
 							//get names of the path nodes
 							transformNames = lineSegments[3].Split(delimeterForwardSlash, System.StringSplitOptions.RemoveEmptyEntries);

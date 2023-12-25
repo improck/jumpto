@@ -7,7 +7,7 @@ namespace ImpRock.JumpTo.Editor
 {
 	internal abstract class JumpLinkContainer<T> : ScriptableObject where T : JumpLink
 	{
-		[SerializeField] protected List<T> m_Links = new();
+		[SerializeField] protected List<T> m_Links = new List<T>();
 		[SerializeField] protected int m_ActiveSelection = -1;
 		[SerializeField] protected int m_SelectionCount = 0;
 		
@@ -40,7 +40,7 @@ namespace ImpRock.JumpTo.Editor
 				}
 				else
 				{
-					List<T> selection = new();
+					List<T> selection = new List<T>();
 					for (int i = 0; i < m_Links.Count; i++)
 					{
 						if (m_Links[i].Selected)
@@ -60,7 +60,7 @@ namespace ImpRock.JumpTo.Editor
 					return null;
 				else
 				{
-					List<Object> selection = new();
+					List<Object> selection = new List<Object>();
 					for (int i = 0; i < m_Links.Count; i++)
 					{
 						if (m_Links[i].Selected)
@@ -209,7 +209,7 @@ namespace ImpRock.JumpTo.Editor
 		public void MoveSelected(int to)
 		{
 			//get the indices of the selected links
-			List<int> selection = new();
+			List<int> selection = new List<int>();
 			for (int i = 0; i < m_Links.Count; i++)
 			{
 				if (m_Links[i].Selected)
@@ -377,7 +377,7 @@ namespace ImpRock.JumpTo.Editor
 		{
 			//TODO: make this more efficient
 			Object[] selectedObjects = Selection.objects;
-			List<Object> totalSelectedObjects = new();
+			List<Object> totalSelectedObjects = new List<Object>();
 			for (int i = 0; i < m_Links.Count; i++)
 			{
 				//add selected objects to the list

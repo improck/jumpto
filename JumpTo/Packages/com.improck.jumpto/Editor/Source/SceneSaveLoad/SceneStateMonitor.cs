@@ -103,7 +103,7 @@ namespace ImpRock.JumpTo.Editor
 		[SerializeField] private bool m_HierarchyChanged = false;
 
 		
-		private Dictionary<int, SceneState> m_SceneStates = new();
+		private Dictionary<int, SceneState> m_SceneStates = new Dictionary<int, SceneState>();
 
 
 		public static event System.Action<int, int> OnSceneCountChanged;
@@ -116,7 +116,8 @@ namespace ImpRock.JumpTo.Editor
 		
 		public SceneState GetSceneState(int sceneId)
 		{
-			m_SceneStates.TryGetValue(sceneId, out SceneState sceneState);
+			SceneState sceneState;
+			m_SceneStates.TryGetValue(sceneId, out sceneState);
 
 			return sceneState;
 		}
@@ -134,7 +135,12 @@ namespace ImpRock.JumpTo.Editor
 			EditorApplication.hierarchyChanged += OnHierarchyWindowChanged;
 
 			m_SceneCount = EditorSceneManager.sceneCount;
+
+#if UNITY_2022_2_OR_NEWER
 			m_LoadedSceneCount = SceneManager.loadedSceneCount;
+#else
+			m_LoadedSceneCount = EditorSceneManager.loadedSceneCount;
+#endif
 
 			for (int i = 0; i < m_SceneCount; i++)
 			{
@@ -159,14 +165,14 @@ namespace ImpRock.JumpTo.Editor
 				if (!m_SceneStates.ContainsKey(currentSceneIds[i]))
 				{
 					sceneStateChanged = true;
-					SceneState sceneState = new(scene);
+					SceneState sceneState = new SceneState(scene);
 					m_SceneStates[currentSceneIds[i]] = sceneState;
 					OnSceneOpened?.Invoke(sceneState);
 				}
 			}
 
 			//find newly closed scenes
-			Dictionary<int, SceneState> currentSceneStates = new();
+			Dictionary<int, SceneState> currentSceneStates = new Dictionary<int, SceneState>();
 			foreach (KeyValuePair<int, SceneState> sceneState in m_SceneStates)
 			{
 				if (!ArrayUtility.Contains(currentSceneIds, sceneState.Key))
@@ -191,8 +197,11 @@ namespace ImpRock.JumpTo.Editor
 
 				m_SceneCount = currentSceneCount;
 			}
-
+#if UNITY_2022_2_OR_NEWER
 			currentSceneCount = SceneManager.loadedSceneCount;
+#else
+			currentSceneCount = EditorSceneManager.loadedSceneCount;
+#endif
 			if (m_LoadedSceneCount != currentSceneCount)
 			{
 				OnLoadedSceneCountChanged?.Invoke(m_LoadedSceneCount, currentSceneCount);

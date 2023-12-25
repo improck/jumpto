@@ -35,7 +35,7 @@ namespace ImpRock.JumpTo.Editor
 
 		public static string GetTransformPath(Transform transform, Transform root = null)
 		{
-			Stack<string> pathStack = new();
+			Stack<string> pathStack = new Stack<string>();
 			Transform rootParent = root != null ? root.parent : null;
 			while (transform != null && transform != rootParent)
 			{
@@ -44,7 +44,7 @@ namespace ImpRock.JumpTo.Editor
 				transform = transform.parent;
 			}
 
-			StringBuilder pathBuilder = new();
+			StringBuilder pathBuilder = new StringBuilder();
 			while (pathStack.Count > 0)
 			{
 				pathBuilder.Append(pathStack.Pop());
@@ -62,7 +62,7 @@ namespace ImpRock.JumpTo.Editor
 			if (orderedRootObjects == null || orderedRootObjects.Length == 0)
 				return;
 			
-			HierarchyProperty hierarchyProperty = new(HierarchyType.GameObjects);
+			HierarchyProperty hierarchyProperty = new HierarchyProperty(HierarchyType.GameObjects);
 			if (!hierarchyProperty.Find(orderedRootObjects[0].GetInstanceID(), null))
 				return;
 			
@@ -110,7 +110,7 @@ namespace ImpRock.JumpTo.Editor
 			Transform linkRoot = (linkReference as GameObject).transform.root;
 
 			int sceneCount = SceneManager.sceneCount;
-			List<GameObject> rootObjects = new();
+			List<GameObject> rootObjects = new List<GameObject>();
 			for (int i = 0; i < sceneCount; i++)
 			{
 				Scene scene = SceneManager.GetSceneAt(i);
