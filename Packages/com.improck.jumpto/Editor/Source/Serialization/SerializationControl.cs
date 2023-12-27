@@ -207,7 +207,7 @@ namespace ImpRock.JumpTo.Editor
 
 						SerializeHierarchyLinksDelegate serializer = FindHierarchyLinksSerializer(m_CurrentFileFormat.FileVersion);
 						if (serializer != null)
-							serializer?.Invoke(m_CurrentFileFormat, streamWriter, m_Window.JumpLinksInstance.ProjectLinks.AllLinkReferences);
+							serializer?.Invoke(m_CurrentFileFormat, streamWriter, m_Window.JumpLinksInstance.HierarchyLinks[sceneId].AllLinkReferences);
 						else
 							Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[1]));
 					}

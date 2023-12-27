@@ -12,25 +12,24 @@ namespace ImpRock.JumpTo.Editor
 	{
 		public static string GetRootOrderPath(Transform transform, Transform root = null)
 		{
-			//SerializedObject so = null;
-			//Stack<string> pathStack = new Stack<string>();
-			//Transform rootParent = root != null ? root.parent : null;
-			//while (transform != null && transform != rootParent)
-			//{
-			//	so = new SerializedObject(transform);
-			//	pathStack.Push("/" + so.FindProperty("m_RootOrder").intValue.ToString());
+			SerializedObject so = null;
+			Stack<string> pathStack = new Stack<string>();
+			Transform rootParent = root != null ? root.parent : null;
+			while (transform != null && transform != rootParent)
+			{
+				so = new SerializedObject(transform);
+				pathStack.Push("/" + so.FindProperty("m_RootOrder").intValue.ToString());
 
-			//	transform = transform.parent;
-			//}
+				transform = transform.parent;
+			}
 
-			//StringBuilder pathBuilder = new StringBuilder();
-			//while (pathStack.Count > 0)
-			//{
-			//	pathBuilder.Append(pathStack.Pop());
-			//}
+			StringBuilder pathBuilder = new StringBuilder();
+			while (pathStack.Count > 0)
+			{
+				pathBuilder.Append(pathStack.Pop());
+			}
 
-			//return pathBuilder.ToString();
-			return " ";
+			return pathBuilder.ToString();
 		}
 
 		public static string GetTransformPath(Transform transform, Transform root = null)
