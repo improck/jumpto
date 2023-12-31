@@ -107,6 +107,21 @@ namespace ImpRock.JumpTo.Editor
 				serializedObject.SetInspectorMode(InspectorMode.Debug);
 
 				int localId = serializedObject.GetLocalIdInFile();
+				if (localId == 0 && prefabType == PrefabType.MissingPrefabInstance)
+				{
+					SerializedProperty prefabInternalProperty = serializedObject.FindProperty("m_PrefabInternal");
+					if (prefabInternalProperty.objectReferenceValue != null)
+					{
+						SerializedObject serializedPrefabObject = new SerializedObject(prefabInternalProperty.objectReferenceValue);
+						serializedPrefabObject.SetInspectorMode(InspectorMode.Debug);
+						SerializedProperty localIdProperty = serializedPrefabObject.FindProperty("m_LocalIdentfierInFile");
+						if (localIdProperty != null)
+						{
+							localId = localIdProperty.intValue;
+						}
+					}
+				}
+
 				streamWriter.WriteLine("{0}|{1}|{2}", (int)prefabType, localId, paths);
 			}
 		}

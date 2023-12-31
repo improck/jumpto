@@ -97,7 +97,7 @@ namespace ImpRock.JumpTo.Editor
 
 				SerializedObject serializedObject = new SerializedObject(linkReference);
 				serializedObject.SetInspectorMode(InspectorMode.Debug);
-				if (serializedObject.GetLocalIdInFile() == 0)
+				if (serializedObject.GetLocalIdInFile() == 0 && prefabType != PrefabType.MissingPrefabInstance)
 				{
 					m_HasLinksToUnsavedInstances = true;
 				}
