@@ -10,15 +10,13 @@ namespace ImpRock.JumpTo.Editor
 {
 	internal static class JumpToUtility
 	{
-		public static string GetRootOrderPath(Transform transform, Transform root = null)
+		public static string GetSiblingIndexPath(Transform transform, Transform root = null)
 		{
-			SerializedObject so = null;
 			Stack<string> pathStack = new Stack<string>();
 			Transform rootParent = root != null ? root.parent : null;
 			while (transform != null && transform != rootParent)
 			{
-				so = new SerializedObject(transform);
-				pathStack.Push("/" + so.FindProperty("m_RootOrder").intValue.ToString());
+				pathStack.Push("/" + transform.GetSiblingIndex());
 
 				transform = transform.parent;
 			}
@@ -60,7 +58,8 @@ namespace ImpRock.JumpTo.Editor
 
 			if (orderedRootObjects == null || orderedRootObjects.Length == 0)
 				return;
-			
+
+			//Ref: https://discussions.unity.com/t/finding-the-root-gameobjects-in-the-scene/7619/5
 			HierarchyProperty hierarchyProperty = new HierarchyProperty(HierarchyType.GameObjects);
 			if (!hierarchyProperty.Find(orderedRootObjects[0].GetInstanceID(), null))
 				return;

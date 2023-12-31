@@ -14,11 +14,11 @@ namespace ImpRock.JumpTo.Editor
 	//	instanceId = (optional) instance ID of child within the asset
 
 	//Hierarchy Line Format
-	//	prefabtype|localId|rootorderpath|transformpath
+	//	prefabtype|localId|siblingindexpath|transformpath
 	//
 	//	prefabtype = PrefabType int
 	//	localId = LocalIdentfierInFile OR prefab object ID
-	//	rootorderpath = child index path to the object from root OR from prefab root
+	//	siblingindexpath = child index path to the object from root OR from prefab root
 	//	transformpath = name path to the object from root OR from prefab root
 
 	internal static class LinksFile_2_0_0_0
@@ -94,12 +94,12 @@ namespace ImpRock.JumpTo.Editor
 
 					//we only want the path up to the prefab instance's root
 					GameObject prefabRoot = PrefabUtility.FindPrefabRoot(linkReferenceTransform.gameObject);
-					paths += JumpToUtility.GetRootOrderPath(linkReferenceTransform, prefabRoot.transform) + "|" +
+					paths += JumpToUtility.GetSiblingIndexPath(linkReferenceTransform, prefabRoot.transform) + "|" +
 						JumpToUtility.GetTransformPath(linkReferenceTransform, prefabRoot.transform);
 				}
 				else
 				{
-					paths += JumpToUtility.GetRootOrderPath(linkReferenceTransform) + "|" +
+					paths += JumpToUtility.GetSiblingIndexPath(linkReferenceTransform) + "|" +
 						JumpToUtility.GetTransformPath(linkReferenceTransform);
 				}
 
@@ -113,20 +113,9 @@ namespace ImpRock.JumpTo.Editor
 
 		public static void DeserializeHierarchyLinks(FileFormat fileFormat, StreamReader streamReader, JumpLinks jumpLinks, Scene scene)
 		{
-			//"unordered" because it's not guaranteed that these objects
-			//	are in the same order as they are in the scene
-			GameObject[] unorderedRootObjects = scene.GetRootGameObjects();
-
-			if (unorderedRootObjects.Length > 0)
+			GameObject[] rootObjects = scene.GetRootGameObjects();
+			if (rootObjects.Length > 0)
 			{
-				GameObject[] rootObjects = new GameObject[unorderedRootObjects.Length];
-				for (int i = 0; i < rootObjects.Length; i++)
-				{
-					//put the root objects in order
-					SerializedObject so = new SerializedObject(unorderedRootObjects[i].transform);
-					rootObjects[so.FindProperty("m_RootOrder").intValue] = unorderedRootObjects[i];
-				}
-
 				Dictionary<int, GameObject> localIdToGameObjects = new Dictionary<int, GameObject>();
 				Dictionary<int, GameObject> localIdToPrefabs = new Dictionary<int, GameObject>();
 				JumpToUtility.GetAllLocalIds(rootObjects, localIdToGameObjects, localIdToPrefabs);

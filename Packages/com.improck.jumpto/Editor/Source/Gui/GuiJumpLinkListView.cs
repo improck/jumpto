@@ -12,7 +12,7 @@ namespace ImpRock.JumpTo.Editor
 		[SerializeField] private List<GuiHierarchyJumpLinkView> m_HierarchyViews = new List<GuiHierarchyJumpLinkView>();
 
 		private readonly RectRef m_DrawRect = new RectRef();
-		private Rect m_ScrollViewRect;
+		private Rect m_ScrollViewRect = new Rect();
 		private string m_HelpMessage1;
 
 		private JumpToEditorWindow m_Window;

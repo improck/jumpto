@@ -100,7 +100,6 @@ namespace ImpRock.JumpTo.Editor
 
 		[SerializeField] private int m_SceneCount = 0;
 		[SerializeField] private int m_LoadedSceneCount = 0;
-		[SerializeField] private bool m_HierarchyChanged = false;
 
 		
 		private Dictionary<int, SceneState> m_SceneStates = new Dictionary<int, SceneState>();
