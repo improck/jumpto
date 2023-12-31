@@ -107,7 +107,7 @@ namespace ImpRock.JumpTo.Editor
 				serializedObject.SetInspectorMode(InspectorMode.Debug);
 
 				int localId = serializedObject.GetLocalIdInFile();
-				streamWriter.WriteLine($"{(int)prefabType}|{localId}|{paths}");
+				streamWriter.WriteLine("{0}|{1}|{2}", (int)prefabType, localId, paths);
 			}
 		}
 

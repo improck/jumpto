@@ -15,12 +15,12 @@ namespace ImpRock.JumpTo.Editor
 
 		public string GetProjectLinksFilePath()
 		{
-			return Path.Combine(SavePath, $"{ProjectLinksFileName}.{FileExtension}");
+			return Path.Combine(SavePath, string.Format("{0}.{1}", ProjectLinksFileName, FileExtension));
 		}
 
 		public string GetHierarchyLinkFilePath(string sceneGuid)
 		{
-			return Path.Combine(HierarchySavePath, $"{sceneGuid}.{FileExtension}");
+			return Path.Combine(HierarchySavePath, string.Format("{0}.{1}", sceneGuid, FileExtension));
 		}
 
 		public bool CreateSaveDirectories()

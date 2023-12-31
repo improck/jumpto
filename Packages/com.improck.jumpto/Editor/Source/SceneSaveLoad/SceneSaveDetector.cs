@@ -47,7 +47,8 @@ namespace ImpRock.JumpTo.Editor
 
 		private static void SceneWillSave(string sceneAssetPath)
 		{
-			OnSceneWillSave?.Invoke(sceneAssetPath);
+			if (OnSceneWillSave != null)
+				OnSceneWillSave.Invoke(sceneAssetPath);
 
 			if (OnSceneSaved != null)
 			{
@@ -61,7 +62,8 @@ namespace ImpRock.JumpTo.Editor
 
 		private static void SceneWillDelete(string sceneAssetPath)
 		{
-			OnSceneWillDelete?.Invoke(sceneAssetPath);
+			if (OnSceneWillDelete != null)
+				OnSceneWillDelete.Invoke(sceneAssetPath);
 
 			if (OnSceneDeleted != null)
 			{
