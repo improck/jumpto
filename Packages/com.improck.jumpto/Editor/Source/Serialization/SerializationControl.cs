@@ -25,7 +25,7 @@ namespace ImpRock.JumpTo.Editor
 
 		public void Initialize(JumpToEditorWindow window)
 		{
-			m_CurrentFileFormat.FileVersion = new System.Version(2, 1, 0, 0);
+			m_CurrentFileFormat.FileVersion = new System.Version(2, 0, 0, 0);
 			m_CurrentFileFormat.SavePath = Path.GetFullPath(Path.Combine(Application.dataPath, Path.Combine("..", "JumpTo")));
 			m_CurrentFileFormat.HierarchySavePath = Path.Combine(m_CurrentFileFormat.SavePath, "HierarchyLinks");
 			m_CurrentFileFormat.ProjectLinksFileName = "projectlinks";
