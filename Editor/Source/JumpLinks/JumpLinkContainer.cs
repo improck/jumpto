@@ -115,7 +115,8 @@ namespace ImpRock.JumpTo.Editor
 				m_Links[i].Area.y = i * GraphicAssets.LinkHeight;
 			}
 
-			OnLinksChanged?.Invoke();
+			if (OnLinksChanged != null)
+				OnLinksChanged.Invoke();
 		}
 
 		public void RemoveSelected()
@@ -135,7 +136,8 @@ namespace ImpRock.JumpTo.Editor
 
 			m_SelectionCount = 0;
 
-			OnLinksChanged?.Invoke();
+			if (OnLinksChanged != null)
+				OnLinksChanged.Invoke();
 		}
 
 		public void RemoveNonSelected()
@@ -155,7 +157,8 @@ namespace ImpRock.JumpTo.Editor
 
 			RefreshLinksY();
 
-			OnLinksChanged?.Invoke();
+			if (OnLinksChanged != null)
+				OnLinksChanged.Invoke();
 		}
 
 		public void RemoveAll()
@@ -163,7 +166,8 @@ namespace ImpRock.JumpTo.Editor
 			m_Links.Clear();
 			m_ActiveSelection = -1;
 
-			OnLinksChanged?.Invoke();
+			if (OnLinksChanged != null)
+				OnLinksChanged.Invoke();
 		}
 
 		public void MoveLink(int from, int to)
@@ -203,7 +207,8 @@ namespace ImpRock.JumpTo.Editor
 				m_Links[min].Area.y = min * GraphicAssets.LinkHeight;
 			}
 
-			OnLinksChanged?.Invoke();
+			if (OnLinksChanged != null)
+				OnLinksChanged.Invoke();
 		}
 
 		public void MoveSelected(int to)
@@ -246,7 +251,8 @@ namespace ImpRock.JumpTo.Editor
 			//fix all of the y-positions
 			RefreshLinksY();
 
-			OnLinksChanged?.Invoke();
+			if (OnLinksChanged != null)
+				OnLinksChanged.Invoke();
 		}
 
 		public void RefreshLinkSelections()
@@ -497,7 +503,8 @@ namespace ImpRock.JumpTo.Editor
 
 		protected void RaiseOnLinksChanged()
 		{
-			OnLinksChanged?.Invoke();
+			if (OnLinksChanged != null)
+				OnLinksChanged.Invoke();
 		}
 	}
 }

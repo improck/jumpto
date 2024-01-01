@@ -73,7 +73,8 @@ namespace ImpRock.JumpTo.Editor
 			{
 				prefabType = PrefabUtility.GetPrefabType(hierarchyProperty.pptrValue);
 				if (prefabType != PrefabType.ModelPrefabInstance &&
-					prefabType != PrefabType.PrefabInstance)
+					prefabType != PrefabType.PrefabInstance &&
+					prefabType != PrefabType.MissingPrefabInstance)
 				{
 					serializedObject = new SerializedObject(hierarchyProperty.pptrValue);
 					serializedObject.SetInspectorMode(InspectorMode.Debug);
@@ -82,6 +83,26 @@ namespace ImpRock.JumpTo.Editor
 					//disconnected prefabs will have a localId of 0 if they haven't been saved to the scene
 					if (localId != 0)
 						idToGameObjects.Add(localId, hierarchyProperty.pptrValue as GameObject);
+				}
+				else if (prefabType == PrefabType.MissingPrefabInstance)
+				{
+					//the localId will be zero, so dig a bit deeper
+					serializedObject = new SerializedObject(hierarchyProperty.pptrValue);
+					serializedObject.SetInspectorMode(InspectorMode.Debug);
+
+					SerializedProperty prefabInternalProperty = serializedObject.FindProperty("m_PrefabInternal");
+					if (prefabInternalProperty.objectReferenceValue != null)
+					{
+						SerializedObject serializedPrefabObject = new SerializedObject(prefabInternalProperty.objectReferenceValue);
+						serializedPrefabObject.SetInspectorMode(InspectorMode.Debug);
+						SerializedProperty localIdProperty = serializedPrefabObject.FindProperty("m_LocalIdentfierInFile");
+						if (localIdProperty != null)
+						{
+							localId = localIdProperty.intValue;
+							if (localId != 0)
+								idToGameObjects.Add(localId, hierarchyProperty.pptrValue as GameObject);
+						}
+					}
 				}
 				else
 				{
@@ -168,31 +189,4 @@ namespace ImpRock.JumpTo.Editor
 			return -1;
 		}
 	}
-
-
-	//tip found at:
-	//	https://code.google.com/p/hounitylibs/source/browse/trunk/HOEditorUtils/HOPanelUtils.cs
-	//public class EditorWindowCachedTitleContentWrapper
-	//{
-	//	private EditorWindow m_Window = null;
-	//	private PropertyInfo m_CachedTitleContentProperty = null;
-
-
-	//	public GUIContent TitleContent
-	//	{
-	//		get
-	//		{
-	//			return m_CachedTitleContentProperty.GetValue(m_Window, null) as GUIContent;
-	//		}
-	//	}
-
-
-	//	public EditorWindowCachedTitleContentWrapper(EditorWindow window)
-	//	{
-	//		m_Window = window;
-
-	//		m_CachedTitleContentProperty =
-	//			typeof(EditorWindow).GetProperty("cachedTitleContent", BindingFlags.Instance | BindingFlags.NonPublic);
-	//	}
-	//}
 }

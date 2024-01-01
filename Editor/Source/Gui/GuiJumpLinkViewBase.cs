@@ -16,7 +16,7 @@ namespace ImpRock.JumpTo.Editor
 	{
 		[SerializeField] protected bool m_HasFocus = false;
 		
-		protected Rect m_FoldoutRect;
+		protected Rect m_FoldoutRect = new Rect();
 		protected Rect m_DrawRect;
 		protected Rect m_LinksAreaRect;
 		protected Rect m_InsertionDrawRect;

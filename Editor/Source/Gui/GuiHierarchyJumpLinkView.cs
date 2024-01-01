@@ -148,9 +148,9 @@ namespace ImpRock.JumpTo.Editor
 				menu.AddSeparator(string.Empty);
 
 				AddCommonTitleContextMenuItems(menu);
-			}
 
-			menu?.ShowAsContext();
+				menu.ShowAsContext();
+			}
 		}
 
 		protected override void OnDoubleClick()

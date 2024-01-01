@@ -20,13 +20,13 @@ namespace ImpRock.JumpTo.Editor
 		private FileFormat m_CurrentFileFormat;
 
 
-		public FileFormat CurrentFileFormat => m_CurrentFileFormat;
+		public FileFormat CurrentFileFormat { get { return m_CurrentFileFormat; } }
 
 
 		public void Initialize(JumpToEditorWindow window)
 		{
-			m_CurrentFileFormat.FileVersion = new System.Version(2, 1, 0, 0);
-			m_CurrentFileFormat.SavePath = Path.GetFullPath(Path.Combine(Application.dataPath, "..", "JumpTo"));
+			m_CurrentFileFormat.FileVersion = new System.Version(2, 0, 0, 0);
+			m_CurrentFileFormat.SavePath = Path.GetFullPath(Path.Combine(Application.dataPath, Path.Combine("..", "JumpTo")));
 			m_CurrentFileFormat.HierarchySavePath = Path.Combine(m_CurrentFileFormat.SavePath, "HierarchyLinks");
 			m_CurrentFileFormat.ProjectLinksFileName = "projectlinks";
 			m_CurrentFileFormat.FileExtension = "jumpto";
@@ -165,7 +165,7 @@ namespace ImpRock.JumpTo.Editor
 
 						SerializeProjectLinksDelegate serializer = FindProjectLinksSerializer(m_CurrentFileFormat.FileVersion);
 						if (serializer != null)
-							serializer?.Invoke(m_CurrentFileFormat, streamWriter, m_Window.JumpLinksInstance.ProjectLinks.AllLinkReferences);
+							serializer.Invoke(m_CurrentFileFormat, streamWriter, m_Window.JumpLinksInstance.ProjectLinks.AllLinkReferences);
 						else
 							Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[0]));
 					}
@@ -207,7 +207,7 @@ namespace ImpRock.JumpTo.Editor
 
 						SerializeHierarchyLinksDelegate serializer = FindHierarchyLinksSerializer(m_CurrentFileFormat.FileVersion);
 						if (serializer != null)
-							serializer?.Invoke(m_CurrentFileFormat, streamWriter, m_Window.JumpLinksInstance.HierarchyLinks[sceneId].AllLinkReferences);
+							serializer.Invoke(m_CurrentFileFormat, streamWriter, m_Window.JumpLinksInstance.HierarchyLinks[sceneId].AllLinkReferences);
 						else
 							Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[1]));
 					}
@@ -250,8 +250,17 @@ namespace ImpRock.JumpTo.Editor
 
 					string readVersion = streamReader.ReadLine();
 
-					System.Version fileVersion;
-					if (System.Version.TryParse(readVersion, out fileVersion))
+					System.Version fileVersion = null;
+					try
+					{
+						fileVersion = new System.Version(readVersion);
+					}
+					catch
+					{
+						Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[2]));
+					}
+
+					if (fileVersion != null)
 					{
 						DeserializeProjectLinksDelegate deserializer = FindProjectLinksDeserializer(fileVersion);
 						if (deserializer != null)
@@ -264,10 +273,6 @@ namespace ImpRock.JumpTo.Editor
 						{
 							Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[2]));
 						}
-					}
-					else
-					{
-						Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[2]));
 					}
 				}
 				catch (System.Exception ex)
@@ -302,8 +307,17 @@ namespace ImpRock.JumpTo.Editor
 					m_Window.CurrentOperation |= Operation.LoadingHierarchyLinks;
 
 					string readVersion = streamReader.ReadLine();
-					System.Version fileVersion;
-					if (System.Version.TryParse(readVersion, out fileVersion))
+					System.Version fileVersion = null;
+					try
+					{
+						fileVersion = new System.Version(readVersion);
+					}
+					catch
+					{
+						Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[4]));
+					}
+
+					if (fileVersion != null)
 					{
 						DeserializeHierarchyLinksDelegate deserializer = FindHierarchyLinkDeserializer(fileVersion);
 						if (deserializer != null)
@@ -316,10 +330,6 @@ namespace ImpRock.JumpTo.Editor
 						{
 							Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[4]));
 						}
-					}
-					else
-					{
-						Debug.LogError(JumpToResources.Instance.GetText(ResId.LogStatements[4]));
 					}
 				}
 				catch (System.Exception ex)

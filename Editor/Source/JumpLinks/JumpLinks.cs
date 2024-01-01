@@ -119,21 +119,24 @@ namespace ImpRock.JumpTo.Editor
 						HierarchyJumpLinkContainer linkContainer = AddHierarchyJumpLinkContainer(sceneId);
 						linkContainer.AddLink(linkReference, prefabType);
 
-						OnHierarchyLinkAdded?.Invoke(sceneId);
+						if (OnHierarchyLinkAdded != null)
+							OnHierarchyLinkAdded.Invoke(sceneId);
 					}
 				}
 				else
 				{
 					m_ProjectLinkContainer.AddLink(linkReference, prefabType);
 
-					OnProjectLinkAdded?.Invoke();
+					if (OnProjectLinkAdded != null)
+						OnProjectLinkAdded.Invoke();
 				}
 			}
 			else if (!(linkReference is Component))
 			{
 				m_ProjectLinkContainer.AddLink(linkReference, PrefabType.None);
 
-				OnProjectLinkAdded?.Invoke();
+				if (OnProjectLinkAdded != null)
+					OnProjectLinkAdded.Invoke();
 			}
 		}
 
@@ -149,7 +152,8 @@ namespace ImpRock.JumpTo.Editor
 			{
 				m_ProjectLinkContainer.AddLink(linkReference, prefabType);
 
-				OnProjectLinkAdded?.Invoke();
+				if (OnProjectLinkAdded != null)
+					OnProjectLinkAdded.Invoke();
 			}
 		}
 
@@ -174,7 +178,8 @@ namespace ImpRock.JumpTo.Editor
 					HierarchyJumpLinkContainer linkContainer = AddHierarchyJumpLinkContainer(sceneId);
 					linkContainer.AddLink(linkReference, prefabType);
 
-					OnHierarchyLinkAdded?.Invoke(sceneId);
+					if (OnHierarchyLinkAdded != null)
+						OnHierarchyLinkAdded.Invoke(sceneId);
 				}
 			}
 		}
