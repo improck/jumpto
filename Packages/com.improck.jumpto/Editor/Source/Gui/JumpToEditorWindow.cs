@@ -167,7 +167,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		if (!m_Initialized)
 			Init();
 
-#if DEBUG
+#if FORCE_PRO_SKIN
 		if (GraphicAssets.ForceProSkin)
 			GUILayout.BeginVertical(EditorGUIUtility.GetBuiltinSkin(EditorSkin.Scene).GetStyle("hostview"));
 #endif
@@ -178,7 +178,7 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		m_Position.Set(0.0f, 0.0f, position.width, position.height);
 		m_JumpLinkListView.Draw(m_Position);
 
-#if DEBUG
+#if FORCE_PRO_SKIN
 		if (GraphicAssets.ForceProSkin)
 			GUILayout.EndVertical();
 #endif

@@ -86,14 +86,19 @@ namespace ImpRock.JumpTo.Editor
 
 				string paths = string.Empty;
 
-				PrefabType prefabType = PrefabUtility.GetPrefabType(linkReferenceObject);
-				if (prefabType == PrefabType.ModelPrefabInstance ||
-					prefabType == PrefabType.PrefabInstance)
+				PrefabAssetType prefabAssetType = PrefabUtility.GetPrefabAssetType(linkReferenceObject);
+				PrefabInstanceStatus prefabInstanceStatus = PrefabUtility.GetPrefabInstanceStatus(linkReferenceObject);
+				//if (prefabType == PrefabType.ModelPrefabInstance ||
+				//	prefabType == PrefabType.PrefabInstance)
+				if (prefabAssetType != PrefabAssetType.NotAPrefab && prefabAssetType != PrefabAssetType.MissingAsset &&
+					prefabInstanceStatus == PrefabInstanceStatus.Connected)
+
 				{
-					linkReferenceObject = PrefabUtility.GetPrefabObject(linkReferenceObject);
+					//linkReferenceObject = PrefabUtility.GetPrefabObject(linkReferenceObject);
+					linkReferenceObject = PrefabUtility.GetPrefabInstanceHandle(linkReferenceObject);
 
 					//we only want the path up to the prefab instance's root
-					GameObject prefabRoot = PrefabUtility.FindPrefabRoot(linkReferenceTransform.gameObject);
+					GameObject prefabRoot = PrefabUtility.GetOutermostPrefabInstanceRoot(linkReferenceTransform.gameObject);
 					paths += JumpToUtility.GetSiblingIndexPath(linkReferenceTransform, prefabRoot.transform) + "|" +
 						JumpToUtility.GetTransformPath(linkReferenceTransform, prefabRoot.transform);
 				}
@@ -107,7 +112,22 @@ namespace ImpRock.JumpTo.Editor
 				serializedObject.SetInspectorMode(InspectorMode.Debug);
 
 				int localId = serializedObject.GetLocalIdInFile();
-				streamWriter.WriteLine($"{(int)prefabType}|{localId}|{paths}");
+				if (localId == 0 && prefabInstanceStatus == PrefabInstanceStatus.MissingAsset)
+				{
+					SerializedProperty prefabInternalProperty = serializedObject.FindProperty("m_PrefabInstance");
+					if (prefabInternalProperty.objectReferenceValue != null)
+					{
+						SerializedObject serializedPrefabObject = new SerializedObject(prefabInternalProperty.objectReferenceValue);
+						serializedPrefabObject.SetInspectorMode(InspectorMode.Debug);
+						SerializedProperty localIdProperty = serializedPrefabObject.FindProperty("m_LocalIdentfierInFile");
+						if (localIdProperty != null)
+						{
+							localId = localIdProperty.intValue;
+						}
+					}
+				}
+
+				streamWriter.WriteLine($"{(int)prefabAssetType}|{(int)prefabInstanceStatus}|{localId}|{paths}");
 			}
 		}
 
@@ -137,27 +157,27 @@ namespace ImpRock.JumpTo.Editor
 					if (lineSegments.Length == 0)
 						continue;
 
-					int prefabTypeId;
-					if (!int.TryParse(lineSegments[0], out prefabTypeId))
+					if (!int.TryParse(lineSegments[0], out int prefabAssetTypeId))
+						continue;
+					
+					if (!int.TryParse(lineSegments[1], out int prefabInstanceStatusId))
 						continue;
 
-					int localId;
-					if (!int.TryParse(lineSegments[1], out localId))
+					if (!int.TryParse(lineSegments[2], out int localId))
 						continue;
 
 					//the localId should NEVER be zero
 					if (localId == 0)
 						continue;
 
-					//TODO: this "could" generate an exception
-					PrefabType prefabType = (PrefabType)prefabTypeId;
+					PrefabAssetType prefabAssetType = (PrefabAssetType)prefabAssetTypeId;
+					PrefabInstanceStatus prefabInstanceStatus = (PrefabInstanceStatus)prefabInstanceStatusId;
 
 					//try to find the object based solely on its localId
-					if (prefabType != PrefabType.ModelPrefabInstance &&
-						prefabType != PrefabType.PrefabInstance)
+					if ((prefabAssetType == PrefabAssetType.Model || prefabAssetType == PrefabAssetType.Regular || prefabAssetType == PrefabAssetType.Variant)
+						&& prefabInstanceStatus == PrefabInstanceStatus.Connected)
 					{
-						GameObject gameObject;
-						if (localIdToGameObjects.TryGetValue(localId, out gameObject))
+						if (localIdToGameObjects.TryGetValue(localId, out GameObject gameObject))
 							jumpLinks.CreateOnlyHierarchyJumpLink(gameObject);
 
 						//TODO: what if it's not found?
@@ -175,7 +195,7 @@ namespace ImpRock.JumpTo.Editor
 						if (localIdToPrefabs.TryGetValue(localId, out gameObject))
 						{
 							//get names of the path nodes
-							transformNames = lineSegments[3].Split(delimeterForwardSlash, System.StringSplitOptions.RemoveEmptyEntries);
+							transformNames = lineSegments[4].Split(delimeterForwardSlash, System.StringSplitOptions.RemoveEmptyEntries);
 
 							//check for corrupt path
 							if (transformNames.Length == 0)

@@ -14,6 +14,7 @@ namespace ImpRock.JumpTo.Editor
 		ModelInstance = 1,
 		Prefab = 2,
 		PrefabInstance = 2,
+		PrefabBroken = 3,
 		PrefabInstanceBroken = 3
 	}
 
@@ -104,34 +105,30 @@ namespace ImpRock.JumpTo.Editor
 		{
 			if (linkReference is GameObject)
 			{
-				PrefabType prefabType = PrefabUtility.GetPrefabType(linkReference);
-				if (prefabType == PrefabType.None ||
-					prefabType == PrefabType.PrefabInstance ||
-					prefabType == PrefabType.ModelPrefabInstance ||
-					prefabType == PrefabType.DisconnectedPrefabInstance ||
-					prefabType == PrefabType.DisconnectedModelPrefabInstance ||
-					prefabType == PrefabType.MissingPrefabInstance)
+				PrefabAssetType prefabAssetType = PrefabUtility.GetPrefabAssetType(linkReference);
+				PrefabInstanceStatus prefabInstanceStatus = PrefabUtility.GetPrefabInstanceStatus(linkReference);
+				if (prefabInstanceStatus != PrefabInstanceStatus.NotAPrefab)
 				{
 					int sceneId = JumpToUtility.FindSceneContaining(linkReference);
 					if (sceneId != 0)
 					{
 						//gets existing, or creates, a link container
 						HierarchyJumpLinkContainer linkContainer = AddHierarchyJumpLinkContainer(sceneId);
-						linkContainer.AddLink(linkReference, prefabType);
+						linkContainer.AddLink(linkReference, prefabAssetType, prefabInstanceStatus);
 
 						OnHierarchyLinkAdded?.Invoke(sceneId);
 					}
 				}
 				else
 				{
-					m_ProjectLinkContainer.AddLink(linkReference, prefabType);
+					m_ProjectLinkContainer.AddLink(linkReference, prefabAssetType, prefabInstanceStatus);
 
 					OnProjectLinkAdded?.Invoke();
 				}
 			}
 			else if (!(linkReference is Component))
 			{
-				m_ProjectLinkContainer.AddLink(linkReference, PrefabType.None);
+				m_ProjectLinkContainer.AddLink(linkReference, PrefabAssetType.NotAPrefab, PrefabInstanceStatus.NotAPrefab);
 
 				OnProjectLinkAdded?.Invoke();
 			}
@@ -142,12 +139,12 @@ namespace ImpRock.JumpTo.Editor
 			if (linkReference is Component)
 				return;
 
-			PrefabType prefabType = PrefabUtility.GetPrefabType(linkReference);
+			PrefabAssetType prefabAssetType = PrefabUtility.GetPrefabAssetType(linkReference);
+			PrefabInstanceStatus prefabInstanceStatus = PrefabUtility.GetPrefabInstanceStatus(linkReference);
 			if (!(linkReference is GameObject) ||
-				prefabType == PrefabType.ModelPrefab ||
-				prefabType == PrefabType.Prefab)
+				prefabInstanceStatus == PrefabInstanceStatus.NotAPrefab)
 			{
-				m_ProjectLinkContainer.AddLink(linkReference, prefabType);
+				m_ProjectLinkContainer.AddLink(linkReference, prefabAssetType, prefabInstanceStatus);
 
 				OnProjectLinkAdded?.Invoke();
 			}
@@ -158,21 +155,17 @@ namespace ImpRock.JumpTo.Editor
 			if (linkReference is Component)
 				return;
 
-			PrefabType prefabType = PrefabUtility.GetPrefabType(linkReference);
-			if (linkReference is GameObject &&
-				(prefabType == PrefabType.None ||
-				   prefabType == PrefabType.PrefabInstance ||
-				   prefabType == PrefabType.ModelPrefabInstance ||
-				   prefabType == PrefabType.DisconnectedPrefabInstance ||
-				   prefabType == PrefabType.DisconnectedModelPrefabInstance ||
-				   prefabType == PrefabType.MissingPrefabInstance))
+			if (linkReference is GameObject)
 			{
 				int sceneId = JumpToUtility.FindSceneContaining(linkReference);
 				if (sceneId != 0)
 				{
+					PrefabAssetType prefabAssetType = PrefabUtility.GetPrefabAssetType(linkReference);
+					PrefabInstanceStatus prefabInstanceStatus = PrefabUtility.GetPrefabInstanceStatus(linkReference);
+
 					//gets existing, or creates, a link container
 					HierarchyJumpLinkContainer linkContainer = AddHierarchyJumpLinkContainer(sceneId);
-					linkContainer.AddLink(linkReference, prefabType);
+					linkContainer.AddLink(linkReference, prefabAssetType, prefabInstanceStatus);
 
 					OnHierarchyLinkAdded?.Invoke(sceneId);
 				}

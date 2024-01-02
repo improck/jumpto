@@ -64,30 +64,46 @@ namespace ImpRock.JumpTo.Editor
 			if (!hierarchyProperty.Find(orderedRootObjects[0].GetInstanceID(), null))
 				return;
 			
-			SerializedObject serializedObject;
-			PrefabType prefabType;
-			int localId;
-			
 			do
 			{
-				prefabType = PrefabUtility.GetPrefabType(hierarchyProperty.pptrValue);
-				if (prefabType != PrefabType.ModelPrefabInstance &&
-					prefabType != PrefabType.PrefabInstance)
+				PrefabInstanceStatus prefabInstanceStatus = PrefabUtility.GetPrefabInstanceStatus(hierarchyProperty.pptrValue);
+
+				if (prefabInstanceStatus == PrefabInstanceStatus.NotAPrefab)
 				{
-					serializedObject = new SerializedObject(hierarchyProperty.pptrValue);
+					SerializedObject serializedObject = new SerializedObject(hierarchyProperty.pptrValue);
 					serializedObject.SetInspectorMode(InspectorMode.Debug);
-					localId = serializedObject.GetLocalIdInFile();
+					int localId = serializedObject.GetLocalIdInFile();
 
 					//disconnected prefabs will have a localId of 0 if they haven't been saved to the scene
 					if (localId != 0)
 						idToGameObjects.Add(localId, hierarchyProperty.pptrValue as GameObject);
 				}
+				else if (prefabInstanceStatus == PrefabInstanceStatus.MissingAsset)
+				{
+					//the localId will be zero, so dig a bit deeper
+					SerializedObject serializedObject = new SerializedObject(hierarchyProperty.pptrValue);
+					serializedObject.SetInspectorMode(InspectorMode.Debug);
+
+					SerializedProperty prefabInternalProperty = serializedObject.FindProperty("m_PrefabInstance");
+					if (prefabInternalProperty.objectReferenceValue != null)
+					{
+						SerializedObject serializedPrefabObject = new SerializedObject(prefabInternalProperty.objectReferenceValue);
+						serializedPrefabObject.SetInspectorMode(InspectorMode.Debug);
+						SerializedProperty localIdProperty = serializedPrefabObject.FindProperty("m_LocalIdentfierInFile");
+						if (localIdProperty != null)
+						{
+							int localId = localIdProperty.intValue;
+							if (localId != 0)
+								idToGameObjects.Add(localId, hierarchyProperty.pptrValue as GameObject);
+						}
+					}
+				}
 				else
 				{
-					Object prefabObject = PrefabUtility.GetPrefabObject(hierarchyProperty.pptrValue);
-					serializedObject = new SerializedObject(prefabObject);
+					Object prefabObject = PrefabUtility.GetPrefabInstanceHandle(hierarchyProperty.pptrValue);
+					SerializedObject serializedObject = new SerializedObject(prefabObject);
 					serializedObject.SetInspectorMode(InspectorMode.Debug);
-					localId = serializedObject.GetLocalIdInFile();
+					int localId = serializedObject.GetLocalIdInFile();
 
 					if (localId != 0 && !idToPrefabs.ContainsKey(localId))
 					{
@@ -167,31 +183,4 @@ namespace ImpRock.JumpTo.Editor
 			return -1;
 		}
 	}
-
-
-	//tip found at:
-	//	https://code.google.com/p/hounitylibs/source/browse/trunk/HOEditorUtils/HOPanelUtils.cs
-	//public class EditorWindowCachedTitleContentWrapper
-	//{
-	//	private EditorWindow m_Window = null;
-	//	private PropertyInfo m_CachedTitleContentProperty = null;
-
-
-	//	public GUIContent TitleContent
-	//	{
-	//		get
-	//		{
-	//			return m_CachedTitleContentProperty.GetValue(m_Window, null) as GUIContent;
-	//		}
-	//	}
-
-
-	//	public EditorWindowCachedTitleContentWrapper(EditorWindow window)
-	//	{
-	//		m_Window = window;
-
-	//		m_CachedTitleContentProperty =
-	//			typeof(EditorWindow).GetProperty("cachedTitleContent", BindingFlags.Instance | BindingFlags.NonPublic);
-	//	}
-	//}
 }

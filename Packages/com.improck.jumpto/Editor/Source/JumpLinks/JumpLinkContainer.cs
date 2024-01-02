@@ -95,8 +95,8 @@ namespace ImpRock.JumpTo.Editor
 		public event System.Action OnLinksChanged;
 
 
-		public abstract void AddLink(UnityEngine.Object linkReference, PrefabType prefabType);
-		protected abstract void UpdateLinkInfo(T link, PrefabType prefabType);
+		public abstract void AddLink(UnityEngine.Object linkReference, PrefabAssetType prefabAssetType, PrefabInstanceStatus prefabInstanceStatus);
+		protected abstract void UpdateLinkInfo(T link, PrefabAssetType prefabAssetType, PrefabInstanceStatus prefabInstanceStatus);
 
 
 		public void RemoveLink(int index)
@@ -419,7 +419,8 @@ namespace ImpRock.JumpTo.Editor
 				else
 				{
 					T link = m_Links[i];
-					UpdateLinkInfo(link, PrefabUtility.GetPrefabType(link.LinkReference));
+					Object linkReference = link.LinkReference;
+					UpdateLinkInfo(link, PrefabUtility.GetPrefabAssetType(linkReference), PrefabUtility.GetPrefabInstanceStatus(linkReference));
 				}
 			}
 
