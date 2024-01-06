@@ -337,7 +337,12 @@ namespace ImpRock.JumpTo.Editor
 		private static SerializeProjectLinksDelegate FindProjectLinksSerializer(System.Version fileVersion)
 		{
 			if (fileVersion.Major >= 2)
-				return LinksFile_2_0_0_0.SerializeProjectLinks;
+			{
+				if (fileVersion.Minor == 0)
+					return LinksFile_2_0_0_0.SerializeProjectLinks;
+				else if (fileVersion.Minor == 1)
+					return LinksFile_2_1_0_0.SerializeProjectLinks;
+			}
 
 			return null;
 		}
@@ -345,7 +350,12 @@ namespace ImpRock.JumpTo.Editor
 		private DeserializeProjectLinksDelegate FindProjectLinksDeserializer(System.Version fileVersion)
 		{
 			if (fileVersion.Major >= 2)
-				return LinksFile_2_0_0_0.DeserializeProjectLinks;
+			{
+				if (fileVersion.Minor == 0)
+					return LinksFile_2_0_0_0.DeserializeProjectLinks;
+				else if (fileVersion.Minor == 1)
+					return LinksFile_2_1_0_0.DeserializeProjectLinks;
+			}
 
 			return null;
 		}
@@ -353,7 +363,12 @@ namespace ImpRock.JumpTo.Editor
 		private static SerializeHierarchyLinksDelegate FindHierarchyLinksSerializer(System.Version fileVersion)
 		{
 			if (fileVersion.Major >= 2)
-				return LinksFile_2_0_0_0.SerializeHierarchyLinks;
+			{
+				if (fileVersion.Minor == 0)
+					return LinksFile_2_0_0_0.SerializeHierarchyLinks;
+				else if (fileVersion.Minor == 1)
+					return LinksFile_2_1_0_0.SerializeHierarchyLinks;
+			}
 
 			return null;
 		}
@@ -361,7 +376,12 @@ namespace ImpRock.JumpTo.Editor
 		private DeserializeHierarchyLinksDelegate FindHierarchyLinkDeserializer(System.Version fileVersion)
 		{
 			if (fileVersion.Major >= 2)
-				return LinksFile_2_0_0_0.DeserializeHierarchyLinks;
+			{
+				if (fileVersion.Minor == 0)
+					return LinksFile_2_0_0_0.DeserializeHierarchyLinks;
+				else if (fileVersion.Minor == 1)
+					return LinksFile_2_1_0_0.DeserializeHierarchyLinks;
+			}
 
 			return null;
 		}
