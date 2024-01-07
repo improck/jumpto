@@ -1,6 +1,8 @@
 ﻿using UnityEditor;
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
+using UnityEditor.SceneManagement;
 
 
 namespace ImpRock.JumpTo.Editor
@@ -76,29 +78,29 @@ namespace ImpRock.JumpTo.Editor
 			m_ProjectLinkContainer.hideFlags = HideFlags.HideAndDontSave;
 		}
 
-		public HierarchyJumpLinkContainer GetHierarchyJumpLinkContainer(int sceneId)
+		public HierarchyJumpLinkContainer GetHierarchyJumpLinkContainer(int sceneHandle)
 		{
 			HierarchyJumpLinkContainer container;
-			m_HierarchyLinkContainers.TryGetValue(sceneId, out container);
+			m_HierarchyLinkContainers.TryGetValue(sceneHandle, out container);
 			return container;
 		}
 
-		public HierarchyJumpLinkContainer AddHierarchyJumpLinkContainer(int sceneId)
+		public HierarchyJumpLinkContainer AddHierarchyJumpLinkContainer(int sceneHandle)
 		{
 			HierarchyJumpLinkContainer container;
-			if (!m_HierarchyLinkContainers.TryGetValue(sceneId, out container))
+			if (!m_HierarchyLinkContainers.TryGetValue(sceneHandle, out container))
 			{
 				container = ScriptableObject.CreateInstance<HierarchyJumpLinkContainer>();
 				container.hideFlags = HideFlags.HideAndDontSave;
-				m_HierarchyLinkContainers.Add(sceneId, container);
+				m_HierarchyLinkContainers.Add(sceneHandle, container);
 			}
 
 			return container;
 		}
 
-		public void RemoveHierarchyJumpLinkContainer(int sceneId)
+		public void RemoveHierarchyJumpLinkContainer(int sceneHandle)
 		{
-			m_HierarchyLinkContainers.Remove(sceneId);
+			m_HierarchyLinkContainers.Remove(sceneHandle);
 		}
 
 		public void CreateJumpLink(UnityEngine.Object linkReference)
@@ -107,16 +109,16 @@ namespace ImpRock.JumpTo.Editor
 			{
 				PrefabAssetType prefabAssetType = PrefabUtility.GetPrefabAssetType(linkReference);
 				PrefabInstanceStatus prefabInstanceStatus = PrefabUtility.GetPrefabInstanceStatus(linkReference);
-				if (prefabInstanceStatus != PrefabInstanceStatus.NotAPrefab)
+				if (prefabInstanceStatus != PrefabInstanceStatus.NotAPrefab || prefabAssetType == PrefabAssetType.NotAPrefab)
 				{
-					int sceneId = JumpToUtility.FindSceneContaining(linkReference);
-					if (sceneId != 0)
+					Scene scene = ((GameObject)linkReference).scene;
+					if (!EditorSceneManager.IsPreviewScene(scene))
 					{
 						//gets existing, or creates, a link container
-						HierarchyJumpLinkContainer linkContainer = AddHierarchyJumpLinkContainer(sceneId);
+						HierarchyJumpLinkContainer linkContainer = AddHierarchyJumpLinkContainer(scene.handle);
 						linkContainer.AddLink(linkReference, prefabAssetType, prefabInstanceStatus);
 
-						OnHierarchyLinkAdded?.Invoke(sceneId);
+						OnHierarchyLinkAdded?.Invoke(scene.handle);
 					}
 				}
 				else
@@ -157,17 +159,17 @@ namespace ImpRock.JumpTo.Editor
 
 			if (linkReference is GameObject)
 			{
-				int sceneId = JumpToUtility.FindSceneContaining(linkReference);
-				if (sceneId != 0)
+				Scene scene = ((GameObject)linkReference).scene;
+				if (!EditorSceneManager.IsPreviewScene(scene))
 				{
 					PrefabAssetType prefabAssetType = PrefabUtility.GetPrefabAssetType(linkReference);
 					PrefabInstanceStatus prefabInstanceStatus = PrefabUtility.GetPrefabInstanceStatus(linkReference);
 
 					//gets existing, or creates, a link container
-					HierarchyJumpLinkContainer linkContainer = AddHierarchyJumpLinkContainer(sceneId);
+					HierarchyJumpLinkContainer linkContainer = AddHierarchyJumpLinkContainer(scene.handle);
 					linkContainer.AddLink(linkReference, prefabAssetType, prefabInstanceStatus);
 
-					OnHierarchyLinkAdded?.Invoke(sceneId);
+					OnHierarchyLinkAdded?.Invoke(scene.handle);
 				}
 			}
 		}

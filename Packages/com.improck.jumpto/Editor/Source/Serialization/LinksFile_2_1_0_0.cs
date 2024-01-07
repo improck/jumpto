@@ -31,6 +31,9 @@ namespace ImpRock.JumpTo.Editor
 			{
 				instanceId = linkReference.GetInstanceID();
 				line = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(instanceId));
+				if (string.IsNullOrWhiteSpace(line))
+					continue;
+
 				if (AssetDatabase.IsSubAsset(instanceId))
 					line += "|" + instanceId;
 
@@ -49,7 +52,7 @@ namespace ImpRock.JumpTo.Editor
 				if (line.Length == 32)
 				{
 					path = AssetDatabase.GUIDToAssetPath(line);
-					if (!string.IsNullOrEmpty(path))
+					if (!string.IsNullOrWhiteSpace(path))
 					{
 						Object obj = AssetDatabase.LoadMainAssetAtPath(path);
 						if (obj != null)
@@ -60,7 +63,7 @@ namespace ImpRock.JumpTo.Editor
 				{
 					instanceId = int.Parse(line.Substring(33));
 					path = AssetDatabase.GUIDToAssetPath(line.Substring(0, 32));
-					if (!string.IsNullOrEmpty(path))
+					if (!string.IsNullOrWhiteSpace(path))
 					{
 						Object[] objs = AssetDatabase.LoadAllAssetsAtPath(path);
 						if (objs != null)
