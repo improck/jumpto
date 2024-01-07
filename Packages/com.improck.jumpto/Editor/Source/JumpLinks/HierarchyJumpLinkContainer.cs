@@ -52,8 +52,6 @@ namespace ImpRock.JumpTo.Editor
 
 			if (linkReference is GameObject)
 			{
-				GraphicAssets graphicAssets = GraphicAssets.Instance;
-
 				link.Active = (link.LinkReference as GameObject).activeInHierarchy;
 
 				switch (prefabInstanceStatus)
