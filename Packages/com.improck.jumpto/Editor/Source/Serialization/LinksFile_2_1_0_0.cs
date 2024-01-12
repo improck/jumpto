@@ -178,7 +178,11 @@ namespace ImpRock.JumpTo.Editor
 
 					//try to find the object based solely on its localId
 					if ((prefabAssetType == PrefabAssetType.NotAPrefab || prefabAssetType == PrefabAssetType.MissingAsset) &&
-						(prefabInstanceStatus == PrefabInstanceStatus.NotAPrefab || prefabInstanceStatus == PrefabInstanceStatus.MissingAsset || prefabInstanceStatus == PrefabInstanceStatus.Disconnected))
+						(prefabInstanceStatus == PrefabInstanceStatus.NotAPrefab || prefabInstanceStatus == PrefabInstanceStatus.MissingAsset
+#if !UNITY_2022_1_OR_NEWER
+						|| prefabInstanceStatus == PrefabInstanceStatus.Disconnected
+#endif
+						))
 					{
 						if (localIdToGameObjects.TryGetValue(localId, out GameObject gameObject))
 							jumpLinks.CreateOnlyHierarchyJumpLink(gameObject);

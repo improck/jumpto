@@ -59,7 +59,9 @@ namespace ImpRock.JumpTo.Editor
 					case PrefabInstanceStatus.NotAPrefab:
 						link.ReferenceType = LinkReferenceType.GameObject;
 						break;
+#if !UNITY_2022_1_OR_NEWER
 					case PrefabInstanceStatus.Disconnected:
+#endif
 					case PrefabInstanceStatus.MissingAsset:
 						link.ReferenceType = LinkReferenceType.PrefabInstanceBroken;
 						break;
