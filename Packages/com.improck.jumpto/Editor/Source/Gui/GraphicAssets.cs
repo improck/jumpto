@@ -61,11 +61,12 @@ namespace ImpRock.JumpTo.Editor
 			else
 				editorSkin = EditorGUIUtility.GetBuiltinSkin(EditorSkin.Inspector);
 
-			LinkViewTitleStyle = new GUIStyle(editorSkin.GetStyle("ProjectBrowserTopBarBg"))
+			LinkViewTitleStyle = new GUIStyle(editorSkin.GetStyle("OT TopBar"))
 			{
 				name = "Link View Title",
 				alignment = TextAnchor.MiddleLeft,
 				clipping = TextClipping.Clip,
+				fixedHeight = 18.0f,
 				contentOffset = new Vector2(0.0f, -1.0f),
 				font = null,
 				fontSize = 0,
