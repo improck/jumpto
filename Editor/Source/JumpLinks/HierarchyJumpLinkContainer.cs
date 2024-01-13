@@ -16,7 +16,7 @@ namespace ImpRock.JumpTo.Editor
 		public bool HasLinksToUnsavedInstances { get { return m_HasLinksToUnsavedInstances; } }
 
 
-		public override void AddLink(UnityEngine.Object linkReference, PrefabType prefabType)
+		public override void AddLink(UnityEngine.Object linkReference, PrefabAssetType prefabAssetType, PrefabInstanceStatus prefabInstanceStatus)
 		{
 			//basically, if no linked object in the list has a reference to the passed object
 			if (!m_Links.Exists(linked => linked.LinkReference == linkReference))
@@ -25,7 +25,7 @@ namespace ImpRock.JumpTo.Editor
 				link.hideFlags = HideFlags.HideAndDontSave;
 				link.LinkReference = linkReference;
 
-				UpdateLinkInfo(link, prefabType);
+				UpdateLinkInfo(link, prefabAssetType, prefabInstanceStatus);
 
 				link.Area.Set(0.0f, m_Links.Count * GraphicAssets.LinkHeight, 100.0f, GraphicAssets.LinkHeight);
 
@@ -42,7 +42,7 @@ namespace ImpRock.JumpTo.Editor
 			base.RefreshLinks();
 		}
 
-		protected override void UpdateLinkInfo(HierarchyJumpLink link, PrefabType prefabType)
+		protected override void UpdateLinkInfo(HierarchyJumpLink link, PrefabAssetType prefabAssetType, PrefabInstanceStatus prefabInstanceStatus)
 		{
 			UnityEngine.Object linkReference = link.LinkReference;
 
@@ -52,52 +52,37 @@ namespace ImpRock.JumpTo.Editor
 
 			if (linkReference is GameObject)
 			{
-				GraphicAssets graphicAssets = GraphicAssets.Instance;
-
 				link.Active = (link.LinkReference as GameObject).activeInHierarchy;
 
-				if (prefabType == PrefabType.PrefabInstance)
+				switch (prefabInstanceStatus)
 				{
-					link.ReferenceType = LinkReferenceType.PrefabInstance;
-
-					if (link.LinkLabelContent.image == null)
-						link.LinkLabelContent.image = graphicAssets.IconPrefabNormal;
-				}
-				else if (prefabType == PrefabType.ModelPrefabInstance)
-				{
-					link.ReferenceType = LinkReferenceType.ModelInstance;
-
-					if (link.LinkLabelContent.image == null)
-						link.LinkLabelContent.image = graphicAssets.IconPrefabModel;
-				}
-				else if (prefabType == PrefabType.DisconnectedPrefabInstance ||
-					prefabType == PrefabType.DisconnectedModelPrefabInstance ||
-					prefabType == PrefabType.MissingPrefabInstance)
-				{
-					link.ReferenceType = LinkReferenceType.PrefabInstanceBroken;
-
-					if (link.LinkLabelContent.image == null)
-						link.LinkLabelContent.image = graphicAssets.IconPrefabNormal;
-				}
-				else
-				{
-					link.ReferenceType = LinkReferenceType.GameObject;
-
-					if (link.LinkLabelContent.image == null)
-						link.LinkLabelContent.image = graphicAssets.IconGameObject;
+					case PrefabInstanceStatus.NotAPrefab:
+						link.ReferenceType = LinkReferenceType.GameObject;
+						break;
+#if !UNITY_2022_1_OR_NEWER
+					case PrefabInstanceStatus.Disconnected:
+#endif
+					case PrefabInstanceStatus.MissingAsset:
+						link.ReferenceType = LinkReferenceType.PrefabInstanceBroken;
+						break;
+					case PrefabInstanceStatus.Connected:
+						link.ReferenceType = prefabAssetType == PrefabAssetType.Model ? LinkReferenceType.ModelInstance : LinkReferenceType.PrefabInstance;
+						break;
 				}
 
 				Transform linkTransform = (linkReference as GameObject).transform;
 				link.LinkLabelContent.tooltip = JumpToUtility.GetTransformPath(linkTransform);
 				
-				if (prefabType == PrefabType.PrefabInstance || prefabType == PrefabType.ModelPrefabInstance)
+				if (prefabAssetType == PrefabAssetType.Model ||
+					prefabAssetType == PrefabAssetType.Regular ||
+					prefabAssetType == PrefabAssetType.Variant)
 				{
-					linkReference = PrefabUtility.GetPrefabObject(linkReference);
+					linkReference = PrefabUtility.GetPrefabInstanceHandle(linkReference);
 				}
 
 				SerializedObject serializedObject = new SerializedObject(linkReference);
 				serializedObject.SetInspectorMode(InspectorMode.Debug);
-				if (serializedObject.GetLocalIdInFile() == 0 && prefabType != PrefabType.MissingPrefabInstance)
+				if (serializedObject.GetLocalIdInFile() == 0 && prefabInstanceStatus != PrefabInstanceStatus.MissingAsset)
 				{
 					m_HasLinksToUnsavedInstances = true;
 				}

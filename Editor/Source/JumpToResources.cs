@@ -132,7 +132,7 @@ namespace ImpRock.JumpTo.Editor
 
 		private void LoadText(string fileName)
 		{
-			TextAsset langAsset = AssetDatabase.LoadAssetAtPath<TextAsset>("Packages/com.improck.jumpto/Editor/Lang/" + fileName);
+			TextAsset langAsset = AssetDatabase.LoadAssetAtPath<TextAsset>($"Packages/com.improck.jumpto/Editor/Lang/{fileName}");
 			if (langAsset != null)
 			{
 				using (StringReader reader = new StringReader(langAsset.text))
@@ -183,7 +183,7 @@ namespace ImpRock.JumpTo.Editor
 			int fileNameHash = fileName.GetHashCode();
 			if (!m_ImageResources.ContainsKey(fileNameHash))
 			{
-				Texture2D imageAsset = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.improck.jumpto/Editor/Images/" + fileName);
+				Texture2D imageAsset = AssetDatabase.LoadAssetAtPath<Texture2D>($"Packages/com.improck.jumpto/Editor/Images/{fileName}");
 				if (imageAsset != null)
 				{
 					m_ImageResources.Add(fileNameHash, imageAsset);

@@ -67,8 +67,7 @@ namespace ImpRock.JumpTo.Editor
 
 		public void SceneClosed()
 		{
-			if (OnClose != null)
-				OnClose.Invoke(this);
+			OnClose?.Invoke(this);
 		}
 
 		public override string ToString()
@@ -167,8 +166,7 @@ namespace ImpRock.JumpTo.Editor
 					sceneStateChanged = true;
 					SceneState sceneState = new SceneState(scene);
 					m_SceneStates[currentSceneIds[i]] = sceneState;
-					if (OnSceneOpened != null)
-						OnSceneOpened.Invoke(sceneState);
+					OnSceneOpened?.Invoke(sceneState);
 				}
 			}
 
@@ -194,8 +192,7 @@ namespace ImpRock.JumpTo.Editor
 
 			if (m_SceneCount != currentSceneCount)
 			{
-				if (OnSceneCountChanged != null)
-					OnSceneCountChanged.Invoke(m_SceneCount, currentSceneCount);
+				OnSceneCountChanged?.Invoke(m_SceneCount, currentSceneCount);
 
 				m_SceneCount = currentSceneCount;
 			}
@@ -206,8 +203,7 @@ namespace ImpRock.JumpTo.Editor
 #endif
 			if (m_LoadedSceneCount != currentSceneCount)
 			{
-				if (OnLoadedSceneCountChanged != null)
-					OnLoadedSceneCountChanged.Invoke(m_LoadedSceneCount, currentSceneCount);
+				OnLoadedSceneCountChanged?.Invoke(m_LoadedSceneCount, currentSceneCount);
 				
 				m_LoadedSceneCount = currentSceneCount;
 			}

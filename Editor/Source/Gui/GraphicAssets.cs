@@ -61,11 +61,12 @@ namespace ImpRock.JumpTo.Editor
 			else
 				editorSkin = EditorGUIUtility.GetBuiltinSkin(EditorSkin.Inspector);
 
-			LinkViewTitleStyle = new GUIStyle(editorSkin.GetStyle("ProjectBrowserTopBarBg"))
+			LinkViewTitleStyle = new GUIStyle(editorSkin.GetStyle("OT TopBar"))
 			{
 				name = "Link View Title",
 				alignment = TextAnchor.MiddleLeft,
 				clipping = TextClipping.Clip,
+				fixedHeight = 18.0f,
 				contentOffset = new Vector2(0.0f, -1.0f),
 				font = null,
 				fontSize = 0,
@@ -99,22 +100,16 @@ namespace ImpRock.JumpTo.Editor
 
 		public void InitAssets()
 		{
-#if UNITY_2020_OR_NEWER
-			IconPrefabNormal = EditorGUIUtility.Load("Prefab On Icon") as Texture2D;
-			IconPrefabModel = EditorGUIUtility.Load("PrefabModel Icon") as Texture2D;
-			IconGameObject = EditorGUIUtility.Load("GameObject Icon") as Texture2D;
-			IconProjectView = EditorGUIUtility.Load("Project") as Texture2D;
-			IconHierarchyView = EditorGUIUtility.Load("d_SceneAsset Icon") as Texture2D;
-#else
-			IconPrefabNormal = EditorGUIUtility.Load("PrefabNormal Icon") as Texture2D;
-			IconPrefabModel = EditorGUIUtility.Load("PrefabModel Icon") as Texture2D;
-			IconGameObject = EditorGUIUtility.Load("GameObject Icon") as Texture2D;
-			IconProjectView = EditorGUIUtility.Load("Project") as Texture2D;
-			IconHierarchyView = EditorGUIUtility.Load("SceneAsset Icon") as Texture2D;
-#endif
-
 			if (EditorGUIUtility.isProSkin || ForceProSkin)
 			{
+#if UNITY_2019_1_OR_NEWER
+				IconProjectView = EditorGUIUtility.Load("d_Project") as Texture2D;
+				IconHierarchyView = EditorGUIUtility.Load("d_SceneAsset Icon") as Texture2D;
+#else
+				IconProjectView = EditorGUIUtility.Load("Project") as Texture2D;
+				IconHierarchyView = EditorGUIUtility.Load("SceneAsset Icon") as Texture2D;
+#endif
+
 				LinkTextColors = new Color[]
 				{
 					new Color(0.7f, 0.7f, 0.7f, 1.0f),		//normal
@@ -125,6 +120,9 @@ namespace ImpRock.JumpTo.Editor
 			}
 			else
 			{
+				IconProjectView = EditorGUIUtility.Load("Project") as Texture2D;
+				IconHierarchyView = EditorGUIUtility.Load("SceneAsset Icon") as Texture2D;
+
 				LinkTextColors = new Color[]
 				{
 					Color.black,							//normal
