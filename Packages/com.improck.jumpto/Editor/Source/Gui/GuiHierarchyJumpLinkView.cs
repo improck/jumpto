@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 
 
-namespace ImpRock.JumpTo.Editor
+namespace ImpRock.JumpTo
 {
 	internal sealed class GuiHierarchyJumpLinkView : GuiJumpLinkViewBase<HierarchyJumpLink>
 	{

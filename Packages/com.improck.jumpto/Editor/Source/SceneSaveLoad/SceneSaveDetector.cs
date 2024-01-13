@@ -3,7 +3,7 @@ using UnityEngine;
 using System.IO;
 
 
-namespace ImpRock.JumpTo.Editor
+namespace ImpRock.JumpTo
 {
 	/// <summary>
 	/// Attempts to detect when scenes are saved as assets in the project.

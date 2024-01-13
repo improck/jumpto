@@ -6,7 +6,7 @@ using System.Text;
 using System.Collections.Generic;
 
 
-namespace ImpRock.JumpTo.Editor
+namespace ImpRock.JumpTo
 {
 	internal static class JumpToUtility
 	{

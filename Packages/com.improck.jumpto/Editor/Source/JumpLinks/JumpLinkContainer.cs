@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 
 
-namespace ImpRock.JumpTo.Editor
+namespace ImpRock.JumpTo
 {
 	internal abstract class JumpLinkContainer<T> : ScriptableObject where T : JumpLink
 	{

@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 
-namespace ImpRock.JumpTo.Editor
+namespace ImpRock.JumpTo
 {
 	//Project Line Format
 	//	assetguid[|instanceId]

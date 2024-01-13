@@ -1,6 +1,6 @@
 ﻿
 
-namespace ImpRock.JumpTo.Editor
+namespace ImpRock.JumpTo
 {
 	[System.Flags]
 	internal enum Operation
