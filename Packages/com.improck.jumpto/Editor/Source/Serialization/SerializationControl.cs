@@ -339,7 +339,7 @@ namespace ImpRock.JumpTo.Editor
 			if (fileVersion.Major >= 2)
 			{
 				if (fileVersion.Minor == 0)
-					return LinksFile_2_0_0_0.SerializeProjectLinks;
+					return null;
 				else if (fileVersion.Minor == 1)
 					return LinksFile_2_1_0_0.SerializeProjectLinks;
 			}
@@ -352,7 +352,7 @@ namespace ImpRock.JumpTo.Editor
 			if (fileVersion.Major >= 2)
 			{
 				if (fileVersion.Minor == 0)
-					return LinksFile_2_0_0_0.DeserializeProjectLinks;
+					return null;
 				else if (fileVersion.Minor == 1)
 					return LinksFile_2_1_0_0.DeserializeProjectLinks;
 			}
@@ -365,7 +365,7 @@ namespace ImpRock.JumpTo.Editor
 			if (fileVersion.Major >= 2)
 			{
 				if (fileVersion.Minor == 0)
-					return LinksFile_2_0_0_0.SerializeHierarchyLinks;
+					return null;
 				else if (fileVersion.Minor == 1)
 					return LinksFile_2_1_0_0.SerializeHierarchyLinks;
 			}
@@ -378,7 +378,7 @@ namespace ImpRock.JumpTo.Editor
 			if (fileVersion.Major >= 2)
 			{
 				if (fileVersion.Minor == 0)
-					return LinksFile_2_0_0_0.DeserializeHierarchyLinks;
+					return null;
 				else if (fileVersion.Minor == 1)
 					return LinksFile_2_1_0_0.DeserializeHierarchyLinks;
 			}
