@@ -2,7 +2,7 @@
 using UnityEngine;
 
 
-namespace ImpRock.JumpTo.Editor
+namespace ImpRock.JumpTo
 {
 	internal struct FileFormat
 	{

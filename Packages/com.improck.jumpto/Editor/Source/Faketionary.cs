@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections;
 
 
-namespace ImpRock.JumpTo.Editor
+namespace ImpRock.JumpTo
 {
 	[System.Serializable]
 	public class Faketionary<K, V> : IEnumerable<KeyValuePair<K, V>>

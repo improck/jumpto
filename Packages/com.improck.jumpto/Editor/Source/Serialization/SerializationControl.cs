@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 
-namespace ImpRock.JumpTo.Editor
+namespace ImpRock.JumpTo
 {
 	internal delegate void SerializeProjectLinksDelegate(FileFormat fileFormat, StreamWriter streamWriter, IEnumerable<Object> linkReferences);
 	internal delegate void DeserializeProjectLinksDelegate(FileFormat fileFormat, StreamReader streamReader, JumpLinks jumpLinks);
