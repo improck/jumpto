@@ -3,7 +3,7 @@
 using UnityEngine;
 
 
-namespace ImpRock.JumpTo.Editor
+namespace ImpRock.JumpTo
 {
 	[System.Serializable]
 	internal class RectRef

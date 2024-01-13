@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 using UnityEditor.SceneManagement;
 
 
-namespace ImpRock.JumpTo.Editor
+namespace ImpRock.JumpTo
 {
 	[System.Serializable]
 	internal enum LinkReferenceType

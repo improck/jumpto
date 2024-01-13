@@ -2,7 +2,7 @@ using UnityEditor;
 using UnityEngine;
 
 
-namespace ImpRock.JumpTo.Editor
+namespace ImpRock.JumpTo
 {
 	internal abstract class EditorScriptableObject<T> : ScriptableObject where T : EditorScriptableObject<T>
 	{

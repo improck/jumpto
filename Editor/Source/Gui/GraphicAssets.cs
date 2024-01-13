@@ -2,7 +2,7 @@
 using UnityEngine;
 
 
-namespace ImpRock.JumpTo.Editor
+namespace ImpRock.JumpTo
 {
 	//TODO: may not need to set prefab icons manually anymore
 	//TODO: unity's selected item colors have changed; try to match

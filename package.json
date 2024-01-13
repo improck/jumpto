@@ -12,8 +12,10 @@
     "bookmark"
   ],
   "author": {
-    "name": "Dean Lackey",
-    "email": "dean@improck.com",
+    "name": "Imp Rock",
     "url": "https://improck.com"
+  },
+  "contributors": {
+    "name": "Dean Lackey", "email": "dean@improck.com"
   }
 }
