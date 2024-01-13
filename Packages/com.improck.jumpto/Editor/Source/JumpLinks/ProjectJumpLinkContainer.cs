@@ -6,7 +6,7 @@ namespace ImpRock.JumpTo.Editor
 {
 	internal sealed class ProjectJumpLinkContainer : JumpLinkContainer<ProjectJumpLink>
 	{
-		public override void AddLink(UnityEngine.Object linkReference, PrefabType prefabType)
+		public override void AddLink(UnityEngine.Object linkReference, PrefabAssetType prefabAssetType, PrefabInstanceStatus prefabInstanceStatus)
 		{
 			//basically, if no linked object in the list has a reference to the passed object
 			if (!m_Links.Exists(linked => linked.LinkReference == linkReference))
@@ -15,7 +15,7 @@ namespace ImpRock.JumpTo.Editor
 				link.hideFlags = HideFlags.HideAndDontSave;
 				link.LinkReference = linkReference;
 
-				UpdateLinkInfo(link, prefabType);
+				UpdateLinkInfo(link, prefabAssetType, prefabInstanceStatus);
 
 				link.Area.Set(0.0f, m_Links.Count * GraphicAssets.LinkHeight, 100.0f, GraphicAssets.LinkHeight);
 
@@ -25,7 +25,7 @@ namespace ImpRock.JumpTo.Editor
 			RaiseOnLinksChanged();
 		}
 
-		protected override void UpdateLinkInfo(ProjectJumpLink link, PrefabType prefabType)
+		protected override void UpdateLinkInfo(ProjectJumpLink link, PrefabAssetType prefabAssetType, PrefabInstanceStatus prefabInstanceStatus)
 		{
 			UnityEngine.Object linkReference = link.LinkReference;
 			GUIContent linkContent = EditorGUIUtility.ObjectContent(linkReference, linkReference.GetType());
@@ -58,26 +58,23 @@ namespace ImpRock.JumpTo.Editor
 			{
 				GraphicAssets graphicAssets = GraphicAssets.Instance;
 
-				if (prefabType == PrefabType.Prefab)
+				switch (prefabAssetType)
 				{
-					link.ReferenceType = LinkReferenceType.Prefab;
-
-					if (link.LinkLabelContent.image == null)
-						link.LinkLabelContent.image = graphicAssets.IconPrefabNormal;
-				}
-				else if (prefabType == PrefabType.ModelPrefab)
-				{
-					link.ReferenceType = LinkReferenceType.Model;
-
-					if (link.LinkLabelContent.image == null)
-						link.LinkLabelContent.image = graphicAssets.IconPrefabModel;
-				}
-				else
-				{
-					link.ReferenceType = LinkReferenceType.Asset;
-
-					if (link.LinkLabelContent.image == null)
-						link.LinkLabelContent.image = graphicAssets.IconGameObject;
+					case PrefabAssetType.NotAPrefab:
+						link.ReferenceType = LinkReferenceType.Asset;
+						break;
+					case PrefabAssetType.Regular:
+						link.ReferenceType = LinkReferenceType.Prefab;
+						break;
+					case PrefabAssetType.Model:
+						link.ReferenceType = LinkReferenceType.Model;
+						break;
+					case PrefabAssetType.Variant:
+						link.ReferenceType = LinkReferenceType.Prefab;
+						break;
+					case PrefabAssetType.MissingAsset:
+						link.ReferenceType = LinkReferenceType.PrefabBroken;
+						break;
 				}
 			}
 		}

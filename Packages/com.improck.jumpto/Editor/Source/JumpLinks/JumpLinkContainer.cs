@@ -95,8 +95,8 @@ namespace ImpRock.JumpTo.Editor
 		public event System.Action OnLinksChanged;
 
 
-		public abstract void AddLink(UnityEngine.Object linkReference, PrefabType prefabType);
-		protected abstract void UpdateLinkInfo(T link, PrefabType prefabType);
+		public abstract void AddLink(UnityEngine.Object linkReference, PrefabAssetType prefabAssetType, PrefabInstanceStatus prefabInstanceStatus);
+		protected abstract void UpdateLinkInfo(T link, PrefabAssetType prefabAssetType, PrefabInstanceStatus prefabInstanceStatus);
 
 
 		public void RemoveLink(int index)
@@ -115,8 +115,7 @@ namespace ImpRock.JumpTo.Editor
 				m_Links[i].Area.y = i * GraphicAssets.LinkHeight;
 			}
 
-			if (OnLinksChanged != null)
-				OnLinksChanged.Invoke();
+			OnLinksChanged?.Invoke();
 		}
 
 		public void RemoveSelected()
@@ -136,8 +135,7 @@ namespace ImpRock.JumpTo.Editor
 
 			m_SelectionCount = 0;
 
-			if (OnLinksChanged != null)
-				OnLinksChanged.Invoke();
+			OnLinksChanged?.Invoke();
 		}
 
 		public void RemoveNonSelected()
@@ -157,8 +155,7 @@ namespace ImpRock.JumpTo.Editor
 
 			RefreshLinksY();
 
-			if (OnLinksChanged != null)
-				OnLinksChanged.Invoke();
+			OnLinksChanged?.Invoke();
 		}
 
 		public void RemoveAll()
@@ -166,8 +163,7 @@ namespace ImpRock.JumpTo.Editor
 			m_Links.Clear();
 			m_ActiveSelection = -1;
 
-			if (OnLinksChanged != null)
-				OnLinksChanged.Invoke();
+			OnLinksChanged?.Invoke();
 		}
 
 		public void MoveLink(int from, int to)
@@ -207,8 +203,7 @@ namespace ImpRock.JumpTo.Editor
 				m_Links[min].Area.y = min * GraphicAssets.LinkHeight;
 			}
 
-			if (OnLinksChanged != null)
-				OnLinksChanged.Invoke();
+			OnLinksChanged?.Invoke();
 		}
 
 		public void MoveSelected(int to)
@@ -251,8 +246,7 @@ namespace ImpRock.JumpTo.Editor
 			//fix all of the y-positions
 			RefreshLinksY();
 
-			if (OnLinksChanged != null)
-				OnLinksChanged.Invoke();
+			OnLinksChanged?.Invoke();
 		}
 
 		public void RefreshLinkSelections()
@@ -425,7 +419,8 @@ namespace ImpRock.JumpTo.Editor
 				else
 				{
 					T link = m_Links[i];
-					UpdateLinkInfo(link, PrefabUtility.GetPrefabType(link.LinkReference));
+					Object linkReference = link.LinkReference;
+					UpdateLinkInfo(link, PrefabUtility.GetPrefabAssetType(linkReference), PrefabUtility.GetPrefabInstanceStatus(linkReference));
 				}
 			}
 
@@ -503,8 +498,7 @@ namespace ImpRock.JumpTo.Editor
 
 		protected void RaiseOnLinksChanged()
 		{
-			if (OnLinksChanged != null)
-				OnLinksChanged.Invoke();
+			OnLinksChanged?.Invoke();
 		}
 	}
 }

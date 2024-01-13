@@ -133,12 +133,9 @@ namespace ImpRock.JumpTo.Editor
 
 		protected override void ShowTitleContextMenu()
 		{
-			GenericMenu menu = null;
-
 			if (m_LinkContainer.Links.Count > 0)
 			{
-				if (menu == null)
-					menu = new GenericMenu();
+				GenericMenu menu = new GenericMenu();
 
 				if (m_IsDirty)
 					menu.AddItem(m_MenuSaveLinks, false, SaveLinks);

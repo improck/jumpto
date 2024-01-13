@@ -167,9 +167,12 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		if (!m_Initialized)
 			Init();
 
-#if FORCE_PRO_SKIN
+//in 2019.3, the dark theme (aka "pro skin") became available to all licenses
+#if !UNITY_2019_3_OR_NEWER && FORCE_PRO_SKIN
+#pragma warning disable CS0162 // Unreachable code detected
 		if (GraphicAssets.ForceProSkin)
 			GUILayout.BeginVertical(EditorGUIUtility.GetBuiltinSkin(EditorSkin.Scene).GetStyle("hostview"));
+#pragma warning restore CS0162 // Unreachable code detected
 #endif
 
 		//position.x & y are the position of the window in Unity, i think
@@ -178,9 +181,11 @@ internal sealed class JumpToEditorWindow : EditorWindow
 		m_Position.Set(0.0f, 0.0f, position.width, position.height);
 		m_JumpLinkListView.Draw(m_Position);
 
-#if FORCE_PRO_SKIN
+#if !UNITY_2019_3_OR_NEWER && FORCE_PRO_SKIN
+#pragma warning disable CS0162 // Unreachable code detected
 		if (GraphicAssets.ForceProSkin)
 			GUILayout.EndVertical();
+#pragma warning restore CS0162 // Unreachable code detected
 #endif
 	}
 
